@@ -1,0 +1,98 @@
+= acts_as_indexed
+
+If you find this plugin useful, please consider a donation to show your support!
+
+  http://www.paypal.com/cgi-bin/webscr?cmd=_send-money
+  
+  Email address: dougal.s@gmail.com
+  
+
+== Instructions
+
+This plugin allows boolean-queried fulltext search to be added to any Rails app
+with no dependencies and minimal setup.
+
+
+== Resources
+
+Install
+  * script/plugin install http://svn.douglasfshearer.com/rails/plugins/acts_as_indexed
+
+
+== Usage
+
+
+=== Setup
+
+Add +acts_as_indexed+ to the top of any models you want to index, along with a
+list of the fields you wish to be indexed.
+
+	class Post < ActiveRecord::Base
+	  acts_as_indexed :fields => [:title, :body]
+  
+	  ...
+	end
+
+The fields are not limited to table columns, but can be any instance method of
+the current model.
+
+	class User < ActiveRecord::Base
+	  acts_as_indexed :fields => [:address, :fullname]
+
+		def fullname
+			return self.firstname + ' ' + self.lastname
+		end
+
+	  ...
+	end
+	
+Acts_as_indexed automatically filters out words shorter than 3 characters, for
+performance sake. This value can be changed by passing +:min_word_size+ along
+with the fields. NOTE: The index files must be rebuilt by deleting the 'index'
+directory in your app's root directory.
+
+	class Post < ActiveRecord::Base
+	  acts_as_indexed :fields => [:title, :body], :min_word_size => 5
+
+	  ...
+	end
+
+
+=== Searching
+
+To search, call the +find_with_index+ method on your model to search using the
+index. The optional +ids+ parameter, when set to true, will return only the IDs
+of any matching records.
+
+	# Returns array of Post objects.
+	my_search_results = Post.find_with_index('my search query') # =>  [#<Post:0x314b09c @attributes={"...
+	
+	# Returns array of IDs.
+	my_search_results = Post.find_with_index('my search query',true) # =>  [12,19,33...
+	
+	
+=== Query Options
+
+The following query operators are supported:
+
+	AND - This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
+	NOT - 'cat -dog' will find records matching 'cat' AND NOT 'dog'
+	"" - Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase.
+			 Quoted terms can be preceded by the NOT operator. 'cat -"big dog"' etc.
+
+
+== Problems, Comments, Suggestions?
+
+All of the above are most welcome. dougal.s@gmail.com
+
+
+== Credits
+
+Douglas F Shearer - http:douglasfshearer.com
+
+
+== Future Releases
+
+Future releases will be looking to add the following features:
+ - Optional html scrubbing during indexing.
+ - :options parameter on find_with_index to allow conditions scoping.
