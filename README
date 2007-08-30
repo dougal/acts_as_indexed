@@ -16,7 +16,7 @@ with no dependencies and minimal setup.
 == Resources
 
 Install
-  * script/plugin install http://svn.douglasfshearer.com/rails/plugins/acts_as_indexed
+  * script/plugin install svn://svn.douglasfshearer.com/rails/plugins/acts_as_indexed
 
 
 == Usage
