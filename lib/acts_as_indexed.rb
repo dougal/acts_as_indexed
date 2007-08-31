@@ -72,7 +72,7 @@ module Foo
         def add_to_index(record, index)
           record_condensed = ''
           aai_config[:fields].each do |f|
-            record_condensed += ' ' + record.send(f) if record.send(f)
+            record_condensed += ' ' + record.send(f).to_s if record.send(f)
           end
           cleanup(record_condensed).each_with_index do |word,i|
             index[word] = {} if !index.has_key?(word)
