@@ -9,6 +9,7 @@ module Foo
       end
 
       module ClassMethods
+        
         def acts_as_indexed(options = {})
           class_eval do
             extend Foo::Acts::Indexed::SingletonMethods
@@ -23,7 +24,7 @@ module Foo
 
           # default config
           self.aai_config = { 
-            :index_file => File.join(RAILS_ROOT,'index',RAILS_ENV,name),
+            :index_file => [RAILS_ROOT,'index',RAILS_ENV,name],
             :min_word_size => 3,
             :fields => []
           }
@@ -33,6 +34,10 @@ module Foo
           
           # set minimum word size if available.
           aai_config[:min_word_size] = options[:min_word_size] if options.include?(:min_word_size)
+          
+          # Set file location for plugin testing.
+          # TODO: Find more portable (ruby) way of doing the up-one-level.
+          aai_config[:index_file] = [File.dirname(__FILE__),'../test/index',RAILS_ENV,name]
           
         end
 
@@ -53,13 +58,13 @@ module Foo
         def search_index(query, ids=false)
           index = load_index
           return [] if query.nil?
-          quieries = parse_query(query)
-          positive = run_queries(quieries[:positive],index)
-          positive_quoted = run_quoted_queries(quieries[:positive_quoted],index)
-          negative = run_queries(quieries[:negative],index)
-          negative_quoted = run_quoted_queries(quieries[:negative_quoted],index)
-          # Uniq is there in case of duplicates from each set.
-          results = (positive + positive_quoted).uniq - (negative + negative_quoted).uniq
+          queries = parse_query(query)
+          positive = run_queries(queries[:positive],index)
+          positive_quoted = run_quoted_queries(queries[:positive_quoted],index)
+          negative = run_queries(queries[:negative],index)
+          negative_quoted = run_quoted_queries(queries[:negative_quoted],index)
+          results = (positive.empty? || positive_quoted.empty?) ? (positive + positive_quoted) : (positive & positive_quoted)
+          results -= (negative + negative_quoted).uniq
           
           return results if ids
           # Doing the find like this eliminates the possibility of errors occuring
@@ -103,20 +108,24 @@ module Foo
             phrase.each do |word|
               new_matches = {}
               current = index[word]
-              if !matches
-                matches = current
+              if current.nil?
+                matches = {}
               else
-                matches.each do |record_id, record_pos|
-                  if current.include?(record_id)
-                    record_pos.each do |pos|
-                      if current[record_id].include?(pos+1)
-                        new_matches[record_id] = current[record_id]
-                        break
+                if !matches
+                  matches = current
+                else
+                  matches.each do |record_id, record_pos|
+                    if current.include?(record_id)
+                      record_pos.each do |pos|
+                        if current[record_id].include?(pos+1)
+                          new_matches[record_id] = current[record_id]
+                          break
+                        end
                       end
                     end
                   end
+                  matches = new_matches
                 end
-                matches = new_matches
               end
             end
             results = results + matches.keys
@@ -152,13 +161,13 @@ module Foo
 
         def load_index
           build_index if !index_exists?
-          File.open(aai_config[:index_file]) do |f|
+          File.open(File.join(aai_config[:index_file])) do |f|
             Marshal.load(f)
           end
         end
 
         def save_index(index)
-          File.open(aai_config[:index_file],'w+') do |f|
+          File.open(File.join(aai_config[:index_file]),'w+') do |f|
             Marshal.dump(index,f)
           end
           true
@@ -169,7 +178,7 @@ module Foo
         end
 
         def index_exists?
-          File.exists?(aai_config[:index_file])
+          File.exists?(File.join(aai_config[:index_file]))
         end
 
         def build_index
@@ -182,8 +191,8 @@ module Foo
         end
 
         def prepare
-          Dir.mkdir(File.join(RAILS_ROOT,'index')) if !File.exists?(File.join(RAILS_ROOT,'index'))
-          Dir.mkdir(File.join(RAILS_ROOT,'index',RAILS_ENV)) if !File.exists?(File.join(RAILS_ROOT,'index',RAILS_ENV))
+          Dir.mkdir(File.join(aai_config[:index_file][0,2])) if !File.exists?(File.join(aai_config[:index_file][0,2]))
+          Dir.mkdir(File.join(aai_config[:index_file][0,3])) if !File.exists?(File.join(aai_config[:index_file][0,3]))
         end
 
         def cleanup(s)
