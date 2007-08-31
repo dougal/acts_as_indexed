@@ -37,7 +37,7 @@ module Foo
           
           # Set file location for plugin testing.
           # TODO: Find more portable (ruby) way of doing the up-one-level.
-          aai_config[:index_file] = [File.dirname(__FILE__),'../test/index',RAILS_ENV,name]
+          aai_config[:index_file] = [File.dirname(__FILE__),'../test/index',RAILS_ENV,name] if options.include?(:index_file)
           
         end
 
