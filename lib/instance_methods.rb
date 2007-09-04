@@ -9,11 +9,11 @@ module Foo
         end
 
         def remove_from_index
-          self.class.index_remove(self.id)
+          self.class.index_remove(self)
         end
 
         def update_index
-          self.class.index_remove(self.id)
+          self.class.index_remove(self)
           self.class.index_add(self)
         end
       end

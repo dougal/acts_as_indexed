@@ -19,6 +19,7 @@ module Foo
           # default config
           self.aai_config = { 
             :index_file => [RAILS_ROOT,'index',RAILS_ENV,name],
+            :index_file_depth => 3,
             :min_word_size => 3,
             :fields => []
           }
@@ -29,6 +30,10 @@ module Foo
           # set minimum word size if available.
           aai_config[:min_word_size] = options[:min_word_size] if options.include?(:min_word_size)
 
+          # set index file depth if available.
+          # Min size of 1.
+          aai_config[:index_file_depth] = options[:index_file_depth].to_i if options.include?(:index_file_depth) && options[:index_file_depth].to_i > 0
+
           # Set file location for plugin testing.
           # TODO: Find more portable (ruby) way of doing the up-one-level.
           aai_config[:index_file] = [File.dirname(__FILE__),'../test/index',RAILS_ENV,name] if options.include?(:self_test)
@@ -36,21 +41,22 @@ module Foo
         end
 
         def index_add(record)
-          index = load_index
+          index = load_index(cleanup(condense_record(record)))
           index = add_to_index(record, index)
           save_index(index)
         end
 
-        def index_remove(record_id)
-          index = load_index
+        def index_remove(record)
+          index = load_index(cleanup(condense_record(record)))
           index.each do |k,v|
-            v.delete(record_id)
+            v.delete(record.id)
           end
           save_index(index)
         end
 
         def search_index(query, ids=false)
-          index = load_index
+          logger.debug('Starting search...')
+          index = load_index(cleanup(query))
           return [] if query.nil?
           queries = parse_query(query)
           positive = run_queries(queries[:positive],index)
@@ -73,16 +79,20 @@ module Foo
         protected
 
         def add_to_index(record, index)
-          record_condensed = ''
-          aai_config[:fields].each do |f|
-            record_condensed += ' ' + record.send(f).to_s if record.send(f)
-          end
-          cleanup(record_condensed).each_with_index do |word,i|
+          cleanup(condense_record(record)).each_with_index do |word,i|
             index[word] = {} if !index.has_key?(word)
             index[word][record.id] = [] if !index[word].has_key?(record.id)
             index[word][record.id] << i
           end
           index
+        end
+
+        def condense_record(record)
+          record_condensed = ''
+          aai_config[:fields].each do |f|
+            record_condensed += ' ' + record.send(f).to_s if record.send(f)
+          end
+          record_condensed
         end
 
         def run_queries(arr,index)
@@ -157,16 +167,49 @@ module Foo
           return {:negative_quoted => negative_quoted, :positive_quoted => positive_quoted, :negative => negative, :positive => positive}
         end
 
-        def load_index
+        def load_index(words = nil)
+          logger.debug('Loading index...')
           build_index if !index_exists?
-          File.open(File.join(aai_config[:index_file])) do |f|
-            Marshal.load(f)
+
+          getwhat = []
+          if words
+            words.each do |w|
+              getwhat << word_prefix(w) if File.exists?(File.join(aai_config[:index_file] + [word_prefix(w)]))
+            end
+          else
+            Dir.new(File.join(aai_config[:index_file])).each do |name|
+              getwhat << name
+            end
           end
+
+          index = {}
+          getwhat.each do |name|
+            if name != '.' && name != '..'
+              logger.debug("Loading index #{name}")
+              File.open(File.join(aai_config[:index_file] + [name])) do |f|
+                index.merge!(Marshal.load(f))
+              end
+            end
+          end
+          index
         end
 
         def save_index(index)
-          File.open(File.join(aai_config[:index_file]),'w+') do |f|
-            Marshal.dump(index,f)
+          logger.debug('Saving indexes')
+          indexes = {}
+          prefixes = {}
+          index.each do |word,v|
+            prefix = word[0,aai_config[:index_file_depth]]
+            prefixes[prefix] ||= word_prefix(word)
+            indexes[prefixes[prefix]] = {} if !indexes.has_key?(prefixes[prefix])
+            indexes[prefixes[prefix]][word] = v
+          end
+          logger.debug("Number of indexes to save: #{indexes.size}")
+          indexes.each do |prefix,v|
+            logger.debug("Saving index #{prefix}")
+            File.open(File.join(aai_config[:index_file] + [prefix.to_s]),'w+') do |f|
+              Marshal.dump(v,f)
+            end
           end
           true
         end
@@ -180,7 +223,7 @@ module Foo
         end
 
         def build_index
-          logger.debug 'building index'
+          logger.debug('Building index from scratch...')
           prepare
           index = {}
           find(:all).each do |record|
@@ -192,6 +235,17 @@ module Foo
         def prepare
           Dir.mkdir(File.join(aai_config[:index_file][0,2])) if !File.exists?(File.join(aai_config[:index_file][0,2]))
           Dir.mkdir(File.join(aai_config[:index_file][0,3])) if !File.exists?(File.join(aai_config[:index_file][0,3]))
+          Dir.mkdir(File.join(aai_config[:index_file])) if !File.exists?(File.join(aai_config[:index_file]))
+        end
+
+        def word_prefix(word)
+          len = word.length
+          if len > 1
+            word[0,aai_config[:index_file_depth]].split(//).collect{|c| c[0]}.inject{|sum,c| sum.to_s + '_' + c.to_s}
+          else
+            word.slice(0,1)[0].to_s
+            logger.debug 'here'
+          end
         end
 
         def cleanup(s)
