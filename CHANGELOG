@@ -1,3 +1,6 @@
+0.2.1 [05 September 2007]
+AR find options can now be passed to the search to allow finer control of returned Model Objects.
+
 0.2.0 [04 September 2007]
 Major performance improvements.
 Index segmentation can now be tuned.

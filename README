@@ -67,8 +67,11 @@ of any matching records.
 	# Returns array of Post objects.
 	my_search_results = Post.find_with_index('my search query') # =>  [#<Post:0x314b09c @attributes={"...
 	
+	# Pass any of the ActiveRecord find options to the search.
+	my_search_results = Post.find_with_index('my search query',{:limit => 10}) # return the first 10 matches.
+	
 	# Returns array of IDs.
-	my_search_results = Post.find_with_index('my search query',true) # =>  [12,19,33...
+	my_search_results = Post.find_with_index('my search query',{},{:ids_only => true}) # =>  [12,19,33...
 	
 	
 === Query Options
