@@ -1,3 +1,6 @@
+0.2.2 [06 September 2007]
+Search now caches query results within a session. Call the search twice in an action? Only runs once!
+
 0.2.1 [05 September 2007]
 AR find options can now be passed to the search to allow finer control of returned Model Objects.
 

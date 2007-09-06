@@ -62,21 +62,28 @@ module Foo
 
         def search_index(query, find_options={}, options={})
           logger.debug('Starting search...')
-          index = load_index(cleanup(query))
-          return [] if query.nil?
-          queries = parse_query(query)
-          positive = run_queries(queries[:positive],index)
-          positive_quoted = run_quoted_queries(queries[:positive_quoted],index)
-          negative = run_queries(queries[:negative],index)
-          negative_quoted = run_quoted_queries(queries[:negative_quoted],index)
-          results = (positive.empty? || positive_quoted.empty?) ? (positive + positive_quoted) : (positive & positive_quoted)
-          results -= (negative + negative_quoted).uniq
+          if !@results_cache || !@results_cache[query]
+            logger.debug('Search does not exist in cache.')
+            index = load_index(cleanup(query))
+            return [] if query.nil?
+            queries = parse_query(query)
+            positive = run_queries(queries[:positive],index)
+            positive_quoted = run_quoted_queries(queries[:positive_quoted],index)
+            negative = run_queries(queries[:negative],index)
+            negative_quoted = run_quoted_queries(queries[:negative_quoted],index)
+            results = (positive.empty? || positive_quoted.empty?) ? (positive + positive_quoted) : (positive & positive_quoted)
+            results -= (negative + negative_quoted).uniq
+            @results_cache = {} if !@results_cache
+            @results_cache[query] = results
+          else
+              logger.debug('Search exists in cache.')
+          end
 
-          return results if options.has_key?(:ids_only) && options[:ids_only]
+          return @results_cache[query] if options.has_key?(:ids_only) && options[:ids_only]
           with_scope :find => find_options do
             # Doing the find like this eliminates the possibility of errors occuring
             # on either missing records (out-of-sync) or an empty results array.
-            find(:all, :conditions => [ 'id IN (?)', results])
+            find(:all, :conditions => [ 'id IN (?)', @results_cache[query]])
           end
         end
 
