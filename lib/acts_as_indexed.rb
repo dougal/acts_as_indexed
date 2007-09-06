@@ -1,3 +1,7 @@
+# ActsAsIndexed
+# Copyright (c) 2007 Douglas F Shearer.
+# http://douglasfshearer.com
+
 require 'active_record'
 
 module Foo
