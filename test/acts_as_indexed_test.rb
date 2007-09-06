@@ -11,14 +11,6 @@ class ActsAsIndexedTest < Test::Unit::TestCase
     destroy_index
   end
   
-  def test_generates_index_on_first_query
-    assert !File.exists?(File.join(File.dirname(__FILE__),'index'))
-    assert_equal [], Post.find_with_index('badger')
-    assert File.exists?(File.join(File.dirname(__FILE__),'index'))
-    assert File.exists?(File.join(File.dirname(__FILE__),'index','development'))
-    assert File.exists?(File.join(File.dirname(__FILE__),'index','development','post'))
-  end
-  
   def test_adds_to_index
     original_post_count = Post.count
     assert_equal [], Post.find_with_index('badger')

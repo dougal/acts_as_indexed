@@ -50,6 +50,8 @@ module Foo
           index = load_index(cleanup(condense_record(record)))
           index = add_to_index(record, index)
           save_index(index)
+          # Flush the query cache.
+          @results_cache = {}
         end
 
         def index_remove(record)
@@ -58,6 +60,8 @@ module Foo
             v.delete(record.id)
           end
           save_index(index)
+          # Flush the query cache.
+          @results_cache = {}
         end
 
         def search_index(query, find_options={}, options={})
