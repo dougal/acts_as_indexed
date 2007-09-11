@@ -197,7 +197,7 @@ module Foo
           getwhat = []
           if words
             words.each do |w|
-              getwhat << word_prefix(w) if File.exists?(File.join(aai_config[:index_file] + [word_prefix(w)]))
+              getwhat << word_prefix(w) if File.exists?(File.join(aai_config[:index_file] + [word_prefix(w).to_s]))
             end
           else
             Dir.new(File.join(aai_config[:index_file])).each do |name|
@@ -209,7 +209,7 @@ module Foo
           getwhat.each do |name|
             if name != '.' && name != '..'
               logger.debug("Loading index #{name}")
-              File.open(File.join(aai_config[:index_file] + [name])) do |f|
+              File.open(File.join(aai_config[:index_file] + [name.to_s])) do |f|
                 index.merge!(Marshal.load(f))
               end
             end
