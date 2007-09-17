@@ -74,7 +74,7 @@ module Foo
             logger.debug('Search does not exist in cache.')
             index = load_index(cleanup(query))
             return [] if query.nil?
-            queries = parse_query(query)
+            queries = parse_query(query.dup)
             positive = run_queries(queries[:positive],index)
             positive_quoted = run_quoted_queries(queries[:positive_quoted],index)
             negative = run_queries(queries[:negative],index)
