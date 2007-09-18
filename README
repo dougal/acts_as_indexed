@@ -46,7 +46,7 @@ the current model.
 	  ...
 	end
 	
-Acts_as_indexed automatically filters out words shorter than 3 characters, for
+Acts_as_indexed automatically filters out query words shorter than 3 characters, for
 performance sake. This value can be changed by passing +:min_word_size+ along
 with the fields. NOTE: The index files must be rebuilt by deleting the 'index'
 directory in your app's root directory.
@@ -80,8 +80,10 @@ The following query operators are supported:
 
 	AND - This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
 	NOT - 'cat -dog' will find records matching 'cat' AND NOT 'dog'
+	INCLUDE - 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
 	"" - Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase.
 			 Quoted terms can be preceded by the NOT operator. 'cat -"big dog"' etc.
+			 Quoted terms can include words shorter than the +min_word_size+.
 
 
 == Problems, Comments, Suggestions?
