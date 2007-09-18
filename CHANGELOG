@@ -1,3 +1,6 @@
+0.3.1 [18 September 2007]
+- Added RDoc documentation comments.
+
 0.3.0 [18 September 2007]
 - Minor bug fixes.
 - min_word_size now works properly, with quieries containing small words in 

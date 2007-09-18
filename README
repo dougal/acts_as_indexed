@@ -2,9 +2,9 @@
 
 If you find this plugin useful, please consider a donation to show your support!
 
-  http://www.paypal.com/cgi-bin/webscr?cmd=_send-money
+http://www.paypal.com/cgi-bin/webscr?cmd=_send-money
   
-  Email address: dougal.s@gmail.com
+Paypal address: mailto:dougal.s@gmail.com
   
 
 == Instructions
@@ -15,8 +15,8 @@ with no dependencies and minimal setup.
 
 == Resources
 
-Install
-  * script/plugin install svn://svn.douglasfshearer.com/rails/plugins/acts_as_indexed
+=== Install
+  ./script/plugin install svn://svn.douglasfshearer.com/rails/plugins/acts_as_indexed
 
 
 == Usage
@@ -33,7 +33,7 @@ list of the fields you wish to be indexed.
 	  ...
 	end
 
-The fields are not limited to table columns, but can be any instance method of
+The fields are not limited to model fields, but can be any instance method of
 the current model.
 
 	class User < ActiveRecord::Base
@@ -47,7 +47,7 @@ the current model.
 	end
 	
 Acts_as_indexed automatically filters out query words shorter than 3 characters, for
-performance sake. This value can be changed by passing +:min_word_size+ along
+performance sake. This value can be changed by passing +min_word_size+ along
 with the fields. NOTE: The index files must be rebuilt by deleting the 'index'
 directory in your app's root directory.
 
@@ -60,9 +60,9 @@ directory in your app's root directory.
 
 === Searching
 
-To search, call the +find_with_index+ method on your model to search using the
-index. The optional +ids+ parameter, when set to true, will return only the IDs
-of any matching records.
+To search, call the +find_with_index+ method on your model, passing a query as 
+the first argument. The optional +ids_only+ parameter, when set to true, will
+return only the IDs of any matching records.
 
 	# Returns array of Post objects.
 	my_search_results = Post.find_with_index('my search query') # =>  [#<Post:0x314b09c @attributes={"...
@@ -78,17 +78,19 @@ of any matching records.
 
 The following query operators are supported:
 
-	AND - This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
-	NOT - 'cat -dog' will find records matching 'cat' AND NOT 'dog'
-	INCLUDE - 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
-	"" - Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase.
-			 Quoted terms can be preceded by the NOT operator. 'cat -"big dog"' etc.
-			 Quoted terms can include words shorter than the +min_word_size+.
+AND:: This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
+NOT:: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
+INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
+"":: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
 
+== RDoc Documentation
+
+To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the acts_as_indexed 
+plugin folder. Then point your browser at <tt>/vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
 
 == Problems, Comments, Suggestions?
 
-All of the above are most welcome. dougal.s@gmail.com
+All of the above are most welcome. mailto:dougal.s@gmail.com
 
 
 == Credits
@@ -99,5 +101,6 @@ Douglas F Shearer - http:douglasfshearer.com
 == Future Releases
 
 Future releases will be looking to add the following features:
- - Optional html scrubbing during indexing.
- - :options parameter on find_with_index to allow conditions scoping.
+* Optional html scrubbing during indexing.
+* Ranked results based on query term occurences.
+* Ranking affected by field weightings.
