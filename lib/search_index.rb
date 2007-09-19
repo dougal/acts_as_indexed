@@ -38,7 +38,7 @@ module Foo #:nodoc:
           atoms = cleanup_atoms(condense_record(record,@fields))
           load_atoms(atoms)
           atoms.each do |a|
-            @atoms[a].remove_record(record.id)
+            @atoms[a].remove_record(record.id) if @atoms.has_key?(a)
           end
         end
 

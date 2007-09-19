@@ -1,3 +1,6 @@
+0.3.2 [19 September 2007]
+- Fixed index update bug.
+
 0.3.1 [18 September 2007]
 - Added RDoc documentation comments.
 
