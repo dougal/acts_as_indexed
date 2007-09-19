@@ -88,6 +88,8 @@ INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is s
 To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the acts_as_indexed 
 plugin folder. Then point your browser at <tt>/vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
 
+Alternatively, you can view the rdoc documentation online[http://douglasfshearer.com/rdoc/acts_as_indexed/].
+
 == Problems, Comments, Suggestions?
 
 All of the above are most welcome. mailto:dougal.s@gmail.com
