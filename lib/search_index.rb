@@ -7,7 +7,7 @@ module Foo #:nodoc:
   module Acts #:nodoc:
     module Indexed #:nodoc:
       class SearchIndex
-        
+
         # root:: Location of index on filesystem.
         # index_depth:: Degree of index partitioning.
         # fields:: Fields or instance methods of ActiveRecord model to be indexed.
@@ -22,24 +22,49 @@ module Foo #:nodoc:
 
         # Adds +record+ to the index.
         def add_record(record)
-          load_atoms(cleanup_atoms(condense_record(record,@fields)))
-          add_occurences(record)
+          condensed_record = condense_record(record)
+          load_atoms(condensed_record)
+          add_occurences(condensed_record,record.id)
         end
         
         # Adds multiple records to the index. Accepts an array of +records+.
         def add_records(records)
           records.each do |r|
-            add_occurences(r)
+            condensed_record = condense_record(r)
+            load_atoms(condensed_record)
+            add_occurences(condensed_record,r.id)
           end
         end
 
         # Removes +record+ from the index.
         def remove_record(record)
-          atoms = cleanup_atoms(condense_record(record,@fields))
+          atoms = condense_record(record)
           load_atoms(atoms)
           atoms.each do |a|
             @atoms[a].remove_record(record.id) if @atoms.has_key?(a)
+            #p "removing #{record.id} from #{a}"
           end
+        end
+
+        def update_record(record_new, record_old)
+          # Work out which atoms have modifications.
+          # Minimises loading and saving of partitions.
+          old_atoms = condense_record(record_old)
+          new_atoms = condense_record(record_new)
+          removed_atoms = old_atoms - new_atoms
+          added_atoms = new_atoms - old_atoms
+          
+          # Remove the old version from the appropriate atoms.
+          load_atoms(removed_atoms)
+          old_atoms.each do |a|
+            @atoms[a].remove_record(record_new.id) if @atoms.has_key?(a)
+          end
+          
+          # Add the new version to the appropriate atoms.
+          load_atoms(added_atoms)
+          # TODO: Make a version of this method that takes the
+          # atomised version of the record.
+          add_occurences(new_atoms, record_new.id)
         end
 
         # Saves the current index partitions to the filesystem.
@@ -58,7 +83,7 @@ module Foo #:nodoc:
             end
           end
         end
-        
+
         # Deletes the current model's index from the filesystem.
         #--
         # TODO: Write a public method that will delete all indexes.
@@ -94,6 +119,14 @@ module Foo #:nodoc:
           @atoms.has_key?(atom)
         end
 
+        # Returns true if all the given atoms are present.
+        def include_atoms?(atoms_arr)
+          atoms_arr.each do |a|
+            return false if !include_atom?(a)
+          end
+          true
+        end
+
         # Returns true if the given record is present.
         def include_record?(record_id)
           @atoms.each do |atomname, atom|
@@ -105,10 +138,11 @@ module Foo #:nodoc:
           @atoms[atom] = SearchAtom.new if !include_atom?(atom)
         end
 
-        def add_occurences(record)
-          cleanup_atoms(condense_record(record,@fields)).each_with_index do |atom, i|
+        def add_occurences(condensed_record,record_id)
+          condensed_record.each_with_index do |atom, i|
             add_atom(atom)
-            @atoms[atom].add_position(record.id, i)
+            @atoms[atom].add_position(record_id, i)
+            #p "adding #{record.id} to #{atom}"
           end
         end
 
@@ -172,35 +206,22 @@ module Foo #:nodoc:
           results
         end
 
-        def run_quoted_queries(arr)
+        def run_quoted_queries(quoted_atoms)
           results = []
-          arr.each do |phrase|
-            matches = nil
-            phrase.each do |word|
-              new_matches = {}
-              current = @atoms[word]
-              if current.nil?
-                matches = {}
-              else
-                current = current.to_h
-                if !matches
-                  matches = current
-                else
-                  matches.each do |record_id, record_pos|
-                    if current.include?(record_id)
-                      record_pos.each do |pos|
-                        if current[record_id].include?(pos+1)
-                          new_matches[record_id] = current[record_id]
-                          break
-                        end
-                      end
-                    end
-                  end
-                  matches = new_matches
-                end
-              end
+          quoted_atoms.each do |quoted_atom|
+
+            # Check the index contains all the required atoms.
+            # match_atom = first_word_atom
+            # for each of the others
+            #   return atom containing records + positions where current atom is preceded by following atom.
+            # end
+            # return records from final atom.
+            next if !include_atoms?(quoted_atom)
+            matches = @atoms[quoted_atom.first]
+            quoted_atom[1..-1].each do |atom_name|
+              matches = @atoms[atom_name].preceded_by(matches)
             end
-            results = results + matches.keys
+            results += matches.record_ids
           end
           return results
         end
@@ -234,12 +255,12 @@ module Foo #:nodoc:
           atoms.reject{|w| w.size < min_size}
         end
 
-        def condense_record(record, fields)
+        def condense_record(record)
           record_condensed = ''
-          fields.each do |f|
+          @fields.each do |f|
             record_condensed += ' ' + record.send(f).to_s if record.send(f)
           end
-          record_condensed
+          cleanup_atoms(record_condensed)
         end
 
       end

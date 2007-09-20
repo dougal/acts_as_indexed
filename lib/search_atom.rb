@@ -14,7 +14,7 @@ module Foo #:nodoc:
         def initialize
           @records = {}
         end
-        
+
         # Returns true if the given record is present.
         def include_record?(record_id)
           @records.include?(record_id)
@@ -30,7 +30,7 @@ module Foo #:nodoc:
           add_record(record_id)
           @records[record_id] << pos
         end
-        
+
         # Returns all record IDs stored in this Atom.
         def record_ids
           @records.keys
@@ -42,15 +42,40 @@ module Foo #:nodoc:
           nil
         end
 
-        # Converts Atom to a hash of form:
-        #  { record_id => [ pos1, po2, pos3 ] }
-        def to_h
-          @records
-        end
-        
         # Removes +record_id+ from this Atom.
         def remove_record(record_id)
           @records.delete(record_id)
+        end
+
+        # Returns at atom containing the records and positions of +self+ preceded by +former+
+        # "former latter" or "big dog" where "big" is the former and "dog" is the latter.
+        def preceded_by(former)
+          matches = SearchAtom.new
+          latter = {}
+          former.record_ids.each do |rid|
+            latter[rid] = @records[rid] if @records[rid]
+          end
+          # Iterate over each record in latter.
+          latter.each do |record_id,pos|
+
+            # Iterate over each position.
+            pos.each do |p|
+              # Check if previous position is in former.
+              if former.include_position?(record_id,p-1)
+                matches.add_record(record_id) if !matches.include_record?(record_id)
+                matches.add_position(record_id,p)
+                break # Break since we only need to find one match.
+              end
+            end
+            
+          end  
+          return matches
+        end
+
+        protected
+      
+        def include_position?(record_id,pos)
+          @records[record_id].include?(pos)
         end
 
       end

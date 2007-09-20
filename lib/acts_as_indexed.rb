@@ -11,7 +11,7 @@ require 'search_atom'
 module Foo #:nodoc:
   module Acts #:nodoc:
     module Indexed #:nodoc:
-      
+
       def self.included(mod)
         mod.extend(ClassMethods)
       end
@@ -37,7 +37,7 @@ module Foo #:nodoc:
           include Foo::Acts::Indexed::InstanceMethods
 
           after_create  :add_to_index
-          after_update  :update_index
+          before_update  :update_index
           after_destroy :remove_from_index
 
           cattr_accessor :aai_config
@@ -67,28 +67,43 @@ module Foo #:nodoc:
         end
 
         # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
-        
+
         def index_add(record)
           index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
           build_index if !index.exists?
           index.add_record(record)
           index.save
-          @results_cache = {}
+          @query_cache = {}
           true
         end
-        
+
         # Removes the passed +record+ from the index. Clears the query cache.
-        
+
         def index_remove(record)
           index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
           # record won't be in index if it doesn't exist. Just return true.
           return true if !index.exists?
           index.remove_record(record)
           index.save
-          @results_cache = {}
+          @query_cache = {}
           true
         end
         
+        # Updates the index.
+        # 1. Removes the previous version of the record from the index
+        # 2. Adds the new version to the index.
+        
+        def index_update(record)
+          index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
+          build_index if !index.exists?
+          #index.remove_record(find(record.id))
+          #index.add_record(record)
+          index.update_record(record,find(record.id))
+          index.save
+          @query_cache = {}
+          true
+        end
+
         # Finds instances matching the terms passed in +query+. Terms are ANDed by
         # default. Returns an array of model instances or, if +ids_only+ is
         # true, an array of integer IDs.
@@ -101,40 +116,49 @@ module Foo #:nodoc:
         #
         # ====options
         # ids_only:: Method returns an array of integer IDs when set to true.
-        
+        # no_query_cache:: Turnsoff the query cache when set to true. Useful for testing.
+
         def search_index(query, find_options={}, options={})
-          if !@results_cache || !@results_cache[query]
+          # Clear the query cache off  if the key is set.
+          @query_cache = {}  if (options.has_key?('no_query_cache') || options[:no_query_cache])
+          if !@query_cache || !@query_cache[query]
             logger.debug('Query not in cache, running search.')
             index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
             build_index if !index.exists?
             index.save
-            @results_cache = {} if !@results_cache
-            @results_cache[query] = index.search(query)
+            @query_cache = {} if !@query_cache
+            @query_cache[query] = index.search(query)
           else
-              logger.debug('Query held in cache.')
+            logger.debug('Query held in cache.')
           end
-          return @results_cache[query] if options.has_key?(:ids_only) && options[:ids_only]
+          return @query_cache[query] if options.has_key?(:ids_only) && options[:ids_only]
           with_scope :find => find_options do
             # Doing the find like this eliminates the possibility of errors occuring
             # on either missing records (out-of-sync) or an empty results array.
-            find(:all, :conditions => [ 'id IN (?)', @results_cache[query]])
+            find(:all, :conditions => [ 'id IN (?)', @query_cache[query]])
           end
         end
 
         private
-        
+
         # Builds an index from scratch for the current model class.
         def build_index
-          index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
-          index.add_records(find(:all))
-          index.save
+          increment = 500
+          offset = 0
+          while (records = find(:all, :limit => increment, :offset => offset)).size > 0
+            #p "offset is #{offset}, increment is #{increment}"
+            index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
+            offset += increment
+            index.add_records(records)
+            index.save
+          end
         end
 
       end
 
       # Adds model class singleton methods.
       module SingletonMethods
-        
+
         # Finds instances matching the terms passed in +query+.
         #
         # See Foo::Acts::Indexed::ClassMethods#search_index.
@@ -148,7 +172,7 @@ module Foo #:nodoc:
       # Methods are called automatically by ActiveRecord on +save+, +destroy+,
       # and +update+ of model instances.
       module InstanceMethods
-        
+
         # Adds the current model instance to index.
         # Called by ActiveRecord on +save+.
         def add_to_index
@@ -164,8 +188,7 @@ module Foo #:nodoc:
         # Updates current model instance index.
         # Called by ActiveRecord on +update+.
         def update_index
-          self.class.index_remove(self)
-          self.class.index_add(self)
+          self.class.index_update(self)
         end
       end
 
