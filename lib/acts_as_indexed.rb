@@ -116,7 +116,7 @@ module Foo #:nodoc:
         #
         # ====options
         # ids_only:: Method returns an array of integer IDs when set to true.
-        # no_query_cache:: Turnsoff the query cache when set to true. Useful for testing.
+        # no_query_cache:: Turns off the query cache when set to true. Useful for testing.
 
         def search_index(query, find_options={}, options={})
           # Clear the query cache off  if the key is set.
