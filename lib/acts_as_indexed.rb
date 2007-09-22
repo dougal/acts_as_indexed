@@ -134,7 +134,7 @@ module Foo #:nodoc:
           
           # slice up the results by offset and limit
           offset = find_options[:offset] || 0
-          limit = find_options.include?(:limit) ? find_options[:limit] + offset : -1
+          limit = find_options.include?(:limit) ? find_options[:limit] + offset : @query_cache[query].size
           part_query = @query_cache[query].sort{|a,b| b <=> a }.slice(offset,limit).collect{|a| a.first}
           
           # Set these to nil as we are dealing with the pagination by setting
@@ -153,7 +153,7 @@ module Foo #:nodoc:
               ranked_records[r] = @query_cache[query][r.id]
             end
 
-            ranked_records.sort{|a,b| b <=> a }.collect{|a| a.first}
+            ranked_records.invert.sort{|a,b| b <=> a }.collect{|a| a.last}
           end
           
         end

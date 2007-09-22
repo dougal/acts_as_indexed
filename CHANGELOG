@@ -1,3 +1,6 @@
+0.4.1 [22 September 2007]
+- Fixed a bug in the main search method.
+
 0.4.0 [22 September 2007]
 - Search results now ranked by relevance.
 
