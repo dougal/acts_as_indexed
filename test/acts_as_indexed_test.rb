@@ -88,5 +88,4 @@ class ActsAsIndexedTest < Test::Unit::TestCase
     assert_equal all_results[1], second_result.first.id
 
   end
-
 end

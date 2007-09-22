@@ -69,8 +69,8 @@ module Foo #:nodoc:
         # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
 
         def index_add(record)
+          build_index if !File.exists?(File.join(aai_config[:index_file]))
           index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
-          build_index if !index.exists?
           index.add_record(record)
           index.save
           @query_cache = {}
@@ -94,8 +94,8 @@ module Foo #:nodoc:
         # 2. Adds the new version to the index.
         
         def index_update(record)
+          build_index if !File.exists?(File.join(aai_config[:index_file]))
           index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
-          build_index if !index.exists?
           #index.remove_record(find(record.id))
           #index.add_record(record)
           index.update_record(record,find(record.id))
@@ -123,20 +123,39 @@ module Foo #:nodoc:
           @query_cache = {}  if (options.has_key?('no_query_cache') || options[:no_query_cache])
           if !@query_cache || !@query_cache[query]
             logger.debug('Query not in cache, running search.')
+            build_index if !File.exists?(File.join(aai_config[:index_file]))
             index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
-            build_index if !index.exists?
-            index.save
             @query_cache = {} if !@query_cache
             @query_cache[query] = index.search(query)
           else
             logger.debug('Query held in cache.')
           end
-          return @query_cache[query] if options.has_key?(:ids_only) && options[:ids_only]
+          return @query_cache[query].sort{|a,b| b <=> a }.collect{|a| a.first} if (options.has_key?(:ids_only) && options[:ids_only]) || @query_cache[query].empty?
+          
+          # slice up the results by offset and limit
+          offset = find_options[:offset] || 0
+          limit = find_options.include?(:limit) ? find_options[:limit] + offset : -1
+          part_query = @query_cache[query].sort{|a,b| b <=> a }.slice(offset,limit).collect{|a| a.first}
+          
+          # Set these to nil as we are dealing with the pagination by setting
+          # exactly what records we want.
+          find_options[:offset] = nil
+          find_options[:limit] = nil
+          
           with_scope :find => find_options do
             # Doing the find like this eliminates the possibility of errors occuring
             # on either missing records (out-of-sync) or an empty results array.
-            find(:all, :conditions => [ 'id IN (?)', @query_cache[query]])
+            records = find(:all, :conditions => [ 'id IN (?)', part_query])
+            
+            # Results come back in random order from SQL, so order again.
+            ranked_records = {}
+            records.each do |r|
+              ranked_records[r] = @query_cache[query][r.id]
+            end
+
+            ranked_records.sort{|a,b| b <=> a }.collect{|a| a.first}
           end
+          
         end
 
         private

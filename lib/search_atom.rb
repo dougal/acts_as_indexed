@@ -10,7 +10,12 @@ module Foo #:nodoc:
 
         # Contains a hash of records.
         # { 'record_id' => [pos1, pos2, pos] }
-
+        #--
+        # Weighting:
+        # http://www.perlmonks.com/index.pl?node_id=27509
+        # W(T, D) = tf(T, D) * log ( DN / df(T))
+        # weighting = frequency_in_this_record * log (total_number_of_records / number_of_matching_records)
+        
         def initialize
           @records = {}
         end
@@ -64,12 +69,22 @@ module Foo #:nodoc:
               if former.include_position?(record_id,p-1)
                 matches.add_record(record_id) if !matches.include_record?(record_id)
                 matches.add_position(record_id,p)
-                break # Break since we only need to find one match.
               end
             end
             
           end  
           return matches
+        end
+
+        # Returns a hash of record_ids and weightings for each record in the
+        # atom.
+        def weightings(records_size)
+          out = {}
+          @records.each do |r_id, pos|
+            # weighting = frequency * log (records.size / records_with_atom)
+            out[r_id] = pos.size * Math.log(records_size / @records.size)
+          end
+          out
         end
 
         protected

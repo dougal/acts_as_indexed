@@ -18,6 +18,7 @@ module Foo #:nodoc:
           @index_depth = index_depth
           @atoms = {}
           @min_word_size = min_word_size
+          @records_size = exists? ? load_record_size : 0
         end
 
         # Adds +record+ to the index.
@@ -25,14 +26,16 @@ module Foo #:nodoc:
           condensed_record = condense_record(record)
           load_atoms(condensed_record)
           add_occurences(condensed_record,record.id)
+          @records_size += 1
         end
-        
+
         # Adds multiple records to the index. Accepts an array of +records+.
         def add_records(records)
           records.each do |r|
             condensed_record = condense_record(r)
             load_atoms(condensed_record)
             add_occurences(condensed_record,r.id)
+            @records_size += 1
           end
         end
 
@@ -42,6 +45,7 @@ module Foo #:nodoc:
           load_atoms(atoms)
           atoms.each do |a|
             @atoms[a].remove_record(record.id) if @atoms.has_key?(a)
+            @records_size -= 1
             #p "removing #{record.id} from #{a}"
           end
         end
@@ -53,13 +57,13 @@ module Foo #:nodoc:
           new_atoms = condense_record(record_new)
           removed_atoms = old_atoms - new_atoms
           added_atoms = new_atoms - old_atoms
-          
+
           # Remove the old version from the appropriate atoms.
           load_atoms(removed_atoms)
           old_atoms.each do |a|
             @atoms[a].remove_record(record_new.id) if @atoms.has_key?(a)
           end
-          
+
           # Add the new version to the appropriate atoms.
           load_atoms(added_atoms)
           # TODO: Make a version of this method that takes the
@@ -82,6 +86,7 @@ module Foo #:nodoc:
               Marshal.dump(atoms,f)
             end
           end
+          save_record_size
         end
 
         # Deletes the current model's index from the filesystem.
@@ -101,8 +106,21 @@ module Foo #:nodoc:
           positive_quoted = run_quoted_queries(queries[:positive_quoted])
           negative = run_queries(queries[:negative])
           negative_quoted = run_quoted_queries(queries[:negative_quoted])
-          results = (positive.empty? || positive_quoted.empty?) ? (positive + positive_quoted) : (positive & positive_quoted)
-          results -= (negative + negative_quoted).uniq
+          
+          if !queries[:positive].empty? && !queries[:positive_quoted].empty?
+            p = positive.delete_if{ |r_id,w| !positive_quoted.include?(r_id) }
+            pq = positive_quoted.delete_if{ |r_id,w| !positive.include?(r_id) }
+            results = p.merge(pq) { |r_id,old_val,new_val| old_val + new_val}
+          elsif !queries[:positive].empty?
+            results = positive
+          else
+            results = positive_quoted
+          end
+          
+          negative_results = (negative.keys + negative_quoted.keys)
+          results.delete_if { |r_id, w| negative_results.include?(r_id) }
+          #p results
+          results
         end
 
         # Returns true if the index root exists on the FS.
@@ -113,6 +131,20 @@ module Foo #:nodoc:
         end
 
         private
+
+        # Gets the size file from the index.
+        def load_record_size
+          File.open(File.join(@root + ['size'])) do |f|
+            return (Marshal.load(f))
+          end
+        end
+
+        # Saves the size to the size file.
+        def save_record_size
+          File.open(File.join(@root + ['size']),'w+') do |f|
+            Marshal.dump(@records_size,f)
+          end
+        end
 
         # Returns true if the given atom is present.
         def include_atom?(atom)
@@ -193,23 +225,31 @@ module Foo #:nodoc:
         end
 
         def run_queries(atoms)
-          results = []
+          results = {}
           atoms.uniq.each do |atom|
+            interim_results = {}
             if include_atom?(atom)
-              if results.empty?
-                results = @atoms[atom].record_ids
-              else
-                results = results & @atoms[atom].record_ids
+              
+              interim_results = @atoms[atom].weightings(@records_size)
+            end
+            if results.empty?
+              results = interim_results
+            else
+              rr = {}
+              interim_results.each do |r,w|
+                rr[r] = w + results[r] if results[r]
               end
+              results = rr
             end
           end
+          #p results
           results
         end
 
         def run_quoted_queries(quoted_atoms)
-          results = []
+          results = {}
           quoted_atoms.each do |quoted_atom|
-
+            interim_results = {}
             # Check the index contains all the required atoms.
             # match_atom = first_word_atom
             # for each of the others
@@ -221,7 +261,20 @@ module Foo #:nodoc:
             quoted_atom[1..-1].each do |atom_name|
               matches = @atoms[atom_name].preceded_by(matches)
             end
-            results += matches.record_ids
+            #results += matches.record_ids
+            
+            interim_results = matches.weightings(@records_size)
+            if results.empty?
+              results = interim_results
+            else
+              rr = {}
+              interim_results.each do |r,w|
+                rr[r] = w + results[r] if results[r]
+              end
+              #p results.class
+              results = rr
+            end
+            
           end
           return results
         end
