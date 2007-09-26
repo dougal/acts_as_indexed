@@ -153,7 +153,7 @@ module Foo #:nodoc:
               ranked_records[r] = @query_cache[query][r.id]
             end
 
-            ranked_records.invert.sort{|a,b| b <=> a }.collect{|a| a.last}
+            ranked_records.to_a.sort{|a,b| b.last <=> a.last }.collect{|a| a.first}
           end
           
         end

@@ -1,3 +1,6 @@
+===0.4.2 [27 September 2007]
+- Fixed a bug causing identically ranked records to be lost.
+
 ===0.4.1 [22 September 2007]
 - Fixed a bug in the main search method.
 
