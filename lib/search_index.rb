@@ -55,17 +55,15 @@ module Foo #:nodoc:
           # Minimises loading and saving of partitions.
           old_atoms = condense_record(record_old)
           new_atoms = condense_record(record_new)
-          removed_atoms = old_atoms - new_atoms
-          added_atoms = new_atoms - old_atoms
 
           # Remove the old version from the appropriate atoms.
-          load_atoms(removed_atoms)
+          load_atoms(old_atoms)
           old_atoms.each do |a|
             @atoms[a].remove_record(record_new.id) if @atoms.has_key?(a)
           end
 
           # Add the new version to the appropriate atoms.
-          load_atoms(added_atoms)
+          load_atoms(new_atoms)
           # TODO: Make a version of this method that takes the
           # atomised version of the record.
           add_occurences(new_atoms, record_new.id)

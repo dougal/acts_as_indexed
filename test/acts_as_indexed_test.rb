@@ -88,4 +88,15 @@ class ActsAsIndexedTest < Test::Unit::TestCase
     assert_equal all_results[1], second_result.first.id
 
   end
+
+  # When a atom already in a record is duplicated, it removes 
+  # all records with that same atom from the index.
+  def test_update_record_bug
+    assert_equal 2, Post.find_with_index('crane',{},{:ids_only => true}).size
+    p = Post.find(6)
+    assert p.update_attributes(:body => p.body + ' crane')
+    assert_equal 2, Post.find_with_index('crane',{},{:ids_only => true}).size
+    assert_equal 2, Post.find_with_index('ship',{},{:ids_only => true}).size
+  end
+  
 end

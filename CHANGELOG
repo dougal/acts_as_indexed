@@ -1,3 +1,6 @@
+===0.4.3 [27 September 2007]
+- Fixed a bug causing records to be deleted from index during record updates.
+
 ===0.4.2 [27 September 2007]
 - Fixed a bug causing identically ranked records to be lost.
 
