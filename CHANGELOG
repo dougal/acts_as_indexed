@@ -1,3 +1,6 @@
+===0.4.4 [29 November 2007]
+- Fixed a bug causing the weighting section of the code to error out.
+
 ===0.4.3 [27 September 2007]
 - Fixed a bug causing records to be deleted from index during record updates.
 

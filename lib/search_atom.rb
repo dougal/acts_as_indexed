@@ -81,6 +81,14 @@ module Foo #:nodoc:
         def weightings(records_size)
           out = {}
           @records.each do |r_id, pos|
+            
+            # Fixes a bug when the records_size is zero. i.e. The only record
+            # contaning the word has been deleted.
+            if records_size < 1
+              out[r_id] = 0.0
+              next
+            end
+            
             # weighting = frequency * log (records.size / records_with_atom)
             out[r_id] = pos.size * Math.log(records_size / @records.size)
           end
