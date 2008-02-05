@@ -1,5 +1,6 @@
 ===0.4.5 [04 February 2007]
-- Fixed a bug where the find_options limit would be added to the offset, which caused incorrectly sized collections to be returned.
+- Fixed a bug where the find_options :limit would be added to the :offset, which caused incorrectly sized collections to be returned.
+- Fixed an 'ambiguous column' error when using the :includes find_options key.
 
 ===0.4.4 [29 November 2007]
 - Fixed a bug causing the weighting section of the code to error out.
