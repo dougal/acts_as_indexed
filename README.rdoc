@@ -18,7 +18,7 @@ with no dependencies and minimal setup.
 === Install
   ./script/plugin install git://github.com/dougal/acts-as-indexed.git
 
-If you don't have git installed, you can download the plugin from the GitHub page (http://github.com/dougal/acts-as-indexed) and unpack it into the +vendor/plugins+ directory of your rails app. 
+If you don't have git installed, you can download the plugin from the GitHub page (http://github.com/dougal/acts_as_indexed) and unpack it into the +vendor/plugins+ directory of your rails app. 
 
 == Usage
 
