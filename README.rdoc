@@ -105,5 +105,4 @@ Douglas F Shearer - http:douglasfshearer.com
 
 Future releases will be looking to add the following features:
 * Optional html scrubbing during indexing.
-* Ranked results based on query term occurences.
 * Ranking affected by field weightings.
