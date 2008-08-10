@@ -88,7 +88,7 @@ INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is s
 
 Pagination is supported via the +paginate_search+ method whose first argument is the search query, followed all the standard will_paginate arguments.
 
-@images = Image.paginate_search 'girl', :page => 1, :per_page => 5
+  @images = Image.paginate_search 'girl', :page => 1, :per_page => 5
 
 == RDoc Documentation
 
