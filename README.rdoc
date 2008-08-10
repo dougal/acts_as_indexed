@@ -66,7 +66,7 @@ the first argument. The optional +ids_only+ parameter, when set to true, will
 return only the IDs of any matching records.
 
 	# Returns array of Post objects.
-	my_search_results = Post.find_with_index('my search query') # =>  [#<Post:0x314b09c @attributes={"...
+	my_search_results = Post.find_with_index('my search query')
 	
 	# Pass any of the ActiveRecord find options to the search.
 	my_search_results = Post.find_with_index('my search query',{:limit => 10}) # return the first 10 matches.
