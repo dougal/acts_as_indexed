@@ -84,6 +84,12 @@ NOT:: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
 INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
 "":: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
 
+=== Pagination
+
+Pagination is supported via the +paginate_search+ method whose first argument is the search query, followed all the standard will_paginate arguments.
+
+@images = Image.paginate_search 'girl', :page => 1, :per_page => 5
+
 == RDoc Documentation
 
 To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the acts_as_indexed 
