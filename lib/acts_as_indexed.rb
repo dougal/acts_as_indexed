@@ -8,7 +8,7 @@ require 'active_record'
 require 'search_index'
 require 'search_atom'
 
-module Foo #:nodoc:
+module DouglasFShearer #:nodoc:
   module Acts #:nodoc:
     module Indexed #:nodoc:
 
