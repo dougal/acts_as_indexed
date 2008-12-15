@@ -5,8 +5,8 @@
 
 require 'active_record'
 
-require 'search_index'
-require 'search_atom'
+require File.dirname(__FILE__) + '/search_index'
+require File.dirname(__FILE__) + '/search_atom'
 
 module Foo #:nodoc:
   module Acts #:nodoc:
