@@ -147,13 +147,17 @@ module Foo #:nodoc:
             # on either missing records (out-of-sync) or an empty results array.
             records = find(:all, :conditions => [ "#{class_name.tableize}.id IN (?)", part_query])
             
-            # Results come back in random order from SQL, so order again.
-            ranked_records = {}
-            records.each do |r|
-              ranked_records[r] = @query_cache[query][r.id]
-            end
-
-            ranked_records.to_a.sort{|a,b| b.last <=> a.last }.collect{|a| a.first}
+            if find_options.include?(:order)
+             records # Just return the records without ranking them.
+           else
+             # Results come back in random order from SQL, so order again.
+             ranked_records = {}
+             records.each do |r|
+               ranked_records[r] = @query_cache[query][r.id]
+             end
+          
+             ranked_records.to_a.sort{|a,b| b.last <=> a.last }.collect{|a| a.first}
+           end
           end
           
         end
