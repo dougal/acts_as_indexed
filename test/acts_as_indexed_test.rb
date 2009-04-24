@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/abstract_unit'
 
-class ActsAsIndexedTest < Test::Unit::TestCase
+class ActsAsIndexedTest < ActiveSupport::TestCase
   fixtures :posts
 
   def setup
