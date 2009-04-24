@@ -108,7 +108,8 @@ module Foo #:nodoc:
         # multiple identical searches.
         #
         # ====find_options
-        # A hash passed on to active_record's find when retrieving the data from db, useful for pagination.
+        # Same as ActiveRecord#find options hash. An :order key will override
+        # the relevance ranking 
         #
         # ====options
         # ids_only:: Method returns an array of integer IDs when set to true.
