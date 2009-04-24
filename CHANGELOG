@@ -1,6 +1,6 @@
 ===0.5.0 [24 April 2009]
 - Ruby 1.9 and Rails 2.3 compatibility.
-- Index location can now be set.
+- Index location can now be set. Provides Heroku compatibility.
 - Better errors on bad options.
 - ActiveRecord order argument overrides ranking returned by find_by_index.
 - Various test environment improvements
