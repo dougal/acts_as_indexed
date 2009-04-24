@@ -29,6 +29,10 @@ module Foo #:nodoc:
         # min_word_size:: Sets the minimum length for a word in a query. Words
         #                 shorter than this value are ignored in searches
         #                 unless preceded by the '+' operator. Default is 3.
+        # index_file:: Sets the location for the index. By default this is 
+        #              RAILS_ROOT/index. Specify as an array. Heroku, for
+        #              example would use RAILS_ROOT/tmp/index, which would be
+        #              set as [RAILS_ROOT,'tmp','index]
 
         def acts_as_indexed(options = {})
           class_eval do
@@ -44,26 +48,18 @@ module Foo #:nodoc:
 
           # default config
           self.aai_config = { 
-            :index_file => [RAILS_ROOT,'index',RAILS_ENV,name],
+            :index_file => [RAILS_ROOT,'index'],
             :index_file_depth => 3,
             :min_word_size => 3,
             :fields => []
           }
 
-          # set fields
-          aai_config[:fields] = options[:fields] if options.include?(:fields)
+          aai_config[:index_file] += [RAILS_ENV,name]
 
-          # set minimum word size if available.
-          aai_config[:min_word_size] = options[:min_word_size] if options.include?(:min_word_size)
+          aai_config.merge!(options)
 
-          # set index file depth if available.
-          # Min size of 1.
-          aai_config[:index_file_depth] = options[:index_file_depth].to_i if options.include?(:index_file_depth) && options[:index_file_depth].to_i > 0
-
-          # Set file location for plugin testing.
-          # TODO: Find more portable (ruby) way of doing the up-one-level.
-          aai_config[:index_file] = [File.dirname(__FILE__),'../test/index',RAILS_ENV,name] if options.include?(:self_test)
-
+          raise(ArgumentError, 'no fields specified') unless aai_config.include?(:fields)
+          raise(ArgumentError, 'index_file_depth cannot be less than one (1)') if aai_config[:index_file_depth].to_i < 1
         end
 
         # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
