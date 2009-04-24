@@ -184,7 +184,7 @@ module Foo #:nodoc:
             if len > 1
               @prefix_cache[prefix] = prefix.split(//).collect{|c| c[0]}.inject{|sum,c| sum.to_s + '_' + c.to_s}
             else
-              @prefix_cache[prefix] = atom[0].to_s
+              @prefix_cache[prefix] = atom[0].ord.to_s
             end
           end
           @prefix_cache[prefix]
