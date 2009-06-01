@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'FileUtils'
+require 'fileutils'
 
 begin
   require File.dirname(__FILE__) + '/../../../../config/boot'
