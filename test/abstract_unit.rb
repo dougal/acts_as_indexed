@@ -41,7 +41,7 @@ class ActiveSupport::TestCase #:nodoc:
   protected
   
   def index_loc
-    File.join(RAILS_ROOT,'index',RAILS_ENV,name)
+    File.join(RAILS_ROOT,'index')
   end
   
 end
