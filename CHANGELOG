@@ -1,3 +1,6 @@
+===0.5.1 [11 June 2009]
+- Fixed Ruby 1.8.6 compatibility.
+
 ===0.5.0 [24 April 2009]
 - Ruby 1.9 and Rails 2.3 compatibility.
 - Index location can now be set. Provides Heroku compatibility.

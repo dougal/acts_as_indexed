@@ -182,12 +182,20 @@ module Foo #:nodoc:
             @prefix_cache = {} if !@prefix_cache
             len = atom.length
             if len > 1
-              @prefix_cache[prefix] = prefix.split(//).collect{|c| c[0]}.inject{|sum,c| sum.to_s + '_' + c.to_s}
+              @prefix_cache[prefix] = prefix.split(//).map{|c| encode_character(c)}.join('_')
             else
-              @prefix_cache[prefix] = atom[0].ord.to_s
+              @prefix_cache[prefix] = encode_character(atom)
             end
           end
           @prefix_cache[prefix]
+        end
+        
+        def encode_character(char)
+          if @@has_ord ||= char.respond_to?(:ord)
+            char.ord.to_s
+          else
+            char[0]
+          end
         end
 
         def parse_query(s)
