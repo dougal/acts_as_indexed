@@ -3,6 +3,7 @@ require 'fileutils'
 require 'rubygems'
 require 'active_record'
 require 'active_record/fixtures'
+require 'mocha'
 require File.dirname(__FILE__) + '/../lib/acts_as_indexed'
 
 # Mock out the required environment variables.
