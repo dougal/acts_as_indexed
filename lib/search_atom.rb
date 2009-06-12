@@ -43,8 +43,7 @@ module Foo #:nodoc:
 
         # Returns an array of positions for +record_id+ stored in this Atom.
         def positions(record_id)
-          return @records[record_id] if include_record?(record_id)
-          nil
+          return @records[record_id]
         end
 
         # Removes +record_id+ from this Atom.
