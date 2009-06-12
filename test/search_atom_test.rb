@@ -1,10 +1,7 @@
 require File.dirname(__FILE__) + '/abstract_unit'
 include Foo::Acts::Indexed
 
-class SearchAtomTest < ActiveSupport::TestCase
-  
-  @search_atom = SearchAtom.new
-  
+class SearchAtomTest < ActiveSupport::TestCase  
   
   def test_should_create_a_new_instance
     assert SearchAtom.new

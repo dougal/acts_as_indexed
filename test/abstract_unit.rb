@@ -27,9 +27,7 @@ class ActiveSupport::TestCase #:nodoc:
   self.use_instantiated_fixtures  = false
   
   def destroy_index
-    FileUtils::rm_rf(index_loc) if File.exists?(index_loc)
-    assert !File.exists?(index_loc)
-    true
+    `rm -rdf #{index_loc}`
   end
   
   def build_index
@@ -38,8 +36,6 @@ class ActiveSupport::TestCase #:nodoc:
     assert File.exists?(index_loc)
     true
   end
-  
-  protected
   
   def index_loc
     File.join(RAILS_ROOT,'index')

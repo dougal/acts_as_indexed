@@ -3,10 +3,6 @@ require File.dirname(__FILE__) + '/abstract_unit'
 class ActsAsIndexedTest < ActiveSupport::TestCase
   fixtures :posts
 
-  def setup
-    destroy_index
-  end
-
   def teardown
     destroy_index
   end
