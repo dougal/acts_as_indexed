@@ -31,11 +31,8 @@ module Foo #:nodoc:
 
         # Adds multiple records to the index. Accepts an array of +records+.
         def add_records(records)
-          records.each do |r|
-            condensed_record = condense_record(r)
-            load_atoms(condensed_record)
-            add_occurences(condensed_record,r.id)
-            @records_size += 1
+          records.each do |record|
+            add_record(record)
           end
         end
 
