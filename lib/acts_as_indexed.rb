@@ -127,12 +127,12 @@ module Foo #:nodoc:
           else
             logger.debug('Query held in cache.')
           end
-          return @query_cache[query].sort{|a,b| b <=> a }.collect{|a| a.first} if (options.has_key?(:ids_only) && options[:ids_only]) || @query_cache[query].empty?
+          return @query_cache[query].sort.reverse.map(&:first) if (options.has_key?(:ids_only) && options[:ids_only]) || @query_cache[query].empty?
           
           # slice up the results by offset and limit
           offset = find_options[:offset] || 0
           limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query].size
-          part_query = @query_cache[query].sort{|a,b| b <=> a }.slice(offset,limit).collect{|a| a.first}
+          part_query = @query_cache[query].sort.reverse.slice(offset,limit).map(&:first)
           
           # Set these to nil as we are dealing with the pagination by setting
           # exactly what records we want.
@@ -153,7 +153,7 @@ module Foo #:nodoc:
                ranked_records[r] = @query_cache[query][r.id]
              end
           
-             ranked_records.to_a.sort{|a,b| b.last <=> a.last }.collect{|a| a.first}
+             ranked_records.to_a.sort_by{|a| a.last }.reverse.map(&:first)
            end
           end
           
