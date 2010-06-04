@@ -142,7 +142,7 @@ module Foo #:nodoc:
           with_scope :find => find_options do
             # Doing the find like this eliminates the possibility of errors occuring
             # on either missing records (out-of-sync) or an empty results array.
-            records = find(:all, :conditions => [ "#{class_name.tableize}.id IN (?)", part_query])
+            records = find(:all, :conditions => [ "#{table_name}.id IN (?)", part_query])
             
             if find_options.include?(:order)
              records # Just return the records without ranking them.
