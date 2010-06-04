@@ -68,18 +68,18 @@ class SearchAtomTest < ActiveSupport::TestCase
   def test_weightings
     # 5 documents.
     weightings = build_search_atom({ 1 => [1, 8], 2 => [1] }).weightings(5)
-    assert_in_delta(1.38629436111989, weightings[1], 2 ** -20)
-    assert_in_delta(0.693147180559945, weightings[2], 2 ** -20)
+    assert_in_delta(1.832, weightings[1], 2 ** -10)
+    assert_in_delta(0.916, weightings[2], 2 ** -10)
     
     # Empty positions.
     weightings = build_search_atom({ 1 => [1, 8], 2 => [] }).weightings(5)
-    assert_in_delta(1.38629436111989, weightings[1], 2 ** -20)
-    assert_in_delta(0.0, weightings[2], 2 ** -20)
+    assert_in_delta(1.832, weightings[1], 2 ** -10)
+    assert_in_delta(0.0, weightings[2], 2 ** -10)
     
     # 10 documents.
     weightings = build_search_atom({ 1 => [1, 8], 2 => [1] }).weightings(10)
-    assert_in_delta(3.2188758248682, weightings[1], 2 ** -20)
-    assert_in_delta(1.6094379124341, weightings[2], 2 ** -20)
+    assert_in_delta(3.219, weightings[1], 2 ** -10)
+    assert_in_delta(1.609, weightings[2], 2 ** -10)
   end
   
   private
