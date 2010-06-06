@@ -233,12 +233,15 @@ module Foo #:nodoc:
           atoms.uniq.each do |atom|
             interim_results = {}
             if include_atom?(atom)
-              
+              # Collect all the weightings for the current atom.
               interim_results = @atoms[atom].weightings(@records_size)
             end
             if results.empty?
+              # If first time round, set results with initial weightings.
               results = interim_results
             else
+              # If second time round, add weightings together for records
+              # matching both atoms. Any matching only one are discarded.
               rr = {}
               interim_results.each do |r,w|
                 rr[r] = w + results[r] if results[r]
