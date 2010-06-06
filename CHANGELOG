@@ -1,7 +1,7 @@
 ===0.5.3 [6th June 2010]
 - Now supports non-standard table names automatically. [nandalopes]
 
-===0.5.2 [3rd May 2009]
+===0.5.2 [3rd May 2010]
 - Fix for Errno::ERANGE error related to certain Math.log calculations. [parndt]
 - Improved index detection in a shared-directory environment. [bob-p]
 
