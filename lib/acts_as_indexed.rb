@@ -127,7 +127,7 @@ module Foo #:nodoc:
           else
             logger.debug('Query held in cache.')
           end
-          return @query_cache[query].sort.reverse.map(&:first) if (options.has_key?(:ids_only) && options[:ids_only]) || @query_cache[query].empty?
+          return @query_cache[query].sort.reverse.map(&:first) if options[:ids_only] || @query_cache[query].empty?
           
           # slice up the results by offset and limit
           offset = find_options[:offset] || 0

@@ -43,7 +43,7 @@ module Foo #:nodoc:
 
         # Returns an array of positions for +record_id+ stored in this Atom.
         def positions(record_id)
-          return @records[record_id]
+          @records[record_id]
         end
 
         # Removes +record_id+ from this Atom.
@@ -72,7 +72,7 @@ module Foo #:nodoc:
             end
 
           end
-          return matches
+          matches
         end
 
         # Returns a hash of record_ids and weightings for each record in the

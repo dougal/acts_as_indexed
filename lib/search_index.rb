@@ -94,8 +94,8 @@ module Foo #:nodoc:
 
         # Returns an array of IDs for records matching +query+.
         def search(query)
-          load_atoms(cleanup_atoms(query))
           return [] if query.nil?
+          load_atoms(cleanup_atoms(query))
           queries = parse_query(query.dup)
           positive = run_queries(queries[:positive])
           positive_quoted = run_quoted_queries(queries[:positive_quoted])
@@ -130,7 +130,7 @@ module Foo #:nodoc:
         # Gets the size file from the index.
         def load_record_size
           File.open(File.join(@root + ['size'])) do |f|
-            return (Marshal.load(f))
+            (Marshal.load(f))
           end
         end
 
@@ -225,7 +225,7 @@ module Foo #:nodoc:
           # Find all other terms.
           positive += cleanup_atoms(s,true)
 
-          return {:negative_quoted => negative_quoted, :positive_quoted => positive_quoted, :negative => negative, :positive => positive}
+          {:negative_quoted => negative_quoted, :positive_quoted => positive_quoted, :negative => negative, :positive => positive}
         end
 
         def run_queries(atoms)
@@ -280,7 +280,7 @@ module Foo #:nodoc:
             end
             
           end
-          return results
+          results
         end
 
         def load_atoms(atoms)
