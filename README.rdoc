@@ -28,35 +28,35 @@ If you don't have git installed, you can download the plugin from the GitHub pag
 Add +acts_as_indexed+ to the top of any models you want to index, along with a
 list of the fields you wish to be indexed.
 
-	class Post < ActiveRecord::Base
-	  acts_as_indexed :fields => [:title, :body]
+  class Post < ActiveRecord::Base
+    acts_as_indexed :fields => [:title, :body]
   
-	  ...
-	end
+    ...
+  end
 
 The fields are not limited to model fields, but can be any instance method of
 the current model.
 
-	class User < ActiveRecord::Base
-	  acts_as_indexed :fields => [:address, :fullname]
+  class User < ActiveRecord::Base
+    acts_as_indexed :fields => [:address, :fullname]
 
-		def fullname
-			return self.firstname + ' ' + self.lastname
-		end
+    def fullname
+      self.firstname + ' ' + self.lastname
+    end
 
-	  ...
-	end
-	
+    ...
+  end
+  
 Acts_as_indexed automatically filters out query words shorter than 3 characters, for
 performance sake. This value can be changed by passing +min_word_size+ along
 with the fields. NOTE: The index files must be rebuilt by deleting the 'index'
 directory in your app's root directory.
 
-	class Post < ActiveRecord::Base
-	  acts_as_indexed :fields => [:title, :body], :min_word_size => 5
+  class Post < ActiveRecord::Base
+    acts_as_indexed :fields => [:title, :body], :min_word_size => 5
 
-	  ...
-	end
+    ...
+  end
 
 
 === Searching
@@ -65,16 +65,16 @@ To search, call the +find_with_index+ method on your model, passing a query as
 the first argument. The optional +ids_only+ parameter, when set to true, will
 return only the IDs of any matching records.
 
-	# Returns array of Post objects.
-	my_search_results = Post.find_with_index('my search query')
-	
-	# Pass any of the ActiveRecord find options to the search.
-	my_search_results = Post.find_with_index('my search query',{:limit => 10}) # return the first 10 matches.
-	
-	# Returns array of IDs.
-	my_search_results = Post.find_with_index('my search query',{},{:ids_only => true}) # =>  [12,19,33...
-	
-	
+  # Returns array of Post objects.
+  my_search_results = Post.find_with_index('my search query')
+  
+  # Pass any of the ActiveRecord find options to the search.
+  my_search_results = Post.find_with_index('my search query',{:limit => 10}) # return the first 10 matches.
+  
+  # Returns array of IDs.
+  my_search_results = Post.find_with_index('my search query',{},{:ids_only => true}) # =>  [12,19,33...
+  
+  
 === Query Options
 
 The following query operators are supported:
@@ -93,7 +93,7 @@ Pagination is supported via the +paginate_search+ method whose first argument is
 == RDoc Documentation
 
 To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the acts_as_indexed 
-plugin folder. Then point your browser at <tt>/vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
+plugin folder. Then point your web browser at <tt>vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
 
 Alternatively, you can view the rdoc documentation online[http://rdoc.info/projects/dougal/acts_as_indexed/].
 
@@ -112,3 +112,5 @@ Douglas F Shearer - http:douglasfshearer.com
 Future releases will be looking to add the following features:
 * Optional html scrubbing during indexing.
 * Ranking affected by field weightings.
+* Support for DataMapper, Sequel and the various MongoDB ORMs.
+* UTF-8 support. See the current solution here: https://gist.github.com/193903bb4e0d6e5debe1
