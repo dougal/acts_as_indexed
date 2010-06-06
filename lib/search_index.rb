@@ -284,10 +284,10 @@ module Foo #:nodoc:
         end
 
         def load_atoms(atoms)
-          # Remove duplicates
+          # Remove duplicate atoms.
           # Remove atoms already in index.
           # Calculate prefixes.
-          # Remove duplicates
+          # Remove duplicate prefixes.
           atoms.uniq.reject{|a| include_atom?(a)}.collect{|a| encoded_prefix(a)}.uniq.each do |name|
             if File.exists?(File.join(@root + [name.to_s]))
               File.open(File.join(@root + [name.to_s])) do |f|
