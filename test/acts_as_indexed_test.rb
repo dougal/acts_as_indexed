@@ -30,6 +30,12 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     end
   end
 
+  def test_scoped_search_returns_posts
+    Post.with_index('album').each do |p|
+      assert_equal Post, p.class
+    end
+  end
+
   def test_search_returns_post_ids
     Post.find_with_index('album',{},{:ids_only => true}).each do |pid|
       assert p = Post.find(pid)
@@ -47,29 +53,59 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_simple_queries
+    assert_equal [],  Post.find_with_index(nil)
+    assert_equal [],  Post.find_with_index('')
     assert_equal [5, 6],  Post.find_with_index('ship',{},{:ids_only => true}).sort
     assert_equal [6],  Post.find_with_index('foo',{},{:ids_only => true})
     assert_equal [6],  Post.find_with_index('foo ship',{},{:ids_only => true})
     assert_equal [6],  Post.find_with_index('ship foo',{},{:ids_only => true})
   end
 
+  def test_scoped_simple_queries
+    assert_equal [],  Post.find_with_index(nil)
+    assert_equal [],  Post.with_index('')
+    assert_equal [5, 6],  Post.with_index('ship').map(&:id).sort
+    assert_equal [6],  Post.with_index('foo').map(&:id)
+    assert_equal [6],  Post.with_index('foo ship').map(&:id)
+    assert_equal [6],  Post.with_index('ship foo').map(&:id)
+  end
+
   def test_negative_queries
     assert_equal [5, 6],  Post.find_with_index('crane',{},{:ids_only => true}).sort
     assert_equal [5],  Post.find_with_index('crane -foo',{},{:ids_only => true})
     assert_equal [5],  Post.find_with_index('-foo crane',{},{:ids_only => true})
-    assert_equal [],  Post.find_with_index('-foo',{},{:ids_only => true}) #Edgecase
+    assert_equal [],  Post.find_with_index('-foo') #Edgecase
+  end
+
+  def test_scoped_negative_queries
+    assert_equal [5, 6],  Post.with_index('crane').map(&:id).sort
+    assert_equal [5],  Post.with_index('crane -foo').map(&:id)
+    assert_equal [5],  Post.with_index('-foo crane').map(&:id)
+    assert_equal [],  Post.with_index('-foo') #Edgecase
   end
 
   def test_quoted_queries
     assert_equal [5],  Post.find_with_index('"crane ship"',{},{:ids_only => true})
     assert_equal [6],  Post.find_with_index('"crane big"',{},{:ids_only => true})
-    assert_equal [],  Post.find_with_index('foo "crane ship"',{},{:ids_only => true})
-    assert_equal [],  Post.find_with_index('"crane badger"',{},{:ids_only => true})
+    assert_equal [],  Post.find_with_index('foo "crane ship"')
+    assert_equal [],  Post.find_with_index('"crane badger"')
+  end
+
+  def test_scoped_quoted_queries
+    assert_equal [5],  Post.with_index('"crane ship"').map(&:id)
+    assert_equal [6],  Post.with_index('"crane big"').map(&:id)
+    assert_equal [],  Post.with_index('foo "crane ship"')
+    assert_equal [],  Post.with_index('"crane badger"')
   end
 
   def test_negative_quoted_queries
     assert_equal [6],  Post.find_with_index('crane -"crane ship"',{},{:ids_only => true})
     assert_equal [],  Post.find_with_index('-"crane big"',{},{:ids_only => true}) # Edgecase
+  end
+
+  def test_scoped_negative_quoted_queries
+    assert_equal [6],  Post.with_index('crane -"crane ship"').map(&:id)
+    assert_equal [],  Post.with_index('-"crane big"') # Edgecase
   end
 
   def test_find_options
@@ -82,7 +118,6 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     second_result = Post.find_with_index('crane',{:limit => 1, :offset => 1})
     assert_equal 1, second_result.size
     assert_equal all_results[1], second_result.first.id
-
   end
 
   # When a atom already in a record is duplicated, it removes 

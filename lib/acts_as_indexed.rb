@@ -44,6 +44,8 @@ module Foo #:nodoc:
           before_update  :update_index
           after_destroy :remove_from_index
 
+          named_scope :with_index, lambda { |query| { :conditions => ['?.id IN (?)', table_name, search_index(query, {}, {:ids_only => true}) ] } }
+          
           cattr_accessor :aai_config
 
           # default config
@@ -179,10 +181,12 @@ module Foo #:nodoc:
       # Adds model class singleton methods.
       module SingletonMethods
 
+        # DEPRECATED. Use with_index scope instead.
         # Finds instances matching the terms passed in +query+.
         #
         # See Foo::Acts::Indexed::ClassMethods#search_index.
         def find_with_index(query='', find_options = {}, options = {})
+          warn "[DEPRECATION] `find_with_index` is deprecated and will be removed in a later release."
           search_index(query, find_options, options)
         end
 
