@@ -44,7 +44,7 @@ module Foo #:nodoc:
           before_update  :update_index
           after_destroy :remove_from_index
 
-          named_scope :with_index, lambda { |query| { :conditions => ["#{table_name}.'id' IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
+          named_scope :with_index, lambda { |query| { :conditions => ["#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
           
           cattr_accessor :aai_config
 
