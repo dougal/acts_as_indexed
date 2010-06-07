@@ -186,7 +186,7 @@ module Foo #:nodoc:
         #
         # See Foo::Acts::Indexed::ClassMethods#search_index.
         def find_with_index(query='', find_options = {}, options = {})
-          warn "[DEPRECATION] `find_with_index` is deprecated and will be removed in a later release."
+          warn "[DEPRECATION] `find_with_index` is deprecated and will be removed in a later release. Use `with_index(query)` instead."
           search_index(query, find_options, options)
         end
 
