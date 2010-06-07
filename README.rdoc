@@ -61,18 +61,14 @@ directory in your app's root directory.
 
 === Searching
 
-To search, call the +find_with_index+ method on your model, passing a query as 
-the first argument. The optional +ids_only+ parameter, when set to true, will
-return only the IDs of any matching records.
+To search, call the +with_index+ named scope on your model, passing a query as 
+the first argument.
 
   # Returns array of Post objects.
-  my_search_results = Post.find_with_index('my search query')
+  my_search_results = Post.with_index('my search query')
   
-  # Pass any of the ActiveRecord find options to the search.
-  my_search_results = Post.find_with_index('my search query',{:limit => 10}) # return the first 10 matches.
-  
-  # Returns array of IDs.
-  my_search_results = Post.find_with_index('my search query',{},{:ids_only => true}) # =>  [12,19,33...
+  # Chain it with any number of ActiveRecord methods and named_scopes.
+  my_search_results = Post.public.with_index('my search query').find(:all, :limit => 10) # return the first 10 matches which are public.
   
   
 === Query Options
@@ -86,9 +82,9 @@ INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is s
 
 === Pagination
 
-Pagination is supported via the +paginate_search+ method whose first argument is the search query, followed all the standard will_paginate arguments.
+Since +with_index+ is a named scope, WillPaginate can be used in the normal fashion.
 
-  @images = Image.paginate_search 'girl', :page => 1, :per_page => 5
+  @images = Image.with_index('girl').paginate(:page => 1, :per_page => 5)
 
 == RDoc Documentation
 

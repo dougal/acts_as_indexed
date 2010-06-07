@@ -181,7 +181,7 @@ module Foo #:nodoc:
       # Adds model class singleton methods.
       module SingletonMethods
 
-        # DEPRECATED. Use with_index scope instead.
+        # DEPRECATED. Use +with_index+ scope instead.
         # Finds instances matching the terms passed in +query+.
         #
         # See Foo::Acts::Indexed::ClassMethods#search_index.

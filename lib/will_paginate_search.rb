@@ -8,7 +8,7 @@ module WillPaginate
 
     module ClassMethods
 
-
+      # DEPRECATED. Use chained pagination instead.
       def paginate_search(query, options)
         warn "[DEPRECATION] `paginate_search` is deprecated and will be removed in a later release. Use `with_index(query).paginate()` instead."
         page, per_page, total_entries = wp_parse_options(options)
