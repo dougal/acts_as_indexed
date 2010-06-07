@@ -1,5 +1,5 @@
 # WillPaginateSearch
-# Copyright (c) 2007 Douglas F Shearer.
+# Copyright (c) 2007 - 2010 Douglas F Shearer.
 # http://douglasfshearer.com
 
 module WillPaginate
@@ -10,7 +10,7 @@ module WillPaginate
 
 
       def paginate_search(query, options)
-
+        warn "[DEPRECATION] `paginate_search` is deprecated and will be removed in a later release. Use `with_index(query).paginate()` instead."
         page, per_page, total_entries = wp_parse_options(options)
         
         total_entries ||= find_with_index(query,{},{:ids_only => true}).size
