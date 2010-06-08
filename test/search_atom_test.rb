@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/abstract_unit'
-include Foo::Acts::Indexed
+include ActsAsIndexed
 
 class SearchAtomTest < ActiveSupport::TestCase  
   
