@@ -5,8 +5,8 @@
 
 require 'active_record'
 
-require File.dirname(__FILE__) + '/search_index'
-require File.dirname(__FILE__) + '/search_atom'
+require 'acts_as_indexed/search_index'
+require 'acts_as_indexed/search_atom'
 
 module ActsAsIndexed #:nodoc:
 
