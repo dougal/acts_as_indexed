@@ -10,9 +10,15 @@ require 'acts_as_indexed/search_index'
 require 'acts_as_indexed/search_atom'
 
 module ActsAsIndexed #:nodoc:
+  
+  # Holds the default configuration for acts_as_indexed.
+  
+  @configuration = Configuration.new
 
-  def self.included(mod)
-    mod.extend(ClassMethods)
+  # Returns the current configuration for acts_as_indexed.
+  
+  def self.configuration
+    @configuration
   end
 
   # Call this method to modify defaults in your initializers.
@@ -24,9 +30,13 @@ module ActsAsIndexed #:nodoc:
   #     config.min_word_size = 3
   #   end
   
-  def self.configure(silent = false)
+  def self.configure
     self.configuration ||= Configuration.new
     yield(configuration)
+  end
+
+  def self.included(mod)
+    mod.extend(ClassMethods)
   end
 
   module ClassMethods
@@ -59,29 +69,22 @@ module ActsAsIndexed #:nodoc:
 
       named_scope :with_index, lambda { |query| { :conditions => ["#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
       
-      cattr_accessor :aai_config
+      cattr_accessor :aai_config, :aai_fields
 
-      # default config
-      self.aai_config = { 
-        :index_file => [RAILS_ROOT,'index'],
-        :index_file_depth => 3,
-        :min_word_size => 3,
-        :fields => []
-      }
-
-      aai_config[:index_file] += [RAILS_ENV,name]
-
-      aai_config.merge!(options)
-
-      raise(ArgumentError, 'no fields specified') unless aai_config.include?(:fields)
-      raise(ArgumentError, 'index_file_depth cannot be less than one (1)') if aai_config[:index_file_depth].to_i < 1
+      self.aai_fields = options.delete(:fields)
+      raise(ArgumentError, 'no fields specified') if aai_fields.nil? || aai_fields.empty?
+      
+      self.aai_config = ActsAsIndexed.configuration.dup
+      options.each do |k, v|
+        self.aai_config.send("#{k}=", v)
+      end
     end
 
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
 
     def index_add(record)
-      build_index if !File.exists?(File.join(aai_config[:index_file]))
-      index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
+      build_index if !File.exists?(File.join(aai_config.index_file))
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
       index.add_record(record)
       index.save
       @query_cache = {}
@@ -91,7 +94,7 @@ module ActsAsIndexed #:nodoc:
     # Removes the passed +record+ from the index. Clears the query cache.
 
     def index_remove(record)
-      index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
       # record won't be in index if it doesn't exist. Just return true.
       return true if !index.exists?
       index.remove_record(record)
@@ -105,8 +108,8 @@ module ActsAsIndexed #:nodoc:
     # 2. Adds the new version to the index.
     
     def index_update(record)
-      build_index if !File.exists?(File.join(aai_config[:index_file]))
-      index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
+      build_index if !File.exists?(File.join(aai_config.index_file))
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
       #index.remove_record(find(record.id))
       #index.add_record(record)
       index.update_record(record,find(record.id))
@@ -135,8 +138,8 @@ module ActsAsIndexed #:nodoc:
       @query_cache = {}  if (options.has_key?('no_query_cache') || options[:no_query_cache])
       if !@query_cache || !@query_cache[query]
         logger.debug('Query not in cache, running search.')
-        build_index if !File.exists?(File.join(aai_config[:index_file]))
-        index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
+        build_index if !File.exists?(File.join(aai_config.index_file))
+        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
         @query_cache = {} if !@query_cache
         @query_cache[query] = index.search(query)
       else
@@ -182,7 +185,7 @@ module ActsAsIndexed #:nodoc:
       offset = 0
       while (records = find(:all, :limit => increment, :offset => offset)).size > 0
         #p "offset is #{offset}, increment is #{increment}"
-        index = SearchIndex.new(aai_config[:index_file], aai_config[:index_file_depth], aai_config[:fields], aai_config[:min_word_size])
+        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
         offset += increment
         index.add_records(records)
         index.save

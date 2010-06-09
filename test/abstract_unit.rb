@@ -4,11 +4,13 @@ require 'rubygems'
 require 'active_record'
 require 'active_record/fixtures'
 require 'mocha'
-require File.dirname(__FILE__) + '/../lib/acts_as_indexed'
 
 # Mock out the required environment variables.
+# Do this before requiring AAI.
 RAILS_ENV = 'test'
 RAILS_ROOT = Dir.pwd
+
+require File.dirname(__FILE__) + '/../lib/acts_as_indexed'
 
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + '/test.log')
 ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
