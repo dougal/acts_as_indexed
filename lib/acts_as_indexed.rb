@@ -5,6 +5,7 @@
 
 require 'active_record'
 
+require 'acts_as_indexed/configuration'
 require 'acts_as_indexed/search_index'
 require 'acts_as_indexed/search_atom'
 
@@ -12,6 +13,20 @@ module ActsAsIndexed #:nodoc:
 
   def self.included(mod)
     mod.extend(ClassMethods)
+  end
+
+  # Call this method to modify defaults in your initializers.
+  #
+  # Example showing defaults:
+  #   ActsAsIndexed.configure do |config|
+  #     config.index_file = [RAILS_ROOT,'index']
+  #     config.index_file_depth = 3
+  #     config.min_word_size = 3
+  #   end
+  
+  def self.configure(silent = false)
+    self.configuration ||= Configuration.new
+    yield(configuration)
   end
 
   module ClassMethods
