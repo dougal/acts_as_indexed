@@ -72,12 +72,13 @@ module ActsAsIndexed #:nodoc:
       cattr_accessor :aai_config, :aai_fields
 
       self.aai_fields = options.delete(:fields)
-      raise(ArgumentError, 'no fields specified') if aai_fields.nil? || aai_fields.empty?
+      raise(ArgumentError, 'no fields specified') if self.aai_fields.nil? || self.aai_fields.empty?
       
       self.aai_config = ActsAsIndexed.configuration.dup
       options.each do |k, v|
         self.aai_config.send("#{k}=", v)
       end
+      self.aai_config.index_file += [RAILS_ENV, self.name]
     end
 
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
