@@ -1,6 +1,7 @@
 = acts_as_indexed
 
-If you find this plugin useful, please consider a donation to show your support!
+If you find this plugin useful, please consider a donation to show your 
+support!
 
 http://www.paypal.com/cgi-bin/webscr?cmd=_send-money
   
@@ -9,8 +10,8 @@ Paypal address: mailto:dougal.s@gmail.com
 
 == Instructions
 
-This plugin allows boolean-queried fulltext search to be added to any Rails app
-with no dependencies and minimal setup.
+This plugin allows boolean-queried fulltext search to be added to any Rails 
+app with no dependencies and minimal setup.
 
 
 == Resources
@@ -18,7 +19,9 @@ with no dependencies and minimal setup.
 === Install
   ./script/plugin install git://github.com/dougal/acts_as_indexed.git
 
-If you don't have git installed, you can download the plugin from the GitHub page (http://github.com/dougal/acts_as_indexed) and unpack it into the +vendor/plugins+ directory of your rails app. 
+If you don't have git installed, you can download the plugin from the GitHub 
+page (http://github.com/dougal/acts_as_indexed) and unpack it into the 
++vendor/plugins+ directory of your rails app. 
 
 == Usage
 
@@ -47,16 +50,7 @@ the current model.
     ...
   end
   
-Acts_as_indexed automatically filters out query words shorter than 3 characters, for
-performance sake. This value can be changed by passing +min_word_size+ along
-with the fields. NOTE: The index files must be rebuilt by deleting the 'index'
-directory in your app's root directory.
-
-  class Post < ActiveRecord::Base
-    acts_as_indexed :fields => [:title, :body], :min_word_size => 5
-
-    ...
-  end
+Any of the configuration options in the Further Configuration section can be added as to the acts_as_indexed method call.
 
 
 === Searching
@@ -75,23 +69,40 @@ the first argument.
 
 The following query operators are supported:
 
-AND:: This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
-NOT:: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
-INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
-"":: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
+* AND:: This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
+* NOT:: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
+* INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
+* "":: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
 
 === Pagination
 
-Since +with_index+ is a named scope, WillPaginate can be used in the normal fashion.
+Since +with_index+ is a named scope, WillPaginate can be used in the normal 
+fashion.
 
   @images = Image.with_index('girl').paginate(:page => 1, :per_page => 5)
 
+=== Further Configuration
+
+A config block can be provided in your environment files or initializers.
+Example showing defaults:
+
+  ActsAsIndexed.configure do |config|
+    config.index_file = [RAILS_ROOT,'index']
+    config.index_file_depth = 3
+    config.min_word_size = 3
+  end
+
+A full rundown of the available configuration options can be found in
+<tt>lib/acts_as_indexed/configuration.rb</tt>
+
 == RDoc Documentation
 
-To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the acts_as_indexed 
-plugin folder. Then point your web browser at <tt>vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
+To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the
+acts_as_indexed plugin folder. Then point your web browser at
+<tt>vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
 
-Alternatively, you can view the rdoc documentation online[http://rdoc.info/projects/dougal/acts_as_indexed/].
+Alternatively, you can view the rdoc documentation 
+online[http://rdoc.info/projects/dougal/acts_as_indexed/].
 
 == Problems, Comments, Suggestions?
 
@@ -109,4 +120,5 @@ Future releases will be looking to add the following features:
 * Optional html scrubbing during indexing.
 * Ranking affected by field weightings.
 * Support for DataMapper, Sequel and the various MongoDB ORMs.
-* UTF-8 support. See the current solution here: https://gist.github.com/193903bb4e0d6e5debe1
+* UTF-8 support. See the current solution here: 
+https://gist.github.com/193903bb4e0d6e5debe1
