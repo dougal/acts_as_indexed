@@ -17,7 +17,12 @@ app with no dependencies and minimal setup.
 == Resources
 
 === Install
+
+== Rails 2.x.x
   ./script/plugin install git://github.com/dougal/acts_as_indexed.git
+
+== Rails 3.x.x
+  rails plugin install git://github.com/dougal/acts_as_indexed.git
 
 If you don't have git installed, you can download the plugin from the GitHub 
 page (http://github.com/dougal/acts_as_indexed) and unpack it into the 
