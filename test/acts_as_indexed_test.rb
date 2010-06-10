@@ -31,7 +31,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_search_returns_posts
-    Post.with_index('album').each do |p|
+    Post.with_query('album').each do |p|
       assert_equal Post, p.class
     end
   end
@@ -63,11 +63,11 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
   def test_scoped_simple_queries
     assert_equal [],  Post.find_with_index(nil)
-    assert_equal [],  Post.with_index('')
-    assert_equal [5, 6],  Post.with_index('ship').map(&:id).sort
-    assert_equal [6],  Post.with_index('foo').map(&:id)
-    assert_equal [6],  Post.with_index('foo ship').map(&:id)
-    assert_equal [6],  Post.with_index('ship foo').map(&:id)
+    assert_equal [],  Post.with_query('')
+    assert_equal [5, 6],  Post.with_query('ship').map(&:id).sort
+    assert_equal [6],  Post.with_query('foo').map(&:id)
+    assert_equal [6],  Post.with_query('foo ship').map(&:id)
+    assert_equal [6],  Post.with_query('ship foo').map(&:id)
   end
 
   def test_negative_queries
@@ -78,10 +78,10 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_negative_queries
-    assert_equal [5, 6],  Post.with_index('crane').map(&:id).sort
-    assert_equal [5],  Post.with_index('crane -foo').map(&:id)
-    assert_equal [5],  Post.with_index('-foo crane').map(&:id)
-    assert_equal [],  Post.with_index('-foo') #Edgecase
+    assert_equal [5, 6],  Post.with_query('crane').map(&:id).sort
+    assert_equal [5],  Post.with_query('crane -foo').map(&:id)
+    assert_equal [5],  Post.with_query('-foo crane').map(&:id)
+    assert_equal [],  Post.with_query('-foo') #Edgecase
   end
 
   def test_quoted_queries
@@ -92,10 +92,10 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_quoted_queries
-    assert_equal [5],  Post.with_index('"crane ship"').map(&:id)
-    assert_equal [6],  Post.with_index('"crane big"').map(&:id)
-    assert_equal [],  Post.with_index('foo "crane ship"')
-    assert_equal [],  Post.with_index('"crane badger"')
+    assert_equal [5],  Post.with_query('"crane ship"').map(&:id)
+    assert_equal [6],  Post.with_query('"crane big"').map(&:id)
+    assert_equal [],  Post.with_query('foo "crane ship"')
+    assert_equal [],  Post.with_query('"crane badger"')
   end
 
   def test_negative_quoted_queries
@@ -104,8 +104,8 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_negative_quoted_queries
-    assert_equal [6],  Post.with_index('crane -"crane ship"').map(&:id)
-    assert_equal [],  Post.with_index('-"crane big"') # Edgecase
+    assert_equal [6],  Post.with_query('crane -"crane ship"').map(&:id)
+    assert_equal [],  Post.with_query('-"crane big"') # Edgecase
   end
 
   def test_find_options

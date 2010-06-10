@@ -69,9 +69,9 @@ module ActsAsIndexed #:nodoc:
 
       # scope for Rails 3.x, named_scope for Rails 2.x.
       if self.respond_to?(:where)
-        scope :with_index, lambda { |query| where("#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true})) }
+        scope :with_query, lambda { |query| where("#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true})) }
       else
-        named_scope :with_index, lambda { |query| { :conditions => ["#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
+        named_scope :with_query, lambda { |query| { :conditions => ["#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
       end
             
       cattr_accessor :aai_config, :aai_fields
@@ -203,12 +203,12 @@ module ActsAsIndexed #:nodoc:
   # Adds model class singleton methods.
   module SingletonMethods
 
-    # DEPRECATED. Use +with_index+ scope instead.
+    # DEPRECATED. Use +with_query+ scope instead.
     # Finds instances matching the terms passed in +query+.
     #
     # See ActsAsIndexed::ClassMethods#search_index.
     def find_with_index(query='', find_options = {}, options = {})
-      warn "[DEPRECATION] `find_with_index` is deprecated and will be removed in a later release. Use `with_index(query)` instead."
+      warn "[DEPRECATION] `find_with_index` is deprecated and will be removed in a later release. Use `with_query(query)` instead."
       search_index(query, find_options, options)
     end
 

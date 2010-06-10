@@ -55,14 +55,14 @@ Any of the configuration options in the Further Configuration section can be add
 
 === Searching
 
-To search, call the +with_index+ named scope on your model, passing a query as 
-the first argument.
+To search, call the +with_query+ named scope on your model, passing a query as 
+an argument.
 
   # Returns array of Post objects.
-  my_search_results = Post.with_index('my search query')
+  my_search_results = Post.with_query('my search query')
   
   # Chain it with any number of ActiveRecord methods and named_scopes.
-  my_search_results = Post.public.with_index('my search query').find(:all, :limit => 10) # return the first 10 matches which are public.
+  my_search_results = Post.public.with_query('my search query').find(:all, :limit => 10) # return the first 10 matches which are public.
   
   
 === Query Options
@@ -76,10 +76,10 @@ The following query operators are supported:
 
 === Pagination
 
-Since +with_index+ is a named scope, WillPaginate can be used in the normal 
+Since +with_query+ is a named scope, WillPaginate can be used in the normal 
 fashion.
 
-  @images = Image.with_index('girl').paginate(:page => 1, :per_page => 5)
+  @images = Image.with_query('girl').paginate(:page => 1, :per_page => 5)
 
 === Further Configuration
 
