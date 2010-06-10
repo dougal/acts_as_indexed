@@ -67,8 +67,13 @@ module ActsAsIndexed #:nodoc:
       before_update  :update_index
       after_destroy :remove_from_index
 
-      named_scope :with_index, lambda { |query| { :conditions => ["#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
-      
+      # scope for Rails 3.x, named_scope for Rails 2.x.
+      if self.respond_to?(:where)
+        scope :with_index, lambda { |query| where("#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true})) }
+      else
+        named_scope :with_index, lambda { |query| { :conditions => ["#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
+      end
+            
       cattr_accessor :aai_config, :aai_fields
 
       self.aai_fields = options.delete(:fields)
