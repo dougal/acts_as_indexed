@@ -1,3 +1,9 @@
+===0.6.0 [10th June 2010]
+ - Now supports Rails 3.x.x as well as Rails 2.x.x.
+ - Added global configuration options.
+ - Now recommending using with_query scope for searching.
+ - Deprecated find_with_index and will_paginate_search methods.
+
 ===0.5.3 [6th June 2010]
 - Now supports non-standard table names automatically. [nandalopes]
 

@@ -55,7 +55,7 @@ the current model.
     ...
   end
   
-Any of the configuration options in the Further Configuration section can be added as to the acts_as_indexed method call.
+Any of the configuration options in the Further Configuration section can be added as to the acts_as_indexed method call. These will override any defaults or global configuration.
 
 
 === Searching
