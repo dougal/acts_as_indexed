@@ -7,8 +7,14 @@ require 'mocha'
 
 # Mock out the required environment variables.
 # Do this before requiring AAI.
-RAILS_ENV = 'test'
-RAILS_ROOT = Dir.pwd
+class Rails
+  def self.root
+    Dir.pwd
+  end
+  def self.env
+    'test'
+  end
+end
 
 require File.dirname(__FILE__) + '/../lib/acts_as_indexed'
 
@@ -40,7 +46,7 @@ class ActiveSupport::TestCase #:nodoc:
   end
   
   def index_loc
-    File.join(RAILS_ROOT,'index')
+    File.join(Rails.root,'index')
   end
   
 end

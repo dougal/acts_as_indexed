@@ -4,7 +4,7 @@ include ActsAsIndexed
 class ConfigurationTest < ActiveSupport::TestCase  
   
   def test_default_index_file_should_be_set
-    assert_equal [RAILS_ROOT, 'index'], config.index_file
+    assert_equal [Rails.root, 'index'], config.index_file
   end
   
   def test_default_index_file_depth_should_be_set
@@ -16,8 +16,8 @@ class ConfigurationTest < ActiveSupport::TestCase
   end
   
   def test_index_file_should_be_writeable
-    config.index_file = [RAILS_ROOT, 'my_index']
-    assert_equal [RAILS_ROOT, 'my_index'], config.index_file
+    config.index_file = [Rails.root, 'my_index']
+    assert_equal [Rails.root, 'my_index'], config.index_file
   end
   
   def test_index_file_depth_should_be_writeable
