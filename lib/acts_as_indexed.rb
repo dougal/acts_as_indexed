@@ -25,7 +25,7 @@ module ActsAsIndexed #:nodoc:
   #
   # Example showing defaults:
   #   ActsAsIndexed.configure do |config|
-  #     config.index_file = [RAILS_ROOT,'index']
+  #     config.index_file = [Rails.root,'index']
   #     config.index_file_depth = 3
   #     config.min_word_size = 3
   #   end
@@ -55,7 +55,7 @@ module ActsAsIndexed #:nodoc:
     # index_file:: Sets the location for the index. By default this is 
     #              RAILS_ROOT/index. Specify as an array. Heroku, for
     #              example would use RAILS_ROOT/tmp/index, which would be
-    #              set as [RAILS_ROOT,'tmp','index]
+    #              set as [Rails.root,'tmp','index]
 
     def acts_as_indexed(options = {})
       class_eval do
@@ -83,7 +83,7 @@ module ActsAsIndexed #:nodoc:
       options.each do |k, v|
         self.aai_config.send("#{k}=", v)
       end
-      self.aai_config.index_file += [RAILS_ENV, self.name]
+      self.aai_config.index_file += [Rails.env, self.name]
     end
 
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
