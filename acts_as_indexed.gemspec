@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "acts_as_indexed.gemspec",
      "lib/acts_as_indexed.rb",
      "lib/acts_as_indexed/configuration.rb",
      "lib/acts_as_indexed/search_atom.rb",

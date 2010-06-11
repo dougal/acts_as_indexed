@@ -26,9 +26,11 @@ app with no dependencies and minimal setup.
 
 === As a Gem
 Despite this being slightly against the the original ethos of the project, 
-acts_as_indexed is now available as a gem as several people have requested it.
+acts_as_indexed is now available as a Gem as several people have requested it.
   
   gem install acts_as_indexed
+  
+Make sure to specify the Gem in your environment.rb file (Rails 2.x.x), or the Gemfile (Rails 3.x.x).
 
 If you don't have git installed, you can download the plugin from the GitHub 
 page (http://github.com/dougal/acts_as_indexed) and unpack it into the 
