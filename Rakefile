@@ -33,3 +33,18 @@ namespace :rcov do
     sh "rm -rdf coverage"
   end
 end
+
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "acts_as_indexed"
+    gemspec.summary = "Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app"
+    gemspec.description = gemspec.summary
+    gemspec.email = "dougal.s@gmail.com"
+    gemspec.homepage = "http://github.com/dougal/acts_as_indexed"
+    gemspec.authors = ["Douglas F Shearer"]  
+  end
+  Jeweler::GemcutterTasks.new
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
+end
