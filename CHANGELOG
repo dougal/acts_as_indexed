@@ -1,3 +1,6 @@
+===0.6.1 [11th June 2010]
+ - Now available as a Gem as well as the original plugin.
+
 ===0.6.0 [10th June 2010]
  - Now supports Rails 3.x.x as well as Rails 2.x.x.
  - Added global configuration options.
