@@ -80,21 +80,20 @@ module ActsAsIndexed #:nodoc:
       raise(ArgumentError, 'no fields specified') if self.aai_fields.nil? || self.aai_fields.empty?
 
       self.aai_config = ActsAsIndexed.configuration.dup
+      self.aai_config.if_proc = options.delete(:if)
       options.each do |k, v|
         self.aai_config.send("#{k}=", v)
       end
 
-      # convert the index file path into a Pathname and add the Rails environment and this model's name to it.
-      self.aai_config.index_file = Pathname.new(
-        (self.aai_config.index_file += [Rails.env, self.name]).collect{|part| part.to_s}.join(File::SEPARATOR)
-      )
+      # Add the Rails environment and this model's name to the index file path.
+      self.aai_config.index_file = self.aai_config.index_file.join(Rails.env, self.name)
     end
 
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
 
     def index_add(record)
       build_index unless aai_config.index_file.directory?
-      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       index.add_record(record)
       index.save
       @query_cache = {}
@@ -104,7 +103,7 @@ module ActsAsIndexed #:nodoc:
     # Removes the passed +record+ from the index. Clears the query cache.
 
     def index_remove(record)
-      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       # record won't be in index if it doesn't exist. Just return true.
       return true unless index.exists?
       index.remove_record(record)
@@ -119,7 +118,7 @@ module ActsAsIndexed #:nodoc:
 
     def index_update(record)
       build_index unless aai_config.index_file.directory?
-      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       #index.remove_record(find(record.id))
       #index.add_record(record)
       index.update_record(record,find(record.id))
@@ -149,7 +148,7 @@ module ActsAsIndexed #:nodoc:
       if !@query_cache || !@query_cache[query]
         logger.debug('Query not in cache, running search.')
         build_index unless aai_config.index_file.directory?
-        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
+        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
         (@query_cache ||= {})[query] = index.search(query)
       else
         logger.debug('Query held in cache.')
@@ -194,7 +193,7 @@ module ActsAsIndexed #:nodoc:
       offset = 0
       while (records = find(:all, :limit => increment, :offset => offset)).size > 0
         #p "offset is #{offset}, increment is #{increment}"
-        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
+        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
         offset += increment
         index.add_records(records)
         index.save

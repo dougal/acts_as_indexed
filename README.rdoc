@@ -65,6 +65,17 @@ the current model.
   
 Any of the configuration options in the Further Configuration section can be added as to the acts_as_indexed method call. These will override any defaults or global configuration.
 
+You can specify proc that needs to evaluate to true before the item gets indexs.
+This is useful if you only want items with a certain state to be included. The Proc
+gets the object passed in.
+
+For example, if you have a visible column that is false if the post is hidden, or true
+if it is visible, you can filter the index by doing:
+
+  class Post < ActiveRecord::Base
+    acts_as_indexed :fields => [:title, :body], :if => Proc.new { |post| post.visible }
+    ...
+  end
 
 === Searching
 
