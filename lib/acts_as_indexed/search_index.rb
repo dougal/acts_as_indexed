@@ -97,11 +97,11 @@ module ActsAsIndexed #:nodoc:
       negative = run_queries(queries[:negative])
       negative_quoted = run_quoted_queries(queries[:negative_quoted])
 
-      if !queries[:positive].empty? && !queries[:positive_quoted].empty?
-        p = positive.delete_if{ |r_id,w| !positive_quoted.include?(r_id) }
-        pq = positive_quoted.delete_if{ |r_id,w| !positive.include?(r_id) }
+      if queries[:positive_quoted].any? && queries[:positive].any?
+        p = positive.delete_if{ |r_id,w| positive_quoted.exclude?(r_id) }
+        pq = positive_quoted.delete_if{ |r_id,w| positive.exclude?(r_id) }
         results = p.merge(pq) { |r_id,old_val,new_val| old_val + new_val}
-      elsif !queries[:positive].empty?
+      elsif queries[:positive].any?
         results = positive
       else
         results = positive_quoted
@@ -158,7 +158,7 @@ module ActsAsIndexed #:nodoc:
     end
 
     def add_atom(atom)
-      @atoms[atom] = SearchAtom.new if !include_atom?(atom)
+      @atoms[atom] = SearchAtom.new unless include_atom?(atom)
     end
 
     def add_occurences(condensed_record,record_id)
@@ -171,10 +171,8 @@ module ActsAsIndexed #:nodoc:
 
     def encoded_prefix(atom)
       prefix = atom[0,@index_depth]
-      if !@prefix_cache || !@prefix_cache.has_key?(prefix)
-        @prefix_cache = {} if !@prefix_cache
-        len = atom.length
-        if len > 1
+      unless (@prefix_cache ||= {}).has_key?(prefix)
+        if atom.length > 1
           @prefix_cache[prefix] = prefix.split(//).map{|c| encode_character(c)}.join('_')
         else
           @prefix_cache[prefix] = encode_character(atom)
@@ -259,7 +257,7 @@ module ActsAsIndexed #:nodoc:
         #   return atom containing records + positions where current atom is preceded by following atom.
         # end
         # return records from final atom.
-        next if !include_atoms?(quoted_atom)
+        next unless include_atoms?(quoted_atom)
         matches = @atoms[quoted_atom.first]
         quoted_atom[1..-1].each do |atom_name|
           matches = @atoms[atom_name].preceded_by(matches)

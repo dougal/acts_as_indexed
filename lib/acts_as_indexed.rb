@@ -106,7 +106,7 @@ module ActsAsIndexed #:nodoc:
     def index_remove(record)
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
       # record won't be in index if it doesn't exist. Just return true.
-      return true if !index.exists?
+      return true unless index.exists?
       index.remove_record(record)
       index.save
       @query_cache = {}
@@ -118,7 +118,7 @@ module ActsAsIndexed #:nodoc:
     # 2. Adds the new version to the index.
 
     def index_update(record)
-      build_index if !File.exists?(File.join(aai_config.index_file))
+      build_index unless aai_config.index_file.directory?
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
       #index.remove_record(find(record.id))
       #index.add_record(record)
@@ -148,10 +148,9 @@ module ActsAsIndexed #:nodoc:
       @query_cache = {}  if (options.has_key?('no_query_cache') || options[:no_query_cache])
       if !@query_cache || !@query_cache[query]
         logger.debug('Query not in cache, running search.')
-        build_index if !File.exists?(File.join(aai_config.index_file))
+        build_index unless aai_config.index_file.directory?
         index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size)
-        @query_cache = {} if !@query_cache
-        @query_cache[query] = index.search(query)
+        (@query_cache ||= {})[query] = index.search(query)
       else
         logger.debug('Query held in cache.')
       end
