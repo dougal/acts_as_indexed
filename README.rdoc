@@ -1,16 +1,16 @@
 = acts_as_indexed
 
-If you find this plugin useful, please consider a donation to show your 
+If you find this plugin useful, please consider a donation to show your
 support!
 
 http://www.paypal.com/cgi-bin/webscr?cmd=_send-money
-  
+
 Paypal address: mailto:dougal.s@gmail.com
-  
+
 
 == Instructions
 
-This plugin allows boolean-queried fulltext search to be added to any Rails 
+This plugin allows boolean-queried fulltext search to be added to any Rails
 app with no dependencies and minimal setup.
 
 
@@ -25,16 +25,16 @@ app with no dependencies and minimal setup.
   rails plugin install git://github.com/dougal/acts_as_indexed.git
 
 === As a Gem
-Despite this being slightly against the the original ethos of the project, 
+Despite this being slightly against the the original ethos of the project,
 acts_as_indexed is now available as a Gem as several people have requested it.
-  
+
   gem install acts_as_indexed
-  
+
 Make sure to specify the Gem in your environment.rb file (Rails 2.x.x), or the Gemfile (Rails 3.x.x).
 
-If you don't have git installed, you can download the plugin from the GitHub 
-page (http://github.com/dougal/acts_as_indexed) and unpack it into the 
-<tt>vendor/plugins</tt> directory of your rails app. 
+If you don't have git installed, you can download the plugin from the GitHub
+page (http://github.com/dougal/acts_as_indexed) and unpack it into the
+<tt>vendor/plugins</tt> directory of your rails app.
 
 == Usage
 
@@ -46,7 +46,7 @@ list of the fields you wish to be indexed.
 
   class Post < ActiveRecord::Base
     acts_as_indexed :fields => [:title, :body]
-  
+
     ...
   end
 
@@ -62,33 +62,33 @@ the current model.
 
     ...
   end
-  
+
 Any of the configuration options in the Further Configuration section can be added as to the acts_as_indexed method call. These will override any defaults or global configuration.
 
-You can specify proc that needs to evaluate to true before the item gets indexs.
-This is useful if you only want items with a certain state to be included. The Proc
-gets the object passed in.
+You can specify proc that needs to evaluate to true before the item gets indexed.
+This is useful if you only want items with a certain state to be included.
+The Proc is passed the current object's instance so you are able to test against that.
 
 For example, if you have a visible column that is false if the post is hidden, or true
 if it is visible, you can filter the index by doing:
 
   class Post < ActiveRecord::Base
-    acts_as_indexed :fields => [:title, :body], :if => Proc.new { |post| post.visible }
+    acts_as_indexed :fields => [:title, :body], :if => Proc.new { |post| post.visible? }
     ...
   end
 
 === Searching
 
-To search, call the +with_query+ named scope on your model, passing a query as 
+To search, call the +with_query+ named scope on your model, passing a query as
 an argument.
 
   # Returns array of Post objects.
   my_search_results = Post.with_query('my search query')
-  
+
   # Chain it with any number of ActiveRecord methods and named_scopes.
   my_search_results = Post.public.with_query('my search query').find(:all, :limit => 10) # return the first 10 matches which are public.
-  
-  
+
+
 === Query Options
 
 The following query operators are supported:
@@ -100,7 +100,7 @@ The following query operators are supported:
 
 === Pagination
 
-Since +with_query+ is a named scope, WillPaginate can be used in the normal 
+Since +with_query+ is a named scope, WillPaginate can be used in the normal
 fashion.
 
   @images = Image.with_query('girl').paginate(:page => 1, :per_page => 5)
@@ -125,7 +125,7 @@ To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the
 acts_as_indexed plugin folder. Then point your web browser at
 <tt>vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
 
-Alternatively, you can view the rdoc documentation 
+Alternatively, you can view the rdoc documentation
 online[http://rdoc.info/projects/dougal/acts_as_indexed/].
 
 == Problems, Comments, Suggestions?
@@ -144,5 +144,5 @@ Future releases will be looking to add the following features:
 * Optional html scrubbing during indexing.
 * Ranking affected by field weightings.
 * Support for DataMapper, Sequel and the various MongoDB ORMs.
-* UTF-8 support. See the current solution here: 
+* UTF-8 support. See the current solution here:
 https://gist.github.com/193903bb4e0d6e5debe1
