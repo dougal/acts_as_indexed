@@ -6,12 +6,12 @@
 module ActsAsIndexed #:nodoc:
   class SearchIndex
 
-    # root:: Location of index on filesystem.
+    # root:: Location of index on filesystem as a Pathname.
     # index_depth:: Degree of index partitioning.
     # fields:: Fields or instance methods of ActiveRecord model to be indexed.
     # min_word_size:: Smallest query term that will be run through search.
     def initialize(root, index_depth, fields, min_word_size)
-      @root = root
+      @root = Pathname.new(root.to_s)
       @fields = fields
       @index_depth = index_depth
       @atoms = {}
@@ -69,13 +69,11 @@ module ActsAsIndexed #:nodoc:
       prepare
       atoms_sorted = {}
       @atoms.each do |atom_name, records|
-        e_p = encoded_prefix(atom_name)
-        atoms_sorted[e_p] = {} if !atoms_sorted.has_key?(e_p)
-        atoms_sorted[e_p][atom_name] = records
+        (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
       end
       atoms_sorted.each do |e_p, atoms|
         #p "Saving #{e_p}."
-        File.open(File.join(@root + [e_p.to_s]),'w+') do |f|
+        @root.join(e_p.to_s).open("w+") do |f|
           Marshal.dump(atoms,f)
         end
       end
@@ -86,8 +84,7 @@ module ActsAsIndexed #:nodoc:
     #--
     # TODO: Write a public method that will delete all indexes.
     def destroy
-      FileUtils.rm_rf(@root)
-      true
+      @root.delete
     end
 
     # Returns an array of IDs for records matching +query+.
@@ -120,21 +117,22 @@ module ActsAsIndexed #:nodoc:
     #--
     # TODO: Make a private method called 'root_exists?' which checks for the root directory.
     def exists?
-      File.exists?(File.join(@root + ['size']))
+      @root.join('size').exist?
     end
 
     private
 
     # Gets the size file from the index.
     def load_record_size
-      File.open(File.join(@root + ['size'])) do |f|
-        (Marshal.load(f))
+      #p "About to load #{@root.join('size')}"
+      @root.join('size').open do |f|
+        Marshal.load(f)
       end
     end
 
     # Saves the size to the size file.
     def save_record_size
-      File.open(File.join(@root + ['size']),'w+') do |f|
+      @root.join('size').open('w+') do |f|
         Marshal.dump(@records_size,f)
       end
     end
@@ -147,7 +145,7 @@ module ActsAsIndexed #:nodoc:
     # Returns true if all the given atoms are present.
     def include_atoms?(atoms_arr)
       atoms_arr.each do |a|
-        return false if !include_atom?(a)
+        return false unless include_atom?(a)
       end
       true
     end
@@ -290,8 +288,8 @@ module ActsAsIndexed #:nodoc:
       # Calculate prefixes.
       # Remove duplicate prefixes.
       atoms.uniq.reject{|a| include_atom?(a)}.collect{|a| encoded_prefix(a)}.uniq.each do |name|
-        if File.exists?(File.join(@root + [name.to_s]))
-          File.open(File.join(@root + [name.to_s])) do |f|
+        if (atom_file = @root.join(name.to_s)).exist?
+          atom_file.open do |f|
             @atoms.merge!(Marshal.load(f))
           end
         end
@@ -299,26 +297,24 @@ module ActsAsIndexed #:nodoc:
     end
 
     def prepare
-      # Makes the RAILS_ROOT/index directory
-      Dir.mkdir(File.join(@root[0,2])) if !File.exists?(File.join(@root[0,2]))
-      # Makes the RAILS_ROOT/index/ENVIRONMENT directory
-      Dir.mkdir(File.join(@root[0,3])) if !File.exists?(File.join(@root[0,3]))
-      # Makes the RAILS_ROOT/index/ENVIRONMENT/CLASS directory
-      Dir.mkdir(File.join(@root)) if !File.exists?(File.join(@root))
+      # Makes the RAILS_ROOT/index/ENVIRONMENT/CLASS directories
+      @root.mkpath
     end
 
     def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
       atoms = s.downcase.gsub(/\W/,' ').squeeze(' ').split
-      return atoms if !limit_size
+      return atoms unless limit_size
       atoms.reject{|w| w.size < min_size}
     end
 
     def condense_record(record)
-      record_condensed = ''
+      condensed = []
       @fields.each do |f|
-        record_condensed += ' ' + record.send(f).to_s if record.send(f)
+        if (value = record.send(f)).present?
+          condensed << value.to_s
+        end
       end
-      cleanup_atoms(record_condensed)
+      cleanup_atoms(condensed.join(' '))
     end
 
   end
