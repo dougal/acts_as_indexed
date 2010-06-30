@@ -8,6 +8,7 @@ require 'active_record'
 require 'acts_as_indexed/configuration'
 require 'acts_as_indexed/search_index'
 require 'acts_as_indexed/search_atom'
+require 'acts_as_indexed/indexed_models'
 
 module ActsAsIndexed #:nodoc:
   
@@ -84,6 +85,8 @@ module ActsAsIndexed #:nodoc:
         self.aai_config.send("#{k}=", v)
       end
       self.aai_config.index_file += [Rails.env, self.name]
+
+      IndexedModels.register_model self
     end
 
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
