@@ -2,7 +2,7 @@
 # Copyright (c) 2007 - 2010 Douglas F Shearer.
 # http://douglasfshearer.com
 
-module Foo::Acts::Indexed
+module ActsAsIndexed
 
    module WillPaginate
 
@@ -29,5 +29,5 @@ module Foo::Acts::Indexed
 end
 
 class ActiveRecord::Base
-  extend Foo::Acts::Indexed::WillPaginate::Search
+  extend ActsAsIndexed::WillPaginate::Search
 end
