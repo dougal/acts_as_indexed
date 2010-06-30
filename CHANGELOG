@@ -1,3 +1,8 @@
+===0.6.3
+ - index file path can now be definited as a Pathname as well as an array. [parndt]
+ - Can now define which records are indexed and which are not via an :if proc. [madpilot]
+ - Lots of tidying up.
+
 ===0.6.2 [11th June 2010]
  - Now available as a Gem as well as the original plugin. [parndt - Thanks for doing most of the hard work.]
 
