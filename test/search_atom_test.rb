@@ -81,6 +81,12 @@ class SearchAtomTest < ActiveSupport::TestCase
     assert_in_delta(3.219, weightings[1], 2 ** -10)
     assert_in_delta(1.609, weightings[2], 2 ** -10)
   end
+
+  def test_adding_with_recursive_merge
+    sa1 = SearchAtom.new({1=>[1]})
+    sa2 = SearchAtom.new({1=>[2], 2=>[3]})
+    assert_equal (sa1+sa2).records, {1=>[1,2], 2=>[3]}
+  end
   
   private
   

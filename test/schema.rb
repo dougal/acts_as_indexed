@@ -3,4 +3,10 @@ ActiveRecord::Schema.define :version => 0 do
     t.column :title, :string
     t.column :body, :text
   end
+
+  create_table :sources, :force => true do |t|
+    t.column :name, :string
+    t.column :url, :string
+    t.column :description, :text
+  end
 end

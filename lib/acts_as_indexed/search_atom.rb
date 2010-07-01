@@ -53,7 +53,7 @@ module ActsAsIndexed #:nodoc:
 
     # Creates a new SearchAtom with the combined records from self and other
     def +(other)
-      SearchAtom.new(@records.merge(other.records))
+      SearchAtom.new(@records.clone.recursive_merge!(other.records))
     end
 
     # Returns at atom containing the records and positions of +self+ preceded by +former+
