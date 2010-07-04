@@ -1,9 +1,11 @@
 class IndexedModels
-  cattr_reader :registered_models
+  def self.registered_models
+    self.load_all_models!
+    @@registered_models
+  end
   
   def self.with_query(query, options={})
-    @@registered_models ||= []
-    self.load_all_models! if @@registered_models.empty? # Sometimes models haven't been loaded if the server has just restarted
+    self.load_all_models! # Sometimes models haven't been loaded if the server has just restarted
     included_models = @@registered_models.clone
     included_models.delete_if{|m| [options[:except]].flatten.map{|s|class_for_sym(s)}.include? m} if options[:except]
     included_models.delete_if{|m| ![options[:only]].flatten.map{|s|class_for_sym(s)}.include? m} if options[:only]
@@ -17,7 +19,6 @@ class IndexedModels
   def self.register_model(model)
     @@registered_models ||= []
     @@registered_models << model unless @@registered_models.include? model
-
     self.load_all_models!
   end
 
