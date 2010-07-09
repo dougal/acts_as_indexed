@@ -27,7 +27,7 @@ module ActsAsIndexed #:nodoc:
 
     # Adds +record_id+ to the stored records.
     def add_record(record_id)
-      @records[record_id] = [] if !include_record?(record_id)
+      @records[record_id] = [] unless include_record?(record_id)
     end
 
     # Adds +pos+ to the array of positions for +record_id+.
@@ -71,7 +71,7 @@ module ActsAsIndexed #:nodoc:
         pos.each do |p|
           # Check if previous position is in former.
           if former.include_position?(record_id,p-1)
-            matches.add_record(record_id) if !matches.include_record?(record_id)
+            matches.add_record(record_id) unless matches.include_record?(record_id)
             matches.add_position(record_id,p)
           end
         end

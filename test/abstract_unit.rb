@@ -9,45 +9,46 @@ require 'mocha'
 # Do this before requiring AAI.
 class Rails
   def self.root
-    Dir.pwd
+    Pathname.new(Dir.pwd)
   end
   def self.env
     'test'
   end
 end
 
-require File.dirname(__FILE__) + '/../lib/acts_as_indexed'
+test_path = Pathname.new(File.expand_path('../', __FILE__))
+require test_path.parent.join('lib', 'acts_as_indexed').to_s
 
-ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + '/test.log')
-ActiveRecord::Base.configurations = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
+ActiveRecord::Base.logger = Logger.new(test_path.join('test.log').to_s)
+ActiveRecord::Base.configurations = YAML::load(IO.read(test_path.join('database.yml').to_s))
 ActiveRecord::Base.establish_connection(ENV['DB'] || 'sqlite3')
 
 # Load Schema
-load(File.dirname(__FILE__) + '/schema.rb')
+load(test_path.join('schema.rb').to_s)
 
 # Load model.
-$LOAD_PATH.unshift(File.dirname(__FILE__) + '/fixtures/')
+$LOAD_PATH.unshift(test_path.join('fixtures').to_s)
 
 class ActiveSupport::TestCase #:nodoc:
   include ActiveRecord::TestFixtures
-  self.fixture_path = File.dirname(__FILE__) + '/fixtures/'
+  self.fixture_path = Pathname.new(File.expand_path('../', __FILE__)).join('fixtures').to_s
   self.use_transactional_fixtures = true
   self.use_instantiated_fixtures  = false
-  
+
   def destroy_index
     `rm -rdf #{index_loc}`
   end
-  
+
   def build_index
     # Makes a query to invoke the index build.
     assert_equal [], Post.find_with_index('badger')
     assert_equal [], Source.find_with_index('badger')
-    assert File.exists?(index_loc)
+    assert index_loc.exist?
     true
   end
-  
+
   def index_loc
-    File.join(Rails.root,'index')
+    Rails.root.join('index')
   end
-  
+
 end

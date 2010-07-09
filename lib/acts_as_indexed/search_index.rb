@@ -6,21 +6,24 @@
 module ActsAsIndexed #:nodoc:
   class SearchIndex
 
-    # root:: Location of index on filesystem.
+    # root:: Location of index on filesystem as a Pathname.
     # index_depth:: Degree of index partitioning.
     # fields:: Fields or instance methods of ActiveRecord model to be indexed.
     # min_word_size:: Smallest query term that will be run through search.
-    def initialize(root, index_depth, fields, min_word_size)
-      @root = root
+    # if_proc:: A Proc. If the proc is true, the index gets added, if false if doesn't
+    def initialize(root, index_depth, fields, min_word_size, if_proc=Proc.new{true})
+      @root = Pathname.new(root.to_s)
       @fields = fields
       @index_depth = index_depth
       @atoms = {}
       @min_word_size = min_word_size
       @records_size = exists? ? load_record_size : 0
+      @if_proc = if_proc
     end
 
     # Adds +record+ to the index.
     def add_record(record)
+      return @records_size unless @if_proc.call(record)
       condensed_record = condense_record(record)
       load_atoms(condensed_record)
       add_occurences(condensed_record,record.id)
@@ -57,11 +60,13 @@ module ActsAsIndexed #:nodoc:
         @atoms[a].remove_record(record_new.id) if @atoms.has_key?(a)
       end
 
-      # Add the new version to the appropriate atoms.
-      load_atoms(new_atoms)
-      # TODO: Make a version of this method that takes the
-      # atomised version of the record.
-      add_occurences(new_atoms, record_new.id)
+      if @if_proc.call(record_new)
+        # Add the new version to the appropriate atoms.
+        load_atoms(new_atoms)
+        # TODO: Make a version of this method that takes the
+        # atomised version of the record.
+        add_occurences(new_atoms, record_new.id)
+      end
     end
 
     # Saves the current index partitions to the filesystem.
@@ -69,13 +74,11 @@ module ActsAsIndexed #:nodoc:
       prepare
       atoms_sorted = {}
       @atoms.each do |atom_name, records|
-        e_p = encoded_prefix(atom_name)
-        atoms_sorted[e_p] = {} if !atoms_sorted.has_key?(e_p)
-        atoms_sorted[e_p][atom_name] = records
+        (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
       end
       atoms_sorted.each do |e_p, atoms|
         #p "Saving #{e_p}."
-        File.open(File.join(@root + [e_p.to_s]),'w+') do |f|
+        @root.join(e_p.to_s).open("w+") do |f|
           Marshal.dump(atoms,f)
         end
       end
@@ -86,8 +89,7 @@ module ActsAsIndexed #:nodoc:
     #--
     # TODO: Write a public method that will delete all indexes.
     def destroy
-      FileUtils.rm_rf(@root)
-      true
+      @root.delete
     end
 
     # Returns an array of IDs for records matching +query+.
@@ -104,9 +106,9 @@ module ActsAsIndexed #:nodoc:
 
       if queries[:start_quoted].any?
         results = start_quoted
-      elsif queries[:positive].any? && queries[:positive_quoted].any?
-        p = positive.delete_if{ |r_id,w| !positive_quoted.include?(r_id) }
-        pq = positive_quoted.delete_if{ |r_id,w| !positive.include?(r_id) }
+      elsif queries[:positive_quoted].any? && queries[:positive].any?
+        p = positive.delete_if{ |r_id,w| positive_quoted.exclude?(r_id) }
+        pq = positive_quoted.delete_if{ |r_id,w| positive.exclude?(r_id) }
         results = p.merge(pq) { |r_id,old_val,new_val| old_val + new_val}
       elsif queries[:positive].any?
         results = positive
@@ -124,21 +126,22 @@ module ActsAsIndexed #:nodoc:
     #--
     # TODO: Make a private method called 'root_exists?' which checks for the root directory.
     def exists?
-      File.exists?(File.join(@root + ['size']))
+      @root.join('size').exist?
     end
 
     private
 
     # Gets the size file from the index.
     def load_record_size
-      File.open(File.join(@root + ['size'])) do |f|
-        (Marshal.load(f))
+      #p "About to load #{@root.join('size')}"
+      @root.join('size').open do |f|
+        Marshal.load(f)
       end
     end
 
     # Saves the size to the size file.
     def save_record_size
-      File.open(File.join(@root + ['size']),'w+') do |f|
+      @root.join('size').open('w+') do |f|
         Marshal.dump(@records_size,f)
       end
     end
@@ -155,7 +158,7 @@ module ActsAsIndexed #:nodoc:
     # Returns true if all the given atoms are present.
     def include_atoms?(atoms_arr)
       atoms_arr.each do |a|
-        return false if !include_atom?(a)
+        return false unless include_atom?(a)
       end
       true
     end
@@ -168,7 +171,7 @@ module ActsAsIndexed #:nodoc:
     end
 
     def add_atom(atom)
-      @atoms[atom] = SearchAtom.new if !include_atom?(atom)
+      @atoms[atom] = SearchAtom.new unless include_atom?(atom)
     end
 
     def add_occurences(condensed_record,record_id)
@@ -181,10 +184,8 @@ module ActsAsIndexed #:nodoc:
 
     def encoded_prefix(atom)
       prefix = atom[0,@index_depth]
-      if !@prefix_cache || !@prefix_cache.has_key?(prefix)
-        @prefix_cache = {} if !@prefix_cache
-        len = atom.length
-        if len > 1
+      unless (@prefix_cache ||= {}).has_key?(prefix)
+        if atom.length > 1
           @prefix_cache[prefix] = prefix.split(//).map{|c| encode_character(c)}.join('_')
         else
           @prefix_cache[prefix] = encode_character(atom)
@@ -279,7 +280,7 @@ module ActsAsIndexed #:nodoc:
         #   return atom containing records + positions where current atom is preceded by following atom.
         # end
         # return records from final atom.
-        next if !include_atoms?(quoted_atom)
+        next unless include_atoms?(quoted_atom)
         matches = @atoms[quoted_atom.first]
         quoted_atom[1..-1].each do |atom_name|
           matches = @atoms[atom_name].preceded_by(matches)
@@ -357,40 +358,35 @@ module ActsAsIndexed #:nodoc:
       # Calculate prefixes.
       # Remove duplicate prefixes.
       atoms.uniq.reject{|a| include_atom?(a)}.collect{|a| encoded_prefix(a)}.uniq.each do |name|
-        basename = File.join(@root + [name.to_s])
-        basename += '*' if options[:start]
-        filenames = Dir.glob basename
-        filenames.each do |filename|
-          if File.exists?(filename)
-            File.open(filename) do |f|
-              @atoms.merge!(Marshal.load(f))
-            end
+        pattern = @root.join(name.to_s).to_s
+        pattern += '*' if options[:start]
+        Pathname.glob(pattern).each do |atom_file|
+          atom_file.open do |f|
+            @atoms.merge!(Marshal.load(f))
           end
         end
       end
     end
 
     def prepare
-      # Makes the RAILS_ROOT/index directory
-      Dir.mkdir(File.join(@root[0,2])) if !File.exists?(File.join(@root[0,2]))
-      # Makes the RAILS_ROOT/index/ENVIRONMENT directory
-      Dir.mkdir(File.join(@root[0,3])) if !File.exists?(File.join(@root[0,3]))
-      # Makes the RAILS_ROOT/index/ENVIRONMENT/CLASS directory
-      Dir.mkdir(File.join(@root)) if !File.exists?(File.join(@root))
+      # Makes the RAILS_ROOT/index/ENVIRONMENT/CLASS directories
+      @root.mkpath
     end
 
     def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
       atoms = s.downcase.gsub(/\W/,' ').squeeze(' ').split
-      return atoms if !limit_size
+      return atoms unless limit_size
       atoms.reject{|w| w.size < min_size}
     end
 
     def condense_record(record)
-      record_condensed = ''
+      condensed = []
       @fields.each do |f|
-        record_condensed += ' ' + record.send(f).to_s if record.send(f)
+        if (value = record.send(f)).present?
+          condensed << value.to_s
+        end
       end
-      cleanup_atoms(record_condensed)
+      cleanup_atoms(condensed.join(' '))
     end
 
   end
