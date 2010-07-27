@@ -25,11 +25,9 @@ class IndexedModels
   def self.load_all_models!
     return if defined? @@models_loaded
     @@models_loaded = true
+    @@registered_models ||= []
     module_dir = File.join Rails.root, 'app', 'models', '*'
-    module_files = Dir.glob module_dir
-    module_files.each do |filename|
-      require filename
-    end
+    load_models(module_dir)
   end
 
   private
@@ -38,4 +36,16 @@ class IndexedModels
         rescue Object.const_get(symbol.to_s.singularize.classify) \
         rescue raise "No such class #{symbol.to_s.classify}"
     end
+
+    def self.load_models(directory)
+      module_files = Dir.glob directory
+      module_files.each do |filename|
+        if File.directory? filename
+          load_models(filename + "/*")
+        else
+          require filename
+        end
+      end
+    end
+
 end
