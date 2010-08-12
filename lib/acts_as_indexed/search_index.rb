@@ -104,16 +104,18 @@ module ActsAsIndexed #:nodoc:
       negative_quoted = run_quoted_queries(queries[:negative_quoted])
       start_quoted = run_start_queries(queries[:start_quoted])
 
+      results = {}
+
       if queries[:start_quoted].any?
-        results = start_quoted
-      elsif queries[:positive_quoted].any? && queries[:positive].any?
-        p = positive.delete_if{ |r_id,w| positive_quoted.exclude?(r_id) }
-        pq = positive_quoted.delete_if{ |r_id,w| positive.exclude?(r_id) }
-        results = p.merge(pq) { |r_id,old_val,new_val| old_val + new_val}
-      elsif queries[:positive].any?
-        results = positive
-      else
-        results = positive_quoted
+        results = merge_query_results(results, start_quoted)
+      end
+      
+      if queries[:positive_quoted].any?
+        results = merge_query_results(results, positive_quoted)
+      end
+      
+      if queries[:positive].any?
+        results = merge_query_results(results, positive)
       end
 
       negative_results = (negative.keys + negative_quoted.keys)
@@ -121,7 +123,23 @@ module ActsAsIndexed #:nodoc:
       #p results
       results
     end
-
+    
+    def merge_query_results(results1, results2)
+      # Return the other if one is empty.
+      return results1 if results2.empty?
+      return results2 if results1.empty?
+      
+      # Delete any records from results 1 that are not in results 2.
+      r1 = results1.delete_if{ |r_id,w| results2.exclude?(r_id) }
+      
+      
+      # Delete any records from results 2 that are not in results 1.
+      r2 = results2.delete_if{ |r_id,w| results1.exclude?(r_id) }
+      
+      # Merge the results by adding their respective scores.
+      r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
+    end
+    
     # Returns true if the index root exists on the FS.
     #--
     # TODO: Make a private method called 'root_exists?' which checks for the root directory.

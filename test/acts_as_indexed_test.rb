@@ -12,10 +12,10 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   def test_adds_to_index
     original_post_count = Post.count
     assert_equal [], Post.find_with_index('badger')
-    p = Post.new(:title => 'badger', :body => 'Thousands of them!')
-    assert p.save
+    post = Post.new(:title => 'badger', :body => 'Thousands of them!')
+    assert post.save
     assert_equal original_post_count+1, Post.count
-    assert_equal [p.id], Post.find_with_index('badger',{},{:ids_only => true})
+    assert_equal [post.id], Post.find_with_index('badger',{},{:ids_only => true})
   end
 
   def test_removes_from_index
@@ -111,6 +111,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_start_quoted_queries
+    assert_equal [6,5],  Post.find_with_index('^"crane" ship',{},{:ids_only => true})
     assert_equal [5],  Post.find_with_index('^"crane ship"',{},{:ids_only => true})
     assert_equal [5],  Post.find_with_index('^"crane shi"',{},{:ids_only => true})
     assert_equal [5],  Post.find_with_index('^"crane sh"',{},{:ids_only => true})
