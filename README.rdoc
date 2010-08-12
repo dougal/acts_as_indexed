@@ -149,5 +149,5 @@ Future releases will be looking to add the following features:
 * Optional html scrubbing during indexing.
 * Ranking affected by field weightings.
 * Support for DataMapper, Sequel and the various MongoDB ORMs.
-* UTF-8 support. See the current solution here:
-https://gist.github.com/193903bb4e0d6e5debe1
+* UTF-8 support. See the current solution in the following Gist: 
+  https://gist.github.com/193903bb4e0d6e5debe1
