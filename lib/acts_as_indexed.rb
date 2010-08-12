@@ -6,10 +6,8 @@
 require 'active_record'
 
 require 'acts_as_indexed/configuration'
-require 'acts_as_indexed/recursive_merge'
 require 'acts_as_indexed/search_index'
 require 'acts_as_indexed/search_atom'
-require 'acts_as_indexed/indexed_models'
 
 module ActsAsIndexed #:nodoc:
 
@@ -89,8 +87,6 @@ module ActsAsIndexed #:nodoc:
 
       # Add the Rails environment and this model's name to the index file path.
       self.aai_config.index_file = self.aai_config.index_file.join(Rails.env, self.name)
-
-      IndexedModels.register_model self
     end
 
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
