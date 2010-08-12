@@ -18,19 +18,21 @@ app with no dependencies and minimal setup.
 
 === Install
 
-== Rails 2.x.x
+==== Rails 2.x.x
   ./script/plugin install git://github.com/dougal/acts_as_indexed.git
 
-== Rails 3.x.x
+==== Rails 3.x.x
   rails plugin install git://github.com/dougal/acts_as_indexed.git
 
-=== As a Gem
+==== As a Gem
 Despite this being slightly against the the original ethos of the project,
 acts_as_indexed is now available as a Gem as several people have requested it.
 
   gem install acts_as_indexed
 
 Make sure to specify the Gem in your environment.rb file (Rails 2.x.x), or the Gemfile (Rails 3.x.x).
+
+==== No Git?
 
 If you don't have git installed, you can download the plugin from the GitHub
 page (http://github.com/dougal/acts_as_indexed) and unpack it into the
@@ -120,7 +122,8 @@ The following query operators are supported:
 * NOT:: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
 * INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
 * "":: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
-* ^"":: A quoted term that begins with ^ matches any phrase that begins with this phrase. '^"cat d"' will find records matching the whole phrases "cat dog" and "cat dinner". When a ^"" term is used, all other terms are ignored. This type of search is useful for autocomplete inputs.
+* ^:: Terms that begin with ^ will match records that contain a word starting with the term. '^cat' will find matches containing 'cat', 'catapult', 'caterpillar' etc.
+* ^"":: A quoted term that begins with ^ matches any phrase that begin with this phrase. '^"cat d"' will find records matching the whole phrases "cat dog" and "cat dinner". This type of search is useful for autocomplete inputs.
 
 === Pagination
 

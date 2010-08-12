@@ -95,19 +95,24 @@ module ActsAsIndexed #:nodoc:
     # Returns an array of IDs for records matching +query+.
     def search(query)
       return [] if query.nil?
-      load_options = { :start => true } if query[0,2] == '^"'
+      load_options = { :start => true } if query[/\^/]
       load_atoms(cleanup_atoms(query), load_options || {})
       queries = parse_query(query.dup)
       positive = run_queries(queries[:positive])
       positive_quoted = run_quoted_queries(queries[:positive_quoted])
       negative = run_queries(queries[:negative])
       negative_quoted = run_quoted_queries(queries[:negative_quoted])
-      start_quoted = run_start_queries(queries[:start_quoted])
+      starts_with = run_starts_with_queries(queries[:starts_with])
+      start_quoted = run_start_quoted_queries(queries[:start_quoted])
 
       results = {}
 
       if queries[:start_quoted].any?
         results = merge_query_results(results, start_quoted)
+      end
+      
+      if queries[:starts_with].any?
+        results = merge_query_results(results, starts_with)
       end
       
       if queries[:positive_quoted].any?
@@ -241,6 +246,12 @@ module ActsAsIndexed #:nodoc:
         positive_quoted << cleanup_atoms(pos_quoted)
       end
 
+      # Find ^foo.
+      starts_with = []
+      while st_with = s.slice!(/\^[\S]*/)
+        starts_with << cleanup_atoms(st_with).first
+      end
+
       # Find -foo.
       negative = []
       while neg = s.slice!(/-[\S]*/)
@@ -259,6 +270,7 @@ module ActsAsIndexed #:nodoc:
       { :start_quoted => start_quoted,
         :negative_quoted => negative_quoted,
         :positive_quoted => positive_quoted,
+        :starts_with => starts_with,
         :negative => negative,
         :positive => positive }
     end
@@ -334,7 +346,7 @@ module ActsAsIndexed #:nodoc:
       end
     end
 
-    def run_start_queries(quoted_atoms)
+    def run_start_quoted_queries(quoted_atoms)
       results = {}
       quoted_atoms.each do |quoted_atom|
         next if quoted_atom.empty?
@@ -362,7 +374,31 @@ module ActsAsIndexed #:nodoc:
           interim_results.each do |r,w|
             rr[r] = w + results[r] if results[r]
           end
-          #p results.class
+
+          results = rr
+        end
+
+      end
+      results
+    end
+
+    def run_starts_with_queries(sw_atoms)
+      results = {}
+      sw_atoms.each do |quoted_atom|
+        quoted_atom = /^#{quoted_atom}/
+        interim_results = {}
+
+        matches = get_atom_results(@atoms.keys, quoted_atom)
+
+        interim_results = matches.weightings(@records_size)
+        if results.empty?
+          results = interim_results
+        else
+          rr = {}
+          interim_results.each do |r,w|
+            rr[r] = w + results[r] if results[r]
+          end
+
           results = rr
         end
 

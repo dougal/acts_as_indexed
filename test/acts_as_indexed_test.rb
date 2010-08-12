@@ -110,8 +110,24 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal [],  Post.with_query('-"crane big"') # Edgecase
   end
 
+  def test_start_queries
+    assert_equal [6,5],  Post.find_with_index('ship ^crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^crane ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^ship ^crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^crane ^ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^ship crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('crane ^ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^cran',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^cra',{},{:ids_only => true})
+    assert_equal [6,5,4],  Post.find_with_index('^cr',{},{:ids_only => true})
+    assert_equal [6,5,4,3,2,1], Post.find_with_index('^c',{},{:ids_only => true})
+    assert_equal [], Post.find_with_index('^notthere',{},{:ids_only => true})
+  end
+
   def test_start_quoted_queries
     assert_equal [6,5],  Post.find_with_index('^"crane" ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('ship ^"crane"',{},{:ids_only => true})
     assert_equal [5],  Post.find_with_index('^"crane ship"',{},{:ids_only => true})
     assert_equal [5],  Post.find_with_index('^"crane shi"',{},{:ids_only => true})
     assert_equal [5],  Post.find_with_index('^"crane sh"',{},{:ids_only => true})
