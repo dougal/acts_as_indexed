@@ -102,7 +102,7 @@ module ActsAsIndexed #:nodoc:
       positive_quoted = run_quoted_queries(queries[:positive_quoted])
       negative = run_queries(queries[:negative])
       negative_quoted = run_quoted_queries(queries[:negative_quoted])
-      starts_with = run_starts_with_queries(queries[:starts_with])
+      starts_with = run_queries(queries[:starts_with], true)
       start_quoted = run_start_quoted_queries(queries[:start_quoted])
 
       results = {}
@@ -274,32 +274,49 @@ module ActsAsIndexed #:nodoc:
         :negative => negative,
         :positive => positive }
     end
-
-    def run_queries(atoms)
+    
+    def run_queries(atoms, starts_with=false)
       results = {}
-      atoms.uniq.each do |atom|
+      atoms.each do |atom|
         interim_results = {}
-        if include_atom?(atom)
-          # Collect all the weightings for the current atom.
-          interim_results = @atoms[atom].weightings(@records_size)
-        end
+        
+        # If these atoms are to be run as 'starts with', make them a Regexp
+        # with a carat.
+        atom = /^#{atom}/ if starts_with
+
+        # Get the resulting matches, and break if none exist.
+        matches = get_atom_results(@atoms.keys, atom)
+        break if matches.nil?
+        
+        # Grab the record IDs and weightings.
+        interim_results = matches.weightings(@records_size)
+        
+        # If this is the first time round this loop, no need to do any complex
+        # computation.
         if results.empty?
-          # If first time round, set results with initial weightings.
           results = interim_results
+          
+        # If this is not the first time round this loop, sum the weightings
+        # for records that exist in both the current results and our interm
+        # results. Discard any that are not in both.
         else
-          # If second time round, add weightings together for records
-          # matching both atoms. Any matching only one are discarded.
+          # TODO: This sort of calulation happens in a lot of places. DRY and
+          # optimize, perhaps with a core method to reduce copying.
           rr = {}
           interim_results.each do |r,w|
             rr[r] = w + results[r] if results[r]
           end
+
           results = rr
         end
+
+        # TODO: Perhaps break here if results is empty, no point continuing
+        # with the calculation.
+        
       end
-      #p results
       results
     end
-
+    
     def run_quoted_queries(quoted_atoms)
       results = {}
       quoted_atoms.each do |quoted_atom|
@@ -365,30 +382,6 @@ module ActsAsIndexed #:nodoc:
           matches = get_atom_results(atoms_keys, atom_name).preceded_by(matches)
         end
         #results += matches.record_ids
-
-        interim_results = matches.weightings(@records_size)
-        if results.empty?
-          results = interim_results
-        else
-          rr = {}
-          interim_results.each do |r,w|
-            rr[r] = w + results[r] if results[r]
-          end
-
-          results = rr
-        end
-
-      end
-      results
-    end
-
-    def run_starts_with_queries(sw_atoms)
-      results = {}
-      sw_atoms.each do |quoted_atom|
-        quoted_atom = /^#{quoted_atom}/
-        interim_results = {}
-
-        matches = get_atom_results(@atoms.keys, quoted_atom)
 
         interim_results = matches.weightings(@records_size)
         if results.empty?
