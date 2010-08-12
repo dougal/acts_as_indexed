@@ -95,21 +95,32 @@ module ActsAsIndexed #:nodoc:
     # Returns an array of IDs for records matching +query+.
     def search(query)
       return [] if query.nil?
-      load_atoms(cleanup_atoms(query))
+      load_options = { :start => true } if query[/\^/]
+      load_atoms(cleanup_atoms(query), load_options || {})
       queries = parse_query(query.dup)
       positive = run_queries(queries[:positive])
       positive_quoted = run_quoted_queries(queries[:positive_quoted])
       negative = run_queries(queries[:negative])
       negative_quoted = run_quoted_queries(queries[:negative_quoted])
+      starts_with = run_starts_with_queries(queries[:starts_with])
+      start_quoted = run_start_quoted_queries(queries[:start_quoted])
 
-      if queries[:positive_quoted].any? && queries[:positive].any?
-        p = positive.delete_if{ |r_id,w| positive_quoted.exclude?(r_id) }
-        pq = positive_quoted.delete_if{ |r_id,w| positive.exclude?(r_id) }
-        results = p.merge(pq) { |r_id,old_val,new_val| old_val + new_val}
-      elsif queries[:positive].any?
-        results = positive
-      else
-        results = positive_quoted
+      results = {}
+
+      if queries[:start_quoted].any?
+        results = merge_query_results(results, start_quoted)
+      end
+      
+      if queries[:starts_with].any?
+        results = merge_query_results(results, starts_with)
+      end
+      
+      if queries[:positive_quoted].any?
+        results = merge_query_results(results, positive_quoted)
+      end
+      
+      if queries[:positive].any?
+        results = merge_query_results(results, positive)
       end
 
       negative_results = (negative.keys + negative_quoted.keys)
@@ -117,7 +128,23 @@ module ActsAsIndexed #:nodoc:
       #p results
       results
     end
-
+    
+    def merge_query_results(results1, results2)
+      # Return the other if one is empty.
+      return results1 if results2.empty?
+      return results2 if results1.empty?
+      
+      # Delete any records from results 1 that are not in results 2.
+      r1 = results1.delete_if{ |r_id,w| results2.exclude?(r_id) }
+      
+      
+      # Delete any records from results 2 that are not in results 1.
+      r2 = results2.delete_if{ |r_id,w| results1.exclude?(r_id) }
+      
+      # Merge the results by adding their respective scores.
+      r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
+    end
+    
     # Returns true if the index root exists on the FS.
     #--
     # TODO: Make a private method called 'root_exists?' which checks for the root directory.
@@ -144,7 +171,11 @@ module ActsAsIndexed #:nodoc:
 
     # Returns true if the given atom is present.
     def include_atom?(atom)
-      @atoms.has_key?(atom)
+      if atom.is_a? Regexp
+        @atoms.keys.grep(atom).any?
+      else
+        @atoms.has_key?(atom)
+      end
     end
 
     # Returns true if all the given atoms are present.
@@ -197,6 +228,12 @@ module ActsAsIndexed #:nodoc:
 
     def parse_query(s)
 
+      # Find ^"foo bar".
+      start_quoted = []
+      while st_quoted = s.slice!(/\^\"[^\"]*\"/)
+        start_quoted << cleanup_atoms(st_quoted)
+      end
+
       # Find -"foo bar".
       negative_quoted = []
       while neg_quoted = s.slice!(/-\"[^\"]*\"/)
@@ -207,6 +244,12 @@ module ActsAsIndexed #:nodoc:
       positive_quoted = []
       while pos_quoted = s.slice!(/\"[^\"]*\"/)
         positive_quoted << cleanup_atoms(pos_quoted)
+      end
+
+      # Find ^foo.
+      starts_with = []
+      while st_with = s.slice!(/\^[\S]*/)
+        starts_with << cleanup_atoms(st_with).first
       end
 
       # Find -foo.
@@ -224,7 +267,12 @@ module ActsAsIndexed #:nodoc:
       # Find all other terms.
       positive += cleanup_atoms(s,true)
 
-      {:negative_quoted => negative_quoted, :positive_quoted => positive_quoted, :negative => negative, :positive => positive}
+      { :start_quoted => start_quoted,
+        :negative_quoted => negative_quoted,
+        :positive_quoted => positive_quoted,
+        :starts_with => starts_with,
+        :negative => negative,
+        :positive => positive }
     end
 
     def run_queries(atoms)
@@ -285,13 +333,88 @@ module ActsAsIndexed #:nodoc:
       results
     end
 
-    def load_atoms(atoms)
+    def get_atom_results(atoms_keys, atom)
+      if atom.is_a? Regexp
+        matching_keys = atoms_keys.grep(atom)
+        results = SearchAtom.new
+        matching_keys.each do |key|
+          results += @atoms[key]
+        end
+        results
+      else
+        @atoms[atom]
+      end
+    end
+
+    def run_start_quoted_queries(quoted_atoms)
+      results = {}
+      quoted_atoms.each do |quoted_atom|
+        next if quoted_atom.empty?
+        quoted_atom[-1] = /^#{quoted_atom.last}/
+        atoms_keys = @atoms.keys
+        interim_results = {}
+        # Check the index contains all the required atoms.
+        # match_atom = first_word_atom
+        # for each of the others
+        #   return atom containing records + positions where current atom is preceded by following atom.
+        # end
+        # return records from final atom.
+        next if !include_atoms?(quoted_atom)
+        matches = get_atom_results(atoms_keys, quoted_atom.first)
+        quoted_atom[1..-1].each do |atom_name|
+          matches = get_atom_results(atoms_keys, atom_name).preceded_by(matches)
+        end
+        #results += matches.record_ids
+
+        interim_results = matches.weightings(@records_size)
+        if results.empty?
+          results = interim_results
+        else
+          rr = {}
+          interim_results.each do |r,w|
+            rr[r] = w + results[r] if results[r]
+          end
+
+          results = rr
+        end
+
+      end
+      results
+    end
+
+    def run_starts_with_queries(sw_atoms)
+      results = {}
+      sw_atoms.each do |quoted_atom|
+        quoted_atom = /^#{quoted_atom}/
+        interim_results = {}
+
+        matches = get_atom_results(@atoms.keys, quoted_atom)
+
+        interim_results = matches.weightings(@records_size)
+        if results.empty?
+          results = interim_results
+        else
+          rr = {}
+          interim_results.each do |r,w|
+            rr[r] = w + results[r] if results[r]
+          end
+
+          results = rr
+        end
+
+      end
+      results
+    end
+
+    def load_atoms(atoms, options={})
       # Remove duplicate atoms.
       # Remove atoms already in index.
       # Calculate prefixes.
       # Remove duplicate prefixes.
       atoms.uniq.reject{|a| include_atom?(a)}.collect{|a| encoded_prefix(a)}.uniq.each do |name|
-        if (atom_file = @root.join(name.to_s)).exist?
+        pattern = @root.join(name.to_s).to_s
+        pattern += '*' if options[:start]
+        Pathname.glob(pattern).each do |atom_file|
           atom_file.open do |f|
             @atoms.merge!(Marshal.load(f))
           end

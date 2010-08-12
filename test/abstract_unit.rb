@@ -42,6 +42,7 @@ class ActiveSupport::TestCase #:nodoc:
   def build_index
     # Makes a query to invoke the index build.
     assert_equal [], Post.find_with_index('badger')
+    assert_equal [], Source.find_with_index('badger')
     assert index_loc.exist?
     true
   end

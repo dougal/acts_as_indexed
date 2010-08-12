@@ -1,4 +1,4 @@
-===0.6.3
+===0.6.3 [5th July 2010]
  - index file path can now be definited as a Pathname as well as an array. [parndt]
  - Can now define which records are indexed and which are not via an :if proc. [madpilot]
  - Lots of tidying up. [parndt]
