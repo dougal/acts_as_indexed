@@ -103,7 +103,7 @@ module ActsAsIndexed #:nodoc:
       negative = run_queries(queries[:negative])
       negative_quoted = run_quoted_queries(queries[:negative_quoted])
       starts_with = run_queries(queries[:starts_with], true)
-      start_quoted = run_start_quoted_queries(queries[:start_quoted])
+      start_quoted = run_quoted_queries(queries[:start_quoted], true)
 
       results = {}
 
@@ -309,43 +309,68 @@ module ActsAsIndexed #:nodoc:
 
           results = rr
         end
-
-        # TODO: Perhaps break here if results is empty, no point continuing
-        # with the calculation.
+        
+        break if results.empty?
         
       end
       results
     end
     
-    def run_quoted_queries(quoted_atoms)
+    def run_quoted_queries(quoted_atoms, starts_with=false)
       results = {}
       quoted_atoms.each do |quoted_atom|
         interim_results = {}
+        
+        # TODO: Maybe break here?
+        break if quoted_atom.empty?
+        
+        # If these atoms are to be run as 'starts with', make the final atom a
+        # Regexp with a carat.
+        quoted_atom[-1] = /^#{quoted_atom.last}/ if starts_with
+        
+        # Little bit of memoization.
+        atoms_keys = @atoms.keys
+        
+        # Get the matches for the first atom.
+        matches = get_atom_results(atoms_keys, quoted_atom.first)
+        break if matches.nil?
+        
         # Check the index contains all the required atoms.
-        # match_atom = first_word_atom
         # for each of the others
         #   return atom containing records + positions where current atom is preceded by following atom.
         # end
-        # return records from final atom.
-        next unless include_atoms?(quoted_atom)
-        matches = @atoms[quoted_atom.first]
+        # Return records from final atom.
         quoted_atom[1..-1].each do |atom_name|
-          matches = @atoms[atom_name].preceded_by(matches)
+          interim_matches = get_atom_results(atoms_keys, atom_name)
+          if interim_matches.nil?
+            matches = nil
+            break
+          end
+          matches = interim_matches.preceded_by(matches)
         end
-        #results += matches.record_ids
 
+        break if matches.nil?
+        # Grab the record IDs and weightings.
         interim_results = matches.weightings(@records_size)
+        
+        # TODO: Same stuff as run_queries uses. Merge methods?
+        # First time round.
         if results.empty?
           results = interim_results
+          
+        # Other times round.
         else
+          # TODO: Perf. See run_queries.
           rr = {}
           interim_results.each do |r,w|
             rr[r] = w + results[r] if results[r]
           end
-          #p results.class
+
           results = rr
         end
-
+        
+        break if results.empty?
+        
       end
       results
     end
@@ -361,42 +386,6 @@ module ActsAsIndexed #:nodoc:
       else
         @atoms[atom]
       end
-    end
-
-    def run_start_quoted_queries(quoted_atoms)
-      results = {}
-      quoted_atoms.each do |quoted_atom|
-        next if quoted_atom.empty?
-        quoted_atom[-1] = /^#{quoted_atom.last}/
-        atoms_keys = @atoms.keys
-        interim_results = {}
-        # Check the index contains all the required atoms.
-        # match_atom = first_word_atom
-        # for each of the others
-        #   return atom containing records + positions where current atom is preceded by following atom.
-        # end
-        # return records from final atom.
-        next if !include_atoms?(quoted_atom)
-        matches = get_atom_results(atoms_keys, quoted_atom.first)
-        quoted_atom[1..-1].each do |atom_name|
-          matches = get_atom_results(atoms_keys, atom_name).preceded_by(matches)
-        end
-        #results += matches.record_ids
-
-        interim_results = matches.weightings(@records_size)
-        if results.empty?
-          results = interim_results
-        else
-          rr = {}
-          interim_results.each do |r,w|
-            rr[r] = w + results[r] if results[r]
-          end
-
-          results = rr
-        end
-
-      end
-      results
     end
 
     def load_atoms(atoms, options={})
