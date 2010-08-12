@@ -90,30 +90,6 @@ an argument.
   # Chain it with any number of ActiveRecord methods and named_scopes.
   my_search_results = Post.public.with_query('my search query').find(:all, :limit => 10) # return the first 10 matches which are public.
 
-
-=== Cross-Model Search
-
-For cross-model searching, this plugin keeps track of every model that acts_as_indexed.
-
-  class BlogPost < ActiveRecord::Base
-    acts_as_indexed :fields => [:body]
-  end
-  class Article < ActiveRecord::Base
-    acts_as_indexed :fields => [:content]
-  end
-  class Review < ActiveRecord::Base
-    acts_as_indexed :fields => [:content]
-  end
-
-Use the +IndexedModels.with_query+ method to search every model that acts_as_indexed.
-You can specify which models to include or exclude using +:only+ and +:except+.
-
-  IndexedModels.with_query 'michael jackson', :only => [:article, :review]
-
-The results are returned grouped by model.
-
-  [[#<Article id:1>, #<Article id:2>], [#<Review id: 1>]]
-
 === Query Options
 
 The following query operators are supported:
