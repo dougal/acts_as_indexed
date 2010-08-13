@@ -22,19 +22,21 @@ module ActsAsIndexed #:nodoc:
     end
 
     # Adds +record+ to the index.
-    def add_record(record)
+    def add_record(record, no_save=false)
       return @records_size unless @if_proc.call(record)
       condensed_record = condense_record(record)
       load_atoms(condensed_record)
       add_occurences(condensed_record,record.id)
       @records_size += 1
+      self.save unless no_save
     end
 
     # Adds multiple records to the index. Accepts an array of +records+.
     def add_records(records)
       records.each do |record|
-        add_record(record)
+        add_record(record, true)
       end
+      self.save
     end
 
     # Removes +record+ from the index.
@@ -46,27 +48,12 @@ module ActsAsIndexed #:nodoc:
         @records_size -= 1
         #p "removing #{record.id} from #{a}"
       end
+      self.save
     end
 
     def update_record(record_new, record_old)
-      # Work out which atoms have modifications.
-      # Minimises loading and saving of partitions.
-      old_atoms = condense_record(record_old)
-      new_atoms = condense_record(record_new)
-
-      # Remove the old version from the appropriate atoms.
-      load_atoms(old_atoms)
-      old_atoms.each do |a|
-        @atoms[a].remove_record(record_new.id) if @atoms.has_key?(a)
-      end
-
-      if @if_proc.call(record_new)
-        # Add the new version to the appropriate atoms.
-        load_atoms(new_atoms)
-        # TODO: Make a version of this method that takes the
-        # atomised version of the record.
-        add_occurences(new_atoms, record_new.id)
-      end
+      remove_record(record_old)
+      add_record(record_new)
     end
 
     # Saves the current index partitions to the filesystem.

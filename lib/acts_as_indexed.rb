@@ -95,7 +95,6 @@ module ActsAsIndexed #:nodoc:
       build_index unless aai_config.index_file.directory?
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       index.add_record(record)
-      index.save
       @query_cache = {}
       true
     end
@@ -107,7 +106,6 @@ module ActsAsIndexed #:nodoc:
       # record won't be in index if it doesn't exist. Just return true.
       return true unless index.exists?
       index.remove_record(record)
-      index.save
       @query_cache = {}
       true
     end
@@ -189,14 +187,9 @@ module ActsAsIndexed #:nodoc:
 
     # Builds an index from scratch for the current model class.
     def build_index
-      increment = 500
-      offset = 0
-      while (records = find(:all, :limit => increment, :offset => offset)).size > 0
-        #p "offset is #{offset}, increment is #{increment}"
-        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
-        offset += increment
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
+      find_in_batches({ :batch_size => 500 }) do |records|
         index.add_records(records)
-        index.save
       end
     end
 
