@@ -66,10 +66,10 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   def test_scoped_simple_queries
     assert_equal [],  Post.find_with_index(nil)
     assert_equal [],  Post.with_query('')
-    assert_equal [5, 6],  Post.with_query('ship').map(&:id).sort
-    assert_equal [6],  Post.with_query('foo').map(&:id)
-    assert_equal [6],  Post.with_query('foo ship').map(&:id)
-    assert_equal [6],  Post.with_query('ship foo').map(&:id)
+    assert_equal [5, 6],  Post.with_query('ship').map{|r| r.id}.sort
+    assert_equal [6],  Post.with_query('foo').map{|r| r.id}
+    assert_equal [6],  Post.with_query('foo ship').map{|r| r.id}
+    assert_equal [6],  Post.with_query('ship foo').map{|r| r.id}
   end
 
   def test_negative_queries
@@ -80,9 +80,9 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_negative_queries
-    assert_equal [5, 6],  Post.with_query('crane').map(&:id).sort
-    assert_equal [5],  Post.with_query('crane -foo').map(&:id)
-    assert_equal [5],  Post.with_query('-foo crane').map(&:id)
+    assert_equal [5, 6],  Post.with_query('crane').map{|r| r.id}.sort
+    assert_equal [5],  Post.with_query('crane -foo').map{|r| r.id}
+    assert_equal [5],  Post.with_query('-foo crane').map{|r| r.id}
     assert_equal [],  Post.with_query('-foo') #Edgecase
   end
 
@@ -94,8 +94,8 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_quoted_queries
-    assert_equal [5],  Post.with_query('"crane ship"').map(&:id)
-    assert_equal [6],  Post.with_query('"crane big"').map(&:id)
+    assert_equal [5],  Post.with_query('"crane ship"').map{|r| r.id}
+    assert_equal [6],  Post.with_query('"crane big"').map{|r| r.id}
     assert_equal [],  Post.with_query('foo "crane ship"')
     assert_equal [],  Post.with_query('"crane badger"')
   end
@@ -106,7 +106,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_negative_quoted_queries
-    assert_equal [6],  Post.with_query('crane -"crane ship"').map(&:id)
+    assert_equal [6],  Post.with_query('crane -"crane ship"').map{|r| r.id}
     assert_equal [],  Post.with_query('-"crane big"') # Edgecase
   end
 
