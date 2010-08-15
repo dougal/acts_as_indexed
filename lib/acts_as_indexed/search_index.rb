@@ -23,7 +23,7 @@ module ActsAsIndexed #:nodoc:
 
     # Adds +record+ to the index.
     def add_record(record, no_save=false)
-      return @records_size unless @if_proc.call(record)
+      return unless @if_proc.call(record)
       condensed_record = condense_record(record)
       load_atoms(condensed_record)
       add_occurences(condensed_record,record.id)
@@ -46,7 +46,6 @@ module ActsAsIndexed #:nodoc:
       atoms.each do |a|
         @atoms[a].remove_record(record.id) if @atoms.has_key?(a)
         @records_size -= 1
-        #p "removing #{record.id} from #{a}"
       end
       self.save
     end
@@ -64,7 +63,6 @@ module ActsAsIndexed #:nodoc:
         (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
       end
       atoms_sorted.each do |e_p, atoms|
-        #p "Saving #{e_p}."
         @root.join(e_p.to_s).open("w+") do |f|
           Marshal.dump(atoms,f)
         end
@@ -112,7 +110,6 @@ module ActsAsIndexed #:nodoc:
 
       negative_results = (negative.keys + negative_quoted.keys)
       results.delete_if { |r_id, w| negative_results.include?(r_id) }
-      #p results
       results
     end
     
@@ -143,7 +140,6 @@ module ActsAsIndexed #:nodoc:
 
     # Gets the size file from the index.
     def load_record_size
-      #p "About to load #{@root.join('size')}"
       @root.join('size').open do |f|
         Marshal.load(f)
       end
@@ -188,7 +184,6 @@ module ActsAsIndexed #:nodoc:
       condensed_record.each_with_index do |atom, i|
         add_atom(atom)
         @atoms[atom].add_position(record_id, i)
-        #p "adding #{record.id} to #{atom}"
       end
     end
 
@@ -278,24 +273,8 @@ module ActsAsIndexed #:nodoc:
         # Grab the record IDs and weightings.
         interim_results = matches.weightings(@records_size)
         
-        # If this is the first time round this loop, no need to do any complex
-        # computation.
-        if results.empty?
-          results = interim_results
-          
-        # If this is not the first time round this loop, sum the weightings
-        # for records that exist in both the current results and our interm
-        # results. Discard any that are not in both.
-        else
-          # TODO: This sort of calulation happens in a lot of places. DRY and
-          # optimize, perhaps with a core method to reduce copying.
-          rr = {}
-          interim_results.each do |r,w|
-            rr[r] = w + results[r] if results[r]
-          end
-
-          results = rr
-        end
+        # Merge them with the results obtained already, if any.
+        results = results.empty? ? interim_results : merge_query_results(results, interim_results)
         
         break if results.empty?
         
@@ -308,7 +287,6 @@ module ActsAsIndexed #:nodoc:
       quoted_atoms.each do |quoted_atom|
         interim_results = {}
         
-        # TODO: Maybe break here?
         break if quoted_atom.empty?
         
         # If these atoms are to be run as 'starts with', make the final atom a
@@ -339,22 +317,9 @@ module ActsAsIndexed #:nodoc:
         break if matches.nil?
         # Grab the record IDs and weightings.
         interim_results = matches.weightings(@records_size)
-        
-        # TODO: Same stuff as run_queries uses. Merge methods?
-        # First time round.
-        if results.empty?
-          results = interim_results
-          
-        # Other times round.
-        else
-          # TODO: Perf. See run_queries.
-          rr = {}
-          interim_results.each do |r,w|
-            rr[r] = w + results[r] if results[r]
-          end
 
-          results = rr
-        end
+        # Merge them with the results obtained already, if any.
+        results = results.empty? ? interim_results : merge_query_results(results, interim_results)
         
         break if results.empty?
         

@@ -96,7 +96,6 @@ module ActsAsIndexed #:nodoc:
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       index.add_record(record)
       @query_cache = {}
-      true
     end
 
     # Removes the passed +record+ from the index. Clears the query cache.
@@ -104,10 +103,9 @@ module ActsAsIndexed #:nodoc:
     def index_remove(record)
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       # record won't be in index if it doesn't exist. Just return true.
-      return true unless index.exists?
+      return unless index.exists?
       index.remove_record(record)
       @query_cache = {}
-      true
     end
 
     # Updates the index.
@@ -117,12 +115,8 @@ module ActsAsIndexed #:nodoc:
     def index_update(record)
       build_index unless aai_config.index_file.directory?
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
-      #index.remove_record(find(record.id))
-      #index.add_record(record)
       index.update_record(record,find(record.id))
-      index.save
       @query_cache = {}
-      true
     end
 
     # Finds instances matching the terms passed in +query+. Terms are ANDed by
