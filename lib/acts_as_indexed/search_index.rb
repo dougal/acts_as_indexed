@@ -290,7 +290,7 @@ module ActsAsIndexed #:nodoc:
         break if quoted_atom.empty?
         
         # If these atoms are to be run as 'starts with', make the final atom a
-        # Regexp with a carat.
+        # Regexp with a line-start anchor.
         quoted_atom[-1] = /^#{quoted_atom.last}/ if starts_with
         
         # Little bit of memoization.
