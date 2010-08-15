@@ -83,9 +83,15 @@ class SearchAtomTest < ActiveSupport::TestCase
   end
 
   def test_adding_with_recursive_merge
+    sa0 = SearchAtom.new()
     sa1 = SearchAtom.new({1=>[1]})
     sa2 = SearchAtom.new({1=>[2], 2=>[3]})
-    assert_equal (sa1+sa2).records, {1=>[1,2], 2=>[3]}
+    
+    assert_equal (sa0 + sa1).records, {1=>[1]}
+    assert_equal (sa0 + sa2).records, {1=>[2], 2=>[3]}
+    
+    assert_equal (sa1 + sa2).records, {1=>[1,2], 2=>[3]}
+    assert_equal (sa2 + sa1).records, {1=>[2,1], 2=>[3]}
   end
   
   private
