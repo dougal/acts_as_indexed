@@ -1,4 +1,4 @@
-require File.expand_path("../abstract_unit", __FILE__)
+require File.dirname(__FILE__) + '/abstract_unit'
 include ActsAsIndexed
 
 class SearchAtomTest < ActiveSupport::TestCase  
@@ -80,6 +80,18 @@ class SearchAtomTest < ActiveSupport::TestCase
     weightings = build_search_atom({ 1 => [1, 8], 2 => [1] }).weightings(10)
     assert_in_delta(3.219, weightings[1], 2 ** -10)
     assert_in_delta(1.609, weightings[2], 2 ** -10)
+  end
+
+  def test_adding_with_recursive_merge
+    sa0 = SearchAtom.new()
+    sa1 = SearchAtom.new({1=>[1]})
+    sa2 = SearchAtom.new({1=>[2], 2=>[3]})
+    
+    assert_equal (sa0 + sa1).records, {1=>[1]}
+    assert_equal (sa0 + sa2).records, {1=>[2], 2=>[3]}
+    
+    assert_equal (sa1 + sa2).records, {1=>[1,2], 2=>[3]}
+    assert_equal (sa2 + sa1).records, {1=>[2,1], 2=>[3]}
   end
   
   private

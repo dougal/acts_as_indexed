@@ -1,4 +1,4 @@
-require File.expand_path("../abstract_unit", __FILE__)
+require File.dirname(__FILE__) + '/abstract_unit'
 
 class ActsAsIndexedTest < ActiveSupport::TestCase
   fixtures :posts
@@ -12,10 +12,10 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   def test_adds_to_index
     original_post_count = Post.count
     assert_equal [], Post.find_with_index('badger')
-    p = Post.new(:title => 'badger', :body => 'Thousands of them!')
-    assert p.save
+    post = Post.new(:title => 'badger', :body => 'Thousands of them!')
+    assert post.save
     assert_equal original_post_count+1, Post.count
-    assert_equal [p.id], Post.find_with_index('badger',{},{:ids_only => true})
+    assert_equal [post.id], Post.find_with_index('badger',{},{:ids_only => true})
   end
 
   def test_removes_from_index
@@ -66,10 +66,10 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   def test_scoped_simple_queries
     assert_equal [],  Post.find_with_index(nil)
     assert_equal [],  Post.with_query('')
-    assert_equal [5, 6],  Post.with_query('ship').map(&:id).sort
-    assert_equal [6],  Post.with_query('foo').map(&:id)
-    assert_equal [6],  Post.with_query('foo ship').map(&:id)
-    assert_equal [6],  Post.with_query('ship foo').map(&:id)
+    assert_equal [5, 6],  Post.with_query('ship').map{|r| r.id}.sort
+    assert_equal [6],  Post.with_query('foo').map{|r| r.id}
+    assert_equal [6],  Post.with_query('foo ship').map{|r| r.id}
+    assert_equal [6],  Post.with_query('ship foo').map{|r| r.id}
   end
 
   def test_negative_queries
@@ -80,9 +80,9 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_negative_queries
-    assert_equal [5, 6],  Post.with_query('crane').map(&:id).sort
-    assert_equal [5],  Post.with_query('crane -foo').map(&:id)
-    assert_equal [5],  Post.with_query('-foo crane').map(&:id)
+    assert_equal [5, 6],  Post.with_query('crane').map{|r| r.id}.sort
+    assert_equal [5],  Post.with_query('crane -foo').map{|r| r.id}
+    assert_equal [5],  Post.with_query('-foo crane').map{|r| r.id}
     assert_equal [],  Post.with_query('-foo') #Edgecase
   end
 
@@ -94,8 +94,8 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_quoted_queries
-    assert_equal [5],  Post.with_query('"crane ship"').map(&:id)
-    assert_equal [6],  Post.with_query('"crane big"').map(&:id)
+    assert_equal [5],  Post.with_query('"crane ship"').map{|r| r.id}
+    assert_equal [6],  Post.with_query('"crane big"').map{|r| r.id}
     assert_equal [],  Post.with_query('foo "crane ship"')
     assert_equal [],  Post.with_query('"crane badger"')
   end
@@ -106,8 +106,38 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_scoped_negative_quoted_queries
-    assert_equal [6],  Post.with_query('crane -"crane ship"').map(&:id)
+    assert_equal [6],  Post.with_query('crane -"crane ship"').map{|r| r.id}
     assert_equal [],  Post.with_query('-"crane big"') # Edgecase
+  end
+
+  def test_start_queries
+    assert_equal [6,5],  Post.find_with_index('ship ^crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^crane ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^ship ^crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^crane ^ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^ship crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('crane ^ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^crane',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^cran',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^cra',{},{:ids_only => true})
+    assert_equal [6,5,4],  Post.find_with_index('^cr',{},{:ids_only => true})
+    assert_equal [6,5,4,3,2,1], Post.find_with_index('^c',{},{:ids_only => true})
+    assert_equal [], Post.find_with_index('^notthere',{},{:ids_only => true})
+  end
+
+  def test_start_quoted_queries
+    assert_equal [6,5],  Post.find_with_index('^"crane" ship',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('ship ^"crane"',{},{:ids_only => true})
+    assert_equal [5],  Post.find_with_index('^"crane ship"',{},{:ids_only => true})
+    assert_equal [5],  Post.find_with_index('^"crane shi"',{},{:ids_only => true})
+    assert_equal [5],  Post.find_with_index('^"crane sh"',{},{:ids_only => true})
+    assert_equal [5],  Post.find_with_index('^"crane s"',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^"crane "',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^"crane"',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^"cran"',{},{:ids_only => true})
+    assert_equal [6,5],  Post.find_with_index('^"cra"',{},{:ids_only => true})
+    assert_equal [6,5,4],  Post.find_with_index('^"cr"',{},{:ids_only => true})
+    assert_equal [6,5,4,3,2,1], Post.find_with_index('^"c"',{},{:ids_only => true})
   end
 
   def test_find_options

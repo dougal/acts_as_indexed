@@ -95,9 +95,7 @@ module ActsAsIndexed #:nodoc:
       build_index unless aai_config.index_file.directory?
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       index.add_record(record)
-      index.save
       @query_cache = {}
-      true
     end
 
     # Removes the passed +record+ from the index. Clears the query cache.
@@ -105,11 +103,9 @@ module ActsAsIndexed #:nodoc:
     def index_remove(record)
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
       # record won't be in index if it doesn't exist. Just return true.
-      return true unless index.exists?
+      return unless index.exists?
       index.remove_record(record)
-      index.save
       @query_cache = {}
-      true
     end
 
     # Updates the index.
@@ -119,12 +115,8 @@ module ActsAsIndexed #:nodoc:
     def index_update(record)
       build_index unless aai_config.index_file.directory?
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
-      #index.remove_record(find(record.id))
-      #index.add_record(record)
       index.update_record(record,find(record.id))
-      index.save
       @query_cache = {}
-      true
     end
 
     # Finds instances matching the terms passed in +query+. Terms are ANDed by
@@ -153,12 +145,12 @@ module ActsAsIndexed #:nodoc:
       else
         logger.debug('Query held in cache.')
       end
-      return @query_cache[query].sort.reverse.map(&:first) if options[:ids_only] || @query_cache[query].empty?
+      return @query_cache[query].sort.reverse.map{|r| r.first} if options[:ids_only] || @query_cache[query].empty?
 
       # slice up the results by offset and limit
       offset = find_options[:offset] || 0
       limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query].size
-      part_query = @query_cache[query].sort.reverse.slice(offset,limit).map(&:first)
+      part_query = @query_cache[query].sort.reverse.slice(offset,limit).map{|r| r.first}
 
       # Set these to nil as we are dealing with the pagination by setting
       # exactly what records we want.
@@ -179,7 +171,7 @@ module ActsAsIndexed #:nodoc:
            ranked_records[r] = @query_cache[query][r.id]
          end
 
-         ranked_records.to_a.sort_by{|a| a.last }.reverse.map(&:first)
+         ranked_records.to_a.sort_by{|a| a.last }.reverse.map{|r| r.first}
        end
       end
 
@@ -189,14 +181,9 @@ module ActsAsIndexed #:nodoc:
 
     # Builds an index from scratch for the current model class.
     def build_index
-      increment = 500
-      offset = 0
-      while (records = find(:all, :limit => increment, :offset => offset)).size > 0
-        #p "offset is #{offset}, increment is #{increment}"
-        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
-        offset += increment
+      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
+      find_in_batches({ :batch_size => 500 }) do |records|
         index.add_records(records)
-        index.save
       end
     end
 

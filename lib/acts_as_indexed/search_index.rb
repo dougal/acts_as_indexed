@@ -22,19 +22,21 @@ module ActsAsIndexed #:nodoc:
     end
 
     # Adds +record+ to the index.
-    def add_record(record)
-      return @records_size unless @if_proc.call(record)
+    def add_record(record, no_save=false)
+      return unless @if_proc.call(record)
       condensed_record = condense_record(record)
       load_atoms(condensed_record)
       add_occurences(condensed_record,record.id)
       @records_size += 1
+      self.save unless no_save
     end
 
     # Adds multiple records to the index. Accepts an array of +records+.
     def add_records(records)
       records.each do |record|
-        add_record(record)
+        add_record(record, true)
       end
+      self.save
     end
 
     # Removes +record+ from the index.
@@ -44,29 +46,13 @@ module ActsAsIndexed #:nodoc:
       atoms.each do |a|
         @atoms[a].remove_record(record.id) if @atoms.has_key?(a)
         @records_size -= 1
-        #p "removing #{record.id} from #{a}"
       end
+      self.save
     end
 
     def update_record(record_new, record_old)
-      # Work out which atoms have modifications.
-      # Minimises loading and saving of partitions.
-      old_atoms = condense_record(record_old)
-      new_atoms = condense_record(record_new)
-
-      # Remove the old version from the appropriate atoms.
-      load_atoms(old_atoms)
-      old_atoms.each do |a|
-        @atoms[a].remove_record(record_new.id) if @atoms.has_key?(a)
-      end
-
-      if @if_proc.call(record_new)
-        # Add the new version to the appropriate atoms.
-        load_atoms(new_atoms)
-        # TODO: Make a version of this method that takes the
-        # atomised version of the record.
-        add_occurences(new_atoms, record_new.id)
-      end
+      remove_record(record_old)
+      add_record(record_new)
     end
 
     # Saves the current index partitions to the filesystem.
@@ -77,7 +63,6 @@ module ActsAsIndexed #:nodoc:
         (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
       end
       atoms_sorted.each do |e_p, atoms|
-        #p "Saving #{e_p}."
         @root.join(e_p.to_s).open("w+") do |f|
           Marshal.dump(atoms,f)
         end
@@ -95,29 +80,55 @@ module ActsAsIndexed #:nodoc:
     # Returns an array of IDs for records matching +query+.
     def search(query)
       return [] if query.nil?
-      load_atoms(cleanup_atoms(query))
+      load_options = { :start => true } if query[/\^/]
+      load_atoms(cleanup_atoms(query), load_options || {})
       queries = parse_query(query.dup)
       positive = run_queries(queries[:positive])
       positive_quoted = run_quoted_queries(queries[:positive_quoted])
       negative = run_queries(queries[:negative])
       negative_quoted = run_quoted_queries(queries[:negative_quoted])
+      starts_with = run_queries(queries[:starts_with], true)
+      start_quoted = run_quoted_queries(queries[:start_quoted], true)
 
-      if queries[:positive_quoted].any? && queries[:positive].any?
-        p = positive.delete_if{ |r_id,w| positive_quoted.exclude?(r_id) }
-        pq = positive_quoted.delete_if{ |r_id,w| positive.exclude?(r_id) }
-        results = p.merge(pq) { |r_id,old_val,new_val| old_val + new_val}
-      elsif queries[:positive].any?
-        results = positive
-      else
-        results = positive_quoted
+      results = {}
+
+      if queries[:start_quoted].any?
+        results = merge_query_results(results, start_quoted)
+      end
+      
+      if queries[:starts_with].any?
+        results = merge_query_results(results, starts_with)
+      end
+      
+      if queries[:positive_quoted].any?
+        results = merge_query_results(results, positive_quoted)
+      end
+      
+      if queries[:positive].any?
+        results = merge_query_results(results, positive)
       end
 
       negative_results = (negative.keys + negative_quoted.keys)
       results.delete_if { |r_id, w| negative_results.include?(r_id) }
-      #p results
       results
     end
-
+    
+    def merge_query_results(results1, results2)
+      # Return the other if one is empty.
+      return results1 if results2.empty?
+      return results2 if results1.empty?
+      
+      # Delete any records from results 1 that are not in results 2.
+      r1 = results1.delete_if{ |r_id,w| results2.exclude?(r_id) }
+      
+      
+      # Delete any records from results 2 that are not in results 1.
+      r2 = results2.delete_if{ |r_id,w| results1.exclude?(r_id) }
+      
+      # Merge the results by adding their respective scores.
+      r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
+    end
+    
     # Returns true if the index root exists on the FS.
     #--
     # TODO: Make a private method called 'root_exists?' which checks for the root directory.
@@ -129,7 +140,6 @@ module ActsAsIndexed #:nodoc:
 
     # Gets the size file from the index.
     def load_record_size
-      #p "About to load #{@root.join('size')}"
       @root.join('size').open do |f|
         Marshal.load(f)
       end
@@ -144,7 +154,11 @@ module ActsAsIndexed #:nodoc:
 
     # Returns true if the given atom is present.
     def include_atom?(atom)
-      @atoms.has_key?(atom)
+      if atom.is_a? Regexp
+        @atoms.keys.grep(atom).any?
+      else
+        @atoms.has_key?(atom)
+      end
     end
 
     # Returns true if all the given atoms are present.
@@ -170,7 +184,6 @@ module ActsAsIndexed #:nodoc:
       condensed_record.each_with_index do |atom, i|
         add_atom(atom)
         @atoms[atom].add_position(record_id, i)
-        #p "adding #{record.id} to #{atom}"
       end
     end
 
@@ -197,6 +210,12 @@ module ActsAsIndexed #:nodoc:
 
     def parse_query(s)
 
+      # Find ^"foo bar".
+      start_quoted = []
+      while st_quoted = s.slice!(/\^\"[^\"]*\"/)
+        start_quoted << cleanup_atoms(st_quoted)
+      end
+
       # Find -"foo bar".
       negative_quoted = []
       while neg_quoted = s.slice!(/-\"[^\"]*\"/)
@@ -207,6 +226,12 @@ module ActsAsIndexed #:nodoc:
       positive_quoted = []
       while pos_quoted = s.slice!(/\"[^\"]*\"/)
         positive_quoted << cleanup_atoms(pos_quoted)
+      end
+
+      # Find ^foo.
+      starts_with = []
+      while st_with = s.slice!(/\^[\S]*/)
+        starts_with << cleanup_atoms(st_with).first
       end
 
       # Find -foo.
@@ -224,74 +249,106 @@ module ActsAsIndexed #:nodoc:
       # Find all other terms.
       positive += cleanup_atoms(s,true)
 
-      {:negative_quoted => negative_quoted, :positive_quoted => positive_quoted, :negative => negative, :positive => positive}
+      { :start_quoted => start_quoted,
+        :negative_quoted => negative_quoted,
+        :positive_quoted => positive_quoted,
+        :starts_with => starts_with,
+        :negative => negative,
+        :positive => positive }
     end
-
-    def run_queries(atoms)
+    
+    def run_queries(atoms, starts_with=false)
       results = {}
-      atoms.uniq.each do |atom|
+      atoms.each do |atom|
         interim_results = {}
-        if include_atom?(atom)
-          # Collect all the weightings for the current atom.
-          interim_results = @atoms[atom].weightings(@records_size)
-        end
-        if results.empty?
-          # If first time round, set results with initial weightings.
-          results = interim_results
-        else
-          # If second time round, add weightings together for records
-          # matching both atoms. Any matching only one are discarded.
-          rr = {}
-          interim_results.each do |r,w|
-            rr[r] = w + results[r] if results[r]
-          end
-          results = rr
-        end
+        
+        # If these atoms are to be run as 'starts with', make them a Regexp
+        # with a carat.
+        atom = /^#{atom}/ if starts_with
+
+        # Get the resulting matches, and break if none exist.
+        matches = get_atom_results(@atoms.keys, atom)
+        break if matches.nil?
+        
+        # Grab the record IDs and weightings.
+        interim_results = matches.weightings(@records_size)
+        
+        # Merge them with the results obtained already, if any.
+        results = results.empty? ? interim_results : merge_query_results(results, interim_results)
+        
+        break if results.empty?
+        
       end
-      #p results
       results
     end
-
-    def run_quoted_queries(quoted_atoms)
+    
+    def run_quoted_queries(quoted_atoms, starts_with=false)
       results = {}
       quoted_atoms.each do |quoted_atom|
         interim_results = {}
+        
+        break if quoted_atom.empty?
+        
+        # If these atoms are to be run as 'starts with', make the final atom a
+        # Regexp with a line-start anchor.
+        quoted_atom[-1] = /^#{quoted_atom.last}/ if starts_with
+        
+        # Little bit of memoization.
+        atoms_keys = @atoms.keys
+        
+        # Get the matches for the first atom.
+        matches = get_atom_results(atoms_keys, quoted_atom.first)
+        break if matches.nil?
+        
         # Check the index contains all the required atoms.
-        # match_atom = first_word_atom
         # for each of the others
         #   return atom containing records + positions where current atom is preceded by following atom.
         # end
-        # return records from final atom.
-        next unless include_atoms?(quoted_atom)
-        matches = @atoms[quoted_atom.first]
+        # Return records from final atom.
         quoted_atom[1..-1].each do |atom_name|
-          matches = @atoms[atom_name].preceded_by(matches)
-        end
-        #results += matches.record_ids
-
-        interim_results = matches.weightings(@records_size)
-        if results.empty?
-          results = interim_results
-        else
-          rr = {}
-          interim_results.each do |r,w|
-            rr[r] = w + results[r] if results[r]
+          interim_matches = get_atom_results(atoms_keys, atom_name)
+          if interim_matches.nil?
+            matches = nil
+            break
           end
-          #p results.class
-          results = rr
+          matches = interim_matches.preceded_by(matches)
         end
 
+        break if matches.nil?
+        # Grab the record IDs and weightings.
+        interim_results = matches.weightings(@records_size)
+
+        # Merge them with the results obtained already, if any.
+        results = results.empty? ? interim_results : merge_query_results(results, interim_results)
+        
+        break if results.empty?
+        
       end
       results
     end
 
-    def load_atoms(atoms)
+    def get_atom_results(atoms_keys, atom)
+      if atom.is_a? Regexp
+        matching_keys = atoms_keys.grep(atom)
+        results = SearchAtom.new
+        matching_keys.each do |key|
+          results += @atoms[key]
+        end
+        results
+      else
+        @atoms[atom]
+      end
+    end
+
+    def load_atoms(atoms, options={})
       # Remove duplicate atoms.
       # Remove atoms already in index.
       # Calculate prefixes.
       # Remove duplicate prefixes.
       atoms.uniq.reject{|a| include_atom?(a)}.collect{|a| encoded_prefix(a)}.uniq.each do |name|
-        if (atom_file = @root.join(name.to_s)).exist?
+        pattern = @root.join(name.to_s).to_s
+        pattern += '*' if options[:start]
+        Pathname.glob(pattern).each do |atom_file|
           atom_file.open do |f|
             @atoms.merge!(Marshal.load(f))
           end

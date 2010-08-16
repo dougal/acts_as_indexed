@@ -1,4 +1,4 @@
-require File.expand_path("../abstract_unit", __FILE__)
+require File.dirname(__FILE__) + '/abstract_unit'
 include ActsAsIndexed
 
 class SearchIndexTest < ActiveSupport::TestCase
@@ -35,8 +35,8 @@ class SearchIndexTest < ActiveSupport::TestCase
     search_index = build_search_index
     mock_records = ['record0', 'record1']
     
-    search_index.expects(:add_record).with('record0')
-    search_index.expects(:add_record).with('record1')
+    search_index.expects(:add_record).with('record0', true)
+    search_index.expects(:add_record).with('record1', true)
     
     search_index.add_records(mock_records)
   end

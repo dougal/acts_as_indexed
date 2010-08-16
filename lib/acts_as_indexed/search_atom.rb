@@ -14,8 +14,10 @@ module ActsAsIndexed #:nodoc:
     # W(T, D) = tf(T, D) * log ( DN / df(T))
     # weighting = frequency_in_this_record * log (total_number_of_records / number_of_matching_records)
 
-    def initialize
-      @records = {}
+    attr_reader :records
+
+    def initialize(records={})
+      @records = records
     end
 
     # Returns true if the given record is present.
@@ -47,6 +49,13 @@ module ActsAsIndexed #:nodoc:
     # Removes +record_id+ from this Atom.
     def remove_record(record_id)
       @records.delete(record_id)
+    end
+
+    # Creates a new SearchAtom with the combined records from self and other
+    def +(other)
+      SearchAtom.new(@records.clone.merge!(other.records) { |key, _old, _new|
+                                                            _old + _new
+                                                          })
     end
 
     # Returns at atom containing the records and positions of +self+ preceded by +former+

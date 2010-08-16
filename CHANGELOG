@@ -1,11 +1,16 @@
+===0.6.4 [16th August 2010]
+ - Added starts-with query type [nilbus - Edward Anderson]
+ - Various fixes and improvements.
+ - Real names given for all contributors.
+
 ===0.6.3 [5th July 2010]
- - index file path can now be definited as a Pathname as well as an array. [parndt]
- - Can now define which records are indexed and which are not via an :if proc. [madpilot]
- - Lots of tidying up. [parndt]
- - Rails 3 fixes. [myabc]
+ - index file path can now be definited as a Pathname as well as an array. [parndt - Philip Arndt]
+ - Can now define which records are indexed and which are not via an :if proc. [madpilot - Myles Eftos]
+ - Lots of tidying up. [parndt - Philip Arndt]
+ - Rails 3 fixes. [myabc - Alex Coles]
 
 ===0.6.2 [11th June 2010]
- - Now available as a Gem as well as the original plugin. [parndt - Thanks for doing most of the hard work.]
+ - Now available as a Gem as well as the original plugin. [parndt - Philip Arndt - Thanks for doing most of the hard work.]
 
 ===0.6.0 [10th June 2010]
  - Now supports Rails 3.x.x as well as Rails 2.x.x.
@@ -14,11 +19,11 @@
  - Deprecated find_with_index and will_paginate_search methods.
 
 ===0.5.3 [6th June 2010]
-- Now supports non-standard table names automatically. [nandalopes]
+- Now supports non-standard table names automatically. [nandalopes - Fernanda Lopes]
 
 ===0.5.2 [3rd May 2010]
-- Fix for Errno::ERANGE error related to certain Math.log calculations. [parndt]
-- Improved index detection in a shared-directory environment. [bob-p]
+- Fix for Errno::ERANGE error related to certain Math.log calculations. [parndt - Philip Arndt]
+- Improved index detection in a shared-directory environment. [bob-p - Thomas Pomfret]
 
 ===0.5.1 [11 June 2009]
 - Fixed Ruby 1.8.6 compatibility.
@@ -67,7 +72,7 @@
 
 ===0.3.0 [18 September 2007]
 - Minor bug fixes.
-- min_word_size now works properly, with quieries containing small words in 
+- min_word_size now works properly, with queries containing small words in 
   quotes or being preceded by a '+' symbol are now searched on.
 
 ===0.2.2 [06 September 2007]
