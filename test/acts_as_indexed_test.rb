@@ -51,7 +51,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     p = Post.create(:title => 'A special title', :body => 'foo bar bla bla bla')
     assert Post.find_with_index('title',{},{:ids_only => true}).include?(p.id)
     p.update_attributes(:title => 'No longer special')
-    assert Post.find_with_index('title',{},{:ids_only => true}).exclude?(p.id)
+    assert !Post.find_with_index('title',{},{:ids_only => true}).include?(p.id)
   end
 
   def test_simple_queries

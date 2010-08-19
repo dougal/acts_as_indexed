@@ -119,11 +119,11 @@ module ActsAsIndexed #:nodoc:
       return results2 if results1.empty?
       
       # Delete any records from results 1 that are not in results 2.
-      r1 = results1.delete_if{ |r_id,w| results2.exclude?(r_id) }
+      r1 = results1.delete_if{ |r_id,w| !results2.include?(r_id) }
       
       
       # Delete any records from results 2 that are not in results 1.
-      r2 = results2.delete_if{ |r_id,w| results1.exclude?(r_id) }
+      r2 = results2.delete_if{ |r_id,w| !results1.include?(r_id) }
       
       # Merge the results by adding their respective scores.
       r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
