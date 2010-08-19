@@ -1,5 +1,5 @@
 ===0.6.5 [19th August 2010]
- - Reintroduced support for older version of Ruby which do not implement Array#exclude? [bug report by Andy Egger]
+ - Reintroduced support for older version of Ruby which do not implement Array#exclude? [bug report by Andy Eggers]
  - Using Bundler to manage development dependencies.
 
 ===0.6.4 [16th August 2010]
