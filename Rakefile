@@ -7,6 +7,7 @@ task :default => :test
 
 desc 'Test the acts_as_indexed plugin.'
 Rake::TestTask.new(:test) do |t|
+  t.libs << 'test'
   t.libs << 'lib'
   t.pattern = 'test/**/*_test.rb'
   t.verbose = true
