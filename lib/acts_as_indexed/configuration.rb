@@ -27,7 +27,7 @@ module ActsAsIndexed
     attr_accessor :if_proc
 
     def initialize
-      @index_file = Rails.root.join('index') if Rails.root
+      @index_file = default_index_file if Rails.root
       @index_file_depth = 3
       @min_word_size = 3
       @if_proc = if_proc
@@ -55,6 +55,16 @@ module ActsAsIndexed
 
     def if_proc
       @if_proc ||= Proc.new{true}
+    end
+
+    private
+    
+    def default_index_file
+      if Rails.root.writable?
+        Rails.root.join('index')
+      else
+        Rails.root.join('tmp', 'index')
+      end
     end
 
   end
