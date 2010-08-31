@@ -30,7 +30,8 @@ acts_as_indexed is now available as a Gem as several people have requested it.
 
   gem install acts_as_indexed
 
-Make sure to specify the Gem in your environment.rb file (Rails 2.x.x), or the Gemfile (Rails 3.x.x).
+Make sure to specify the Gem in your environment.rb file (Rails 2.x.x), or the
+Gemfile (Rails 3.x.x).
 
 ==== No Git?
 
@@ -65,14 +66,17 @@ the current model.
     ...
   end
 
-Any of the configuration options in the Further Configuration section can be added as to the acts_as_indexed method call. These will override any defaults or global configuration.
+Any of the configuration options in the Further Configuration section can be
+added as to the acts_as_indexed method call. These will override any defaults
+or global configuration.
 
-You can specify proc that needs to evaluate to true before the item gets indexed.
-This is useful if you only want items with a certain state to be included.
-The Proc is passed the current object's instance so you are able to test against that.
+You can specify proc that needs to evaluate to true before the item gets
+indexed. This is useful if you only want items with a certain state to be
+included. The Proc is passed the current object's instance so you are able to
+test against that.
 
-For example, if you have a visible column that is false if the post is hidden, or true
-if it is visible, you can filter the index by doing:
+For example, if you have a visible column that is false if the post is hidden,
+or true if it is visible, you can filter the index by doing:
 
   class Post < ActiveRecord::Base
     acts_as_indexed :fields => [:title, :body], :if => Proc.new { |post| post.visible? }
@@ -114,7 +118,7 @@ A config block can be provided in your environment files or initializers.
 Example showing defaults:
 
   ActsAsIndexed.configure do |config|
-    config.index_file = [RAILS_ROOT,'index']
+    config.index_file = [RAILS_ROOT,'index'] 
     config.index_file_depth = 3
     config.min_word_size = 3
   end
@@ -122,6 +126,10 @@ Example showing defaults:
 A full rundown of the available configuration options can be found in
 <tt>lib/acts_as_indexed/configuration.rb</tt>
 
+=== Heroku Support
+
+Acts As Indexed now supports Heroku out-of-the-box. When a non-writeable root
+directory is detected, the index will be created in the tmp directory.
 
 == RDoc Documentation
 
