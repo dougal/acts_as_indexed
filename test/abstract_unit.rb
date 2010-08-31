@@ -4,7 +4,6 @@ require 'rubygems'
 require 'active_record'
 require 'active_record/fixtures'
 require 'mocha'
-require 'redgreen'
 
 # Mock out the required environment variables.
 # Do this before requiring AAI.
