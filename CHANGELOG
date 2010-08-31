@@ -1,3 +1,8 @@
+===0.6.6 [31st August 2010]
+ - Now Heroku compatible out of the box, index is created in tmp when root dir is non-writable. [parndt - Philip Arndt - Great suggestion]
+ - Fixed a require path issue on 1.9.2.
+ - Fixed an issue with index_file location on Rails 3.0.0 final.
+
 ===0.6.5 [19th August 2010]
  - Reintroduced support for older version of Ruby which do not implement Array#exclude? [bug report by Andy Eggers]
  - Using Bundler to manage development dependencies.
