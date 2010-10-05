@@ -98,13 +98,13 @@ an argument.
 
 The following query operators are supported:
 
-* AND:: This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
-* NOT:: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
-* INCLUDE:: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
-* "":: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
-* ^:: Terms that begin with ^ will match records that contain a word starting with the term. '^cat' will find matches containing 'cat', 'catapult', 'caterpillar' etc.
-* ^"":: A quoted term that begins with ^ matches any phrase that begin with this phrase. '^"cat d"' will find records matching the whole phrases "cat dog" and "cat dinner". This type of search is useful for autocomplete inputs.
-* *:: A wildcard that matches zero to many characters. For instance '^pla*trub*rail' will match 'planetrubyonrails' and 'com*mun'ty will match 'community'
+* AND :: This is the default option. 'cat dog' will find records matching 'cat' AND 'dog'.
+* NOT :: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
+* INCLUDE :: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is smaller than the +min_word_size+
+* "" :: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
+* ^ :: Terms that begin with ^ will match records that contain a word starting with the term. '^cat' will find matches containing 'cat', 'catapult', 'caterpillar' etc.
+* ^"" :: A quoted term that begins with ^ matches any phrase that begin with this phrase. '^"cat d"' will find records matching the whole phrases "cat dog" and "cat dinner". This type of search is useful for autocomplete inputs.
+* * :: A wildcard that matches zero to many characters. For instance '^pla*trub*rail' will match 'planetrubyonrails' and 'com*mun'ty will match 'community'.
 
 === Pagination
 
