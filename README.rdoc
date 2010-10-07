@@ -118,7 +118,7 @@ A config block can be provided in your environment files or initializers.
 Example showing defaults:
 
   ActsAsIndexed.configure do |config|
-    config.index_file = [RAILS_ROOT,'index'] 
+    config.index_file = [Rails.root.to_s,'index'] 
     config.index_file_depth = 3
     config.min_word_size = 3
   end
