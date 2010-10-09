@@ -8,9 +8,7 @@ module ActsAsIndexed
 
      module Search
 
-      # DEPRECATED. Use chained pagination instead.
       def paginate_search(query, options)
-        warn "[DEPRECATION] `paginate_search` is deprecated and will be removed in a later release. Use `with_query(query).paginate()` instead."
         page, per_page, total_entries = wp_parse_options(options)
 
         total_entries ||= find_with_index(query,{},{:ids_only => true}).size

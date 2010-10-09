@@ -192,12 +192,10 @@ module ActsAsIndexed #:nodoc:
   # Adds model class singleton methods.
   module SingletonMethods
 
-    # DEPRECATED. Use +with_query+ scope instead.
     # Finds instances matching the terms passed in +query+.
     #
     # See ActsAsIndexed::ClassMethods#search_index.
     def find_with_index(query='', find_options = {}, options = {})
-      warn "[DEPRECATION] `find_with_index` is deprecated and will be removed in a later release. Use `with_query(query)` instead."
       search_index(query, find_options, options)
     end
 
