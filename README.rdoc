@@ -39,6 +39,9 @@ If you don't have git installed, you can download the plugin from the GitHub
 page (http://github.com/dougal/acts_as_indexed) and unpack it into the
 <tt>vendor/plugins</tt> directory of your rails app.
 
+=== Upgrade
+
+You have to clear out your index directory when upgrading.
 
 == Usage
 
