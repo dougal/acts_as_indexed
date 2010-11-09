@@ -254,7 +254,8 @@ module ActsAsIndexed #:nodoc:
         :positive_quoted => positive_quoted,
         :starts_with => starts_with,
         :negative => negative,
-        :positive => positive }
+        :positive => positive
+      }
     end
     
     def run_queries(atoms, starts_with=false)
