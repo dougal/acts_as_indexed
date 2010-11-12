@@ -8,6 +8,7 @@ require 'active_record'
 require 'acts_as_indexed/configuration'
 require 'acts_as_indexed/search_index'
 require 'acts_as_indexed/search_atom'
+require 'acts_as_indexed/storage'
 
 module ActsAsIndexed #:nodoc:
 

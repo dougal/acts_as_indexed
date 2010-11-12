@@ -58,6 +58,12 @@ module ActsAsIndexed #:nodoc:
                                                           })
     end
 
+    # Creates a new SearchAtom with records in other removed from self.
+    def -(other)
+      records = @records.clone.reject { |name, records| other.records.include?(name) }
+      SearchAtom.new(records)
+    end
+
     # Returns at atom containing the records and positions of +self+ preceded by +former+
     # "former latter" or "big dog" where "big" is the former and "dog" is the latter.
     def preceded_by(former)
