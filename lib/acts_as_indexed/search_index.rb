@@ -46,8 +46,6 @@ module ActsAsIndexed #:nodoc:
     end
 
     def update_record(record_new, record_old)
-      # This actually does nothing, need to grab the original state and remove
-      # those atoms.
       remove_record(record_old)
       add_record(record_new)
     end

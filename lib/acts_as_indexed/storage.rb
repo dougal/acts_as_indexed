@@ -34,7 +34,7 @@ module ActsAsIndexed #:nodoc:
           from_file = {}
         end
 
-        from_file.merge(atoms){ |k,o,n| o + n }
+        atoms = from_file.merge(atoms){ |k,o,n| o + n }
 
         path.open("w+") do |f|
           Marshal.dump(atoms,f)
@@ -61,13 +61,13 @@ module ActsAsIndexed #:nodoc:
 
         if path.exist?
           from_file = path.open do |f|
-            Marshall.load(f)
+            Marshal.load(f)
           end
         else
           from_file = {}
         end
 
-        from_file.merge(atoms){ |k,o,n| o - n }
+        atoms = from_file.merge(atoms){ |k,o,n| o - n }
 
         path.open("w+") do |f|
           Marshal.dump(atoms,f)
@@ -116,8 +116,11 @@ module ActsAsIndexed #:nodoc:
     private
 
     def update_record_count(delta)
+      new_count = self.record_count + delta
+      new_count = 0 if new_count < 0
+      
       @path.join('size').open('w+') do |f|
-        Marshal.dump(self.record_count + delta,f)
+        Marshal.dump(new_count,f)
       end
     end
 

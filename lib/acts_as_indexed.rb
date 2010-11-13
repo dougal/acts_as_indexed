@@ -103,8 +103,6 @@ module ActsAsIndexed #:nodoc:
 
     def index_remove(record)
       index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.if_proc)
-      # record won't be in index if it doesn't exist. Just return true.
-      return unless index.exists?
       index.remove_record(record)
       @query_cache = {}
     end
