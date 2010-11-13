@@ -12,34 +12,9 @@ module ActsAsIndexed #:nodoc:
       prepare
     end
 
-    # Takes a hash of atoms and stores these.
-    def add(atoms)      
-      # ActiveSupport always available?
-      atoms_sorted = ActiveSupport::OrderedHash.new
-
-      # Sort the atoms into the appropriate shards for writing to individual
-      # files.
-      atoms.each do |atom_name, records|
-        (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
-      end
-
-      atoms_sorted.each do |e_p, atoms|
-        path = @path.join(e_p.to_s)
-
-        if path.exist?
-          from_file = path.open do |f|
-            Marshal.load(f)
-          end
-        else
-          from_file = {}
-        end
-
-        atoms = from_file.merge(atoms){ |k,o,n| o + n }
-
-        path.open("w+") do |f|
-          Marshal.dump(atoms,f)
-        end
-      end
+    # Takes a hash of atoms and adds these to storage.
+    def add(atoms)
+      operate(:+, atoms)
 
       update_record_count(1)
 
@@ -47,32 +22,7 @@ module ActsAsIndexed #:nodoc:
 
     # Takes a hash of atoms and removes these from storage.
     def remove(atoms)
-      # ActiveSupport always available?
-      atoms_sorted = ActiveSupport::OrderedHash.new
-
-      # Sort the atoms into the appropriate shards for writing to individual
-      # files.
-      atoms.each do |atom_name, records|
-        (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
-      end
-
-      atoms_sorted.each do |e_p, atoms|
-        path = @path.join(e_p.to_s)
-
-        if path.exist?
-          from_file = path.open do |f|
-            Marshal.load(f)
-          end
-        else
-          from_file = {}
-        end
-
-        atoms = from_file.merge(atoms){ |k,o,n| o - n }
-
-        path.open("w+") do |f|
-          Marshal.dump(atoms,f)
-        end
-      end
+      operate(:-, atoms)
 
       update_record_count(-1)
     end
@@ -114,6 +64,37 @@ module ActsAsIndexed #:nodoc:
     end
 
     private
+
+    # Takes atoms and adds or removes them from the index depending on the
+    # passed operation.
+    def operate(operation, atoms)
+      # ActiveSupport always available?
+      atoms_sorted = ActiveSupport::OrderedHash.new
+
+      # Sort the atoms into the appropriate shards for writing to individual
+      # files.
+      atoms.each do |atom_name, records|
+        (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
+      end
+
+      atoms_sorted.each do |e_p, atoms|
+        path = @path.join(e_p.to_s)
+
+        if path.exist?
+          from_file = path.open do |f|
+            Marshal.load(f)
+          end
+        else
+          from_file = {}
+        end
+
+        atoms = from_file.merge(atoms){ |k,o,n| o.send(operation, n) }
+
+        path.open("w+") do |f|
+          Marshal.dump(atoms,f)
+        end
+      end
+    end
 
     def update_record_count(delta)
       new_count = self.record_count + delta
