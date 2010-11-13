@@ -51,11 +51,11 @@ module ActsAsIndexed #:nodoc:
       # TODO: Record count is currently a marshaled integer. Why not store as
       # string integer? Breaks compatibility, so leave until other changes
       # need to be made to the index.
-      
+
       @path.join('size').open do |f|
         Marshal.load(f)
       end
-      
+
     # This is a bit horrible.
     rescue Errno::ENOENT
       0
@@ -99,7 +99,7 @@ module ActsAsIndexed #:nodoc:
     def update_record_count(delta)
       new_count = self.record_count + delta
       new_count = 0 if new_count < 0
-      
+
       @path.join('size').open('w+') do |f|
         Marshal.dump(new_count,f)
       end
