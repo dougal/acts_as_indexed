@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{acts_as_indexed}
-  s.version = "0.6.6"
+  s.version = "0.6.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Douglas F Shearer"]
-  s.date = %q{2010-08-31}
+  s.date = %q{2011-02-07}
   s.description = %q{Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app}
   s.email = %q{dougal.s@gmail.com}
   s.extra_rdoc_files = [
@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
      "lib/acts_as_indexed/configuration.rb",
      "lib/acts_as_indexed/search_atom.rb",
      "lib/acts_as_indexed/search_index.rb",
+     "lib/acts_as_indexed/storage.rb",
      "lib/will_paginate_search.rb",
      "rails/init.rb",
      "test/abstract_unit.rb",

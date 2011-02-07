@@ -1,3 +1,8 @@
+===0.6.7 [7th February 2011]
+ - find_by_index and paginate_search are no longer deprecated.
+ - Improved documentation
+ - Storage is now it's own class to allow future development of locking and pluggable backends.
+
 ===0.6.6 [31st August 2010]
  - Now Heroku compatible out of the box, index is created in tmp when root dir is non-writable. [parndt - Philip Arndt - Great suggestion]
  - Fixed a require path issue on 1.9.2.
