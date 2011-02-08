@@ -12,8 +12,8 @@ class SearchIndexTest < ActiveSupport::TestCase
   
   private
   
-  def build_search_index(root = index_loc, index_depth = 2, fields = [:title, :body], min_word_size = 3)
-    SearchIndex.new([root], index_depth, fields, min_word_size)
+  def build_search_index(fields, config)
+    SearchIndex.new(fields, config)
   end
   
 end
