@@ -35,13 +35,15 @@ Gemfile (Rails 3.x.x).
 
 ==== No Git?
 
-If you don't have git installed, but still want the plugin, you can download the plugin from the GitHub
-page (http://github.com/dougal/acts_as_indexed) and unpack it into the
-<tt>vendor/plugins</tt> directory of your rails app.
+If you don't have git installed, but still want the plugin, you can download
+the plugin from the GitHub page (http://github.com/dougal/acts_as_indexed) and
+unpack it into the <tt>vendor/plugins</tt> directory of your rails app.
 
 === Upgrade
 
-You have to clear out your index directory when upgrading.
+When upgrading to a new version of acts_as_indexed it is recommended you
+delete the index directory and allow it to be rebuilt.
+
 
 == Usage
 
@@ -100,7 +102,7 @@ of any matching records.
 
   # Pass any of the ActiveRecord find options to the search.
   my_search_results = Post.find_with_index('my search query',{:limit => 10}) # return the first 10 matches.
-  
+
   # Returns array of IDs ordered by relevance.
   my_search_results = Post.find_with_index('my search query',{},{:ids_only => true}) # =>  [12,19,33...
 
@@ -131,7 +133,7 @@ The following query operators are supported:
 ==== With Relevance
 
 Pagination is supported via the +paginate_search+ method whose first argument is the search query, followed all the standard will_paginate arguments.
-  
+
   @images = Image.paginate_search('girl', :page => 1, :per_page => 5)
 
 ==== Without Relevance (Scope)
@@ -147,7 +149,7 @@ A config block can be provided in your environment files or initializers.
 Example showing defaults:
 
   ActsAsIndexed.configure do |config|
-    config.index_file = [Rails.root.to_s,'index'] 
+    config.index_file = [Rails.root.to_s,'index']
     config.index_file_depth = 3
     config.min_word_size = 3
   end
@@ -191,5 +193,5 @@ Future releases will be looking to add the following features:
 * Optional html scrubbing during indexing.
 * Ranking affected by field weightings.
 * Support for DataMapper, Sequel and the various MongoDB ORMs.
-* UTF-8 support. See the current solution in the following Gist: 
+* UTF-8 support. See the current solution in the following Gist:
   https://gist.github.com/193903bb4e0d6e5debe1
