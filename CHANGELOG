@@ -1,7 +1,7 @@
 ===0.6.7 [7th February 2011]
  - find_by_index and paginate_search are no longer deprecated.
  - Improved documentation.
- - Storage is now it's own class to allow future development of locking and pluggable backends.
+ - Storage is now its own class to allow future development of locking and pluggable backends.
 
 ===0.6.6 [31st August 2010]
  - Now Heroku compatible out of the box, index is created in tmp when root dir is non-writable. [parndt - Philip Arndt - Great suggestion]
@@ -86,15 +86,15 @@
 
 ===0.3.0 [18 September 2007]
 - Minor bug fixes.
-- min_word_size now works properly, with queries containing small words in 
+- min_word_size now works properly, with queries containing small words in
   quotes or being preceded by a '+' symbol are now searched on.
 
 ===0.2.2 [06 September 2007]
-- Search now caches query results within a session. Call the search twice in an 
+- Search now caches query results within a session. Call the search twice in an
   action? Only runs once!
 
 ===0.2.1 [05 September 2007]
-- AR find options can now be passed to the search to allow finer control of 
+- AR find options can now be passed to the search to allow finer control of
   returned Model Objects.
 
 ===0.2.0 [04 September 2007]
