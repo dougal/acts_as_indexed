@@ -15,6 +15,8 @@ require 'acts_as_indexed/storage'
 
 module ActsAsIndexed #:nodoc:
 
+  # This is the last version of the plugin where the index structure was
+  # changed in some manner. Is only changed when necessary, not every release.
   INDEX_VERSION = '0.6.8'
 
   # Holds the default configuration for acts_as_indexed.
