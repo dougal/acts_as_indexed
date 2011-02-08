@@ -15,6 +15,8 @@ require 'acts_as_indexed/storage'
 
 module ActsAsIndexed #:nodoc:
 
+  INDEX_VERSION = '0.6.8'
+
   # Holds the default configuration for acts_as_indexed.
 
   @configuration = Configuration.new
