@@ -59,7 +59,7 @@ module ActsAsIndexed
 
     def index_add(record)
       build_index unless aai_config.index_file.directory?
-      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.case_sensitive, aai_config.if_proc)
+      index = new_index
       index.add_record(record)
       @query_cache = {}
     end
@@ -67,7 +67,7 @@ module ActsAsIndexed
     # Removes the passed +record+ from the index. Clears the query cache.
 
     def index_remove(record)
-      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.case_sensitive, aai_config.if_proc)
+      index = new_index
       index.remove_record(record)
       @query_cache = {}
     end
@@ -78,7 +78,7 @@ module ActsAsIndexed
 
     def index_update(record)
       build_index unless aai_config.index_file.directory?
-      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.case_sensitive, aai_config.if_proc)
+      index = new_index
       index.update_record(record,find(record.id))
       @query_cache = {}
     end
@@ -104,7 +104,7 @@ module ActsAsIndexed
       if !@query_cache || !@query_cache[query]
         logger.debug('Query not in cache, running search.')
         build_index unless aai_config.index_file.directory?
-        index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.case_sensitive, aai_config.if_proc)
+        index = new_index
         (@query_cache ||= {})[query] = index.search(query)
       else
         logger.debug('Query held in cache.')
@@ -143,9 +143,13 @@ module ActsAsIndexed
 
     private
 
+    def new_index
+      SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.case_sensitive, aai_config.if_proc)
+    end
+
     # Builds an index from scratch for the current model class.
     def build_index
-      index = SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.case_sensitive, aai_config.if_proc)
+      index = new_index
       find_in_batches({ :batch_size => 500 }) do |records|
         index.add_records(records)
       end
