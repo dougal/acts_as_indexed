@@ -1,5 +1,5 @@
 # WillPaginateSearch
-# Copyright (c) 2007 - 2010 Douglas F Shearer.
+# Copyright (c) 2007 - 2011 Douglas F Shearer.
 # http://douglasfshearer.com
 
 module ActsAsIndexed
