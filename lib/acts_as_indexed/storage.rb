@@ -57,9 +57,7 @@ module ActsAsIndexed #:nodoc:
       # string integer? Breaks compatibility, so leave until other changes
       # need to be made to the index.
 
-      @size_path.open do |f|
-        Marshal.load(f)
-      end
+      @size_path.read.to_i
 
     # This is a bit horrible.
     rescue Errno::ENOENT
@@ -109,7 +107,7 @@ module ActsAsIndexed #:nodoc:
 
       lock_file(@size_path) do
         File.atomic_write(@size_path.to_s, Dir.tmpdir) do |f|
-          Marshal.dump(new_count, f)
+          f.write(new_count)
         end
       end
     end
