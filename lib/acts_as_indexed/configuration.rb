@@ -22,8 +22,8 @@ module ActsAsIndexed
     attr_reader :min_word_size
 
     # Proc that allows you to turn on or off index for a record.
-    # Useful if you don't want the index to be updated if the target model is
-    # should not return up in results, such as a draft post.
+    # Useful if you don't want an object to be placed in the index, such as a
+    # draft post.
     attr_accessor :if_proc
 
     # Enable or disable case sensitivity.
