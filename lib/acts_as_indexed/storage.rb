@@ -3,11 +3,15 @@
 # http://douglasfshearer.com
 # Distributed under the MIT license as included with this plugin.
 
+require 'tmpdir'
+require 'active_support/core_ext/file/atomic'
+
 module ActsAsIndexed #:nodoc:
   class Storage
 
     def initialize(path, prefix_size)
       @path = path
+      @size_path = path.join('size')
       @prefix_size = prefix_size
       prepare
     end
@@ -17,7 +21,6 @@ module ActsAsIndexed #:nodoc:
       operate(:+, atoms)
 
       update_record_count(1)
-
     end
 
     # Takes a hash of atoms and removes these from storage.
@@ -52,7 +55,7 @@ module ActsAsIndexed #:nodoc:
       # string integer? Breaks compatibility, so leave until other changes
       # need to be made to the index.
 
-      @path.join('size').open do |f|
+      @size_path.open do |f|
         Marshal.load(f)
       end
 
@@ -90,8 +93,10 @@ module ActsAsIndexed #:nodoc:
 
         atoms = from_file.merge(atoms){ |k,o,n| o.send(operation, n) }
 
-        path.open("w+") do |f|
-          Marshal.dump(atoms,f)
+        lock_file(path.to_s) do
+          File.atomic_write(path.to_s, Dir.tmpdir) do |f|
+            Marshal.dump(atoms,f)
+          end
         end
       end
     end
@@ -100,8 +105,10 @@ module ActsAsIndexed #:nodoc:
       new_count = self.record_count + delta
       new_count = 0 if new_count < 0
 
-      @path.join('size').open('w+') do |f|
-        Marshal.dump(new_count,f)
+      lock_file(@size_path.to_s) do
+        File.atomic_write(@size_path.to_s, Dir.tmpdir) do |f|
+          Marshal.dump(new_count, f)
+        end
       end
     end
 
@@ -129,6 +136,23 @@ module ActsAsIndexed #:nodoc:
         char.ord.to_s
       else
         char[0]
+      end
+    end
+
+    # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
+    # Lock a file for a block so only one process can modify it at a time.
+    def lock_file(file_name, &block) # :nodoc:
+      if File.exist?(file_name)
+        File.open(file_name, 'r') do |f|
+          begin
+            f.flock File::LOCK_EX
+            yield
+          ensure
+            f.flock File::LOCK_UN
+          end
+        end
+      else
+        yield
       end
     end
 
