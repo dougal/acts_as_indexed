@@ -11,12 +11,14 @@ module ActsAsIndexed #:nodoc:
     # fields:: Fields or instance methods of ActiveRecord model to be indexed.
     # min_word_size:: Smallest query term that will be run through search.
     # if_proc:: A Proc. If the proc is true, the index gets added, if false if doesn't
-    def initialize(root, index_depth, fields, min_word_size, if_proc=Proc.new{true})
+    def initialize(root, index_depth, fields, min_word_size, case_sensitive, if_proc=Proc.new{true})
+      # TODO: Pass in the configuration rather than having all these separate agruments.
       @storage = Storage.new(Pathname.new(root.to_s), index_depth)
       @fields = fields
       @atoms = {}
       @min_word_size = min_word_size
       @records_size = @storage.record_count
+      @case_sensitive = case_sensitive
       @if_proc = if_proc
     end
 
@@ -248,7 +250,8 @@ module ActsAsIndexed #:nodoc:
 
 
     def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
-      atoms = s.downcase.gsub(/\W/,' ').squeeze(' ').split
+      s = @case_sensitive ? s : s.downcase
+      atoms = s.gsub(/\W/,' ').squeeze(' ').split
       return atoms unless limit_size
       atoms.reject{|w| w.size < min_size}
     end

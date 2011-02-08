@@ -26,11 +26,17 @@ module ActsAsIndexed
     # should not return up in results, such as a draft post.
     attr_accessor :if_proc
 
+    # Enable or disable case sensitivity.
+    # Set to true to enable.
+    # Default is false, non-case sensitive.
+    attr_accessor :case_sensitive
+
     def initialize
       @index_file = nil
       @index_file_depth = 3
       @min_word_size = 3
       @if_proc = if_proc
+      @case_sensitive = false
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put

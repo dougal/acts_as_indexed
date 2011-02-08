@@ -196,6 +196,17 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal 1, Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true}).size
   end
 
+  def test_case_insensitive
+    Post.acts_as_indexed :fields => [:title, :body], :case_sensitive => true
+    destroy_index
+    
+    assert_equal 1, Post.find_with_index('Ellis', {}, { :no_query_cache => true, :ids_only => true}).size
+    assert_equal 0, Post.find_with_index('ellis', {}, { :no_query_cache => true, :ids_only => true}).size
+    
+    assert_equal 3, Post.find_with_index('The', {}, { :no_query_cache => true, :ids_only => true}).size
+    assert_equal 5, Post.find_with_index('the', {}, { :no_query_cache => true, :ids_only => true}).size
+  end
+
   private
   
   def result_ids(query)
