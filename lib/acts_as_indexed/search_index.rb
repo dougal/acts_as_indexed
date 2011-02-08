@@ -6,20 +6,16 @@
 module ActsAsIndexed #:nodoc:
   class SearchIndex
 
-    # root:: Location of index on filesystem as a Pathname.
-    # index_depth:: Degree of index partitioning.
     # fields:: Fields or instance methods of ActiveRecord model to be indexed.
-    # min_word_size:: Smallest query term that will be run through search.
-    # if_proc:: A Proc. If the proc is true, the index gets added, if false if doesn't
-    def initialize(root, index_depth, fields, min_word_size, case_sensitive, if_proc=Proc.new{true})
-      # TODO: Pass in the configuration rather than having all these separate agruments.
-      @storage = Storage.new(Pathname.new(root.to_s), index_depth)
+    # config:: ActsAsIndexed::Configuration instance.
+    def initialize(fields, config)
+      @storage = Storage.new(Pathname.new(config.index_file.to_s), config.index_file_depth)
       @fields = fields
       @atoms = {}
-      @min_word_size = min_word_size
+      @min_word_size = config.min_word_size
       @records_size = @storage.record_count
-      @case_sensitive = case_sensitive
-      @if_proc = if_proc
+      @case_sensitive = config.case_sensitive
+      @if_proc = config.if_proc
     end
 
     # Adds +record+ to the index.

@@ -144,7 +144,7 @@ module ActsAsIndexed
     private
 
     def new_index
-      SearchIndex.new(aai_config.index_file, aai_config.index_file_depth, aai_fields, aai_config.min_word_size, aai_config.case_sensitive, aai_config.if_proc)
+      SearchIndex.new(aai_fields, aai_config)
     end
 
     # Builds an index from scratch for the current model class.
