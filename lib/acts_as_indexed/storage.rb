@@ -11,11 +11,10 @@ module ActsAsIndexed #:nodoc:
     INDEX_FILE_EXTENSION = '.ind'
     TEMP_FILE_EXTENSION  = '.tmp'
 
-    def initialize(path, prefix_size, threadsafe)
+    def initialize(path, prefix_size)
       @path = path
       @size_path = path.join('size')
       @prefix_size = prefix_size
-      @threadsafe = threadsafe
       prepare
     end
 
@@ -151,40 +150,28 @@ module ActsAsIndexed #:nodoc:
     end
 
     def write_file(file_path)
-      if @threadsafe
-        new_file = file_path.to_s
-        tmp_file = new_file + TEMP_FILE_EXTENSION
+      new_file = file_path.to_s
+      tmp_file = new_file + TEMP_FILE_EXTENSION
 
-        File.open(tmp_file, 'w+') do |f|
-          yield(f)
-        end
-
-        FileUtils.mv(tmp_file, new_file)
-
-      else
-        file_path.open('w+') do |f|
-          yield(f)
-        end
+      File.open(tmp_file, 'w+') do |f|
+        yield(f)
       end
+
+      FileUtils.mv(tmp_file, new_file)
     end
 
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
     # Lock a file for a block so only one process can modify it at a time.
     def lock_file(file_path, &block) # :nodoc:
-      if @threadsafe
-        if file_path.exist?
-          file_path.open('r') do |f|
-            begin
-              f.flock File::LOCK_EX
-              yield
-            ensure
-              f.flock File::LOCK_UN
-            end
+      if file_path.exist?
+        file_path.open('r') do |f|
+          begin
+            f.flock File::LOCK_EX
+            yield
+          ensure
+            f.flock File::LOCK_UN
           end
-        else
-          yield
         end
-
       else
         yield
       end
