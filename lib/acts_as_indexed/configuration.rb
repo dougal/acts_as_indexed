@@ -33,15 +33,16 @@ module ActsAsIndexed
 
     # Enable or disable thread safety.
     #
-    # Disabling thread safety comes with a small write-performance boost, but
-    # comes at the small risk of index corruption in an environment where
-    # concurrent writes are common.
+    # Disabling thread safety comes with a small (~2.5x) write-performance
+    # boost, but comes at the risk of index corruption in an environment where
+    # concurrent writes are numerous.
     #
     # If you have multiple processes accessing the same index (Passenger,
     # Mongrels, Unicorn) it is recommended that you leave this as-is.
     #
     # If the index is only used by one process at any one time (Heroku), then
-    # this can safely be set to false.
+    # this can safely be set to false. This is the recommended setting for
+    # Heroku.
     #
     # Default is true.
     attr_accessor :threadsafe

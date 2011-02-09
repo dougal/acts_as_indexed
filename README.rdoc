@@ -161,6 +161,10 @@ A full rundown of the available configuration options can be found in
 Acts As Indexed now supports Heroku out-of-the-box. When a non-writeable root
 directory is detected, the index will be created in the tmp directory.
 
+It is recommended that you turn thread safety off when running on Heroku,
+see the 'Further Configuration' section above, and the relevant section in
+<tt>lib/acts_as_indexed/configuration.rb</tt> for more information.
+
 == RDoc Documentation
 
 To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the

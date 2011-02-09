@@ -95,7 +95,7 @@ module ActsAsIndexed #:nodoc:
         atoms = from_file.merge(atoms){ |k,o,n| o.send(operation, n) }
 
         lock_file(path) do
-          File.atomic_write(path.to_s, Dir.tmpdir) do |f|
+          write_file(path) do |f|
             Marshal.dump(atoms,f)
           end
         end
@@ -107,7 +107,7 @@ module ActsAsIndexed #:nodoc:
       new_count = 0 if new_count < 0
 
       lock_file(@size_path) do
-        File.atomic_write(@size_path.to_s, Dir.tmpdir) do |f|
+        write_file(@size_path) do |f|
           f.write(new_count)
         end
       end
@@ -124,7 +124,7 @@ module ActsAsIndexed #:nodoc:
       else
         @path.mkpath
 
-        version_path.open('w+') do |f|
+        write_file(version_path) do |f|
           f.write(ActsAsIndexed::INDEX_VERSION)
         end
       end
@@ -153,6 +153,19 @@ module ActsAsIndexed #:nodoc:
       end
     end
 
+    def write_file(file_path)
+      if @threadsafe
+        File.atomic_write(file_path.to_s, Dir.tmpdir) do |f|
+          yield(f)
+        end
+
+      else
+        file_path.open('w+') do |f|
+          yield(f)
+        end
+      end
+    end
+
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
     # Lock a file for a block so only one process can modify it at a time.
     def lock_file(file_path, &block) # :nodoc:
@@ -169,6 +182,7 @@ module ActsAsIndexed #:nodoc:
         else
           yield
         end
+
       else
         yield
       end
