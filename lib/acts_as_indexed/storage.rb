@@ -3,15 +3,13 @@
 # http://douglasfshearer.com
 # Distributed under the MIT license as included with this plugin.
 
-require 'tmpdir'
-require 'active_support/core_ext/file/atomic'
-
 module ActsAsIndexed #:nodoc:
   class Storage
 
     class OldIndexVersion < Exception;end
 
     INDEX_FILE_EXTENSION = '.ind'
+    TEMP_FILE_EXTENSION  = '.tmp'
 
     def initialize(path, prefix_size, threadsafe)
       @path = path
@@ -154,9 +152,14 @@ module ActsAsIndexed #:nodoc:
 
     def write_file(file_path)
       if @threadsafe
-        File.atomic_write(file_path.to_s, Dir.tmpdir) do |f|
+        new_file = file_path.to_s
+        tmp_file = new_file + TEMP_FILE_EXTENSION
+
+        File.open(tmp_file, 'w+') do |f|
           yield(f)
         end
+
+        FileUtils.mv(tmp_file, new_file)
 
       else
         file_path.open('w+') do |f|
