@@ -42,10 +42,7 @@ module ActsAsIndexed
     # Since we cannot expect Rails to be available on load, it is best to put
     # off setting the index_file attribute until as late as possible.
     def index_file
-      if @index_file.nil?
-        @index_file = default_index_file
-      end
-      @index_file
+      @index_file ||= default_index_file
     end
 
     def index_file=(file_path)
