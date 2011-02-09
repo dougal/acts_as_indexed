@@ -9,7 +9,9 @@ require 'active_support/core_ext/file/atomic'
 module ActsAsIndexed #:nodoc:
   class Storage
 
-  class OldIndexVersion < Exception;end
+    class OldIndexVersion < Exception;end
+
+    INDEX_FILE_EXTENSION = '.ind'
 
     def initialize(path, prefix_size, threadsafe)
       @path = path
@@ -41,6 +43,7 @@ module ActsAsIndexed #:nodoc:
       atom_names.uniq.collect{|a| encoded_prefix(a) }.uniq.each do |prefix|
         pattern = @path.join(prefix.to_s).to_s
         pattern += '*' if start
+        pattern += INDEX_FILE_EXTENSION
 
         Pathname.glob(pattern).each do |atom_file|
           atom_file.open do |f|
@@ -54,10 +57,6 @@ module ActsAsIndexed #:nodoc:
 
     # Returns the number of records currently stored in this index.
     def record_count
-      # TODO: Record count is currently a marshaled integer. Why not store as
-      # string integer? Breaks compatibility, so leave until other changes
-      # need to be made to the index.
-
       @size_path.read.to_i
 
     # This is a bit horrible.
@@ -82,7 +81,7 @@ module ActsAsIndexed #:nodoc:
       end
 
       atoms_sorted.each do |e_p, atoms|
-        path = @path.join(e_p.to_s)
+        path = @path.join(e_p.to_s + INDEX_FILE_EXTENSION)
 
         if path.exist?
           from_file = path.open do |f|
