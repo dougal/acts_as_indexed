@@ -23,23 +23,30 @@ module ActsAsIndexed #:nodoc:
       return unless @if_proc.call(record)
 
       condensed_record = condense_record(record)
-      atoms = add_occurences(condensed_record,record.id)
-      
+      atoms = add_occurences(condensed_record, record.id)
+
       @storage.add(atoms)
     end
 
     # Adds multiple records to the index. Accepts an array of +records+.
     def add_records(records)
+      atoms = {}
+
       records.each do |record|
-        add_record(record)
+        next unless @if_proc.call(record)
+
+        condensed_record = condense_record(record)
+        atoms = add_occurences(condensed_record, record.id, atoms)
       end
+
+      @storage.add(atoms)
     end
 
     # Removes +record+ from the index.
     def remove_record(record)
       condensed_record = condense_record(record)
       atoms = add_occurences(condensed_record,record.id)
-      
+
       @storage.remove(atoms)
     end
 
@@ -102,8 +109,7 @@ module ActsAsIndexed #:nodoc:
       r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
     end
 
-    def add_occurences(condensed_record,record_id)
-      atoms = {}
+    def add_occurences(condensed_record, record_id, atoms={})
       condensed_record.each_with_index do |atom_name, i|
         atoms[atom_name] = SearchAtom.new unless atoms.include?(atom_name)
         atoms[atom_name].add_position(record_id, i)
