@@ -11,10 +11,11 @@ module ActsAsIndexed #:nodoc:
 
   class OldIndexVersion < Exception;end
 
-    def initialize(path, prefix_size)
+    def initialize(path, prefix_size, threadsafe)
       @path = path
       @size_path = path.join('size')
       @prefix_size = prefix_size
+      @threadsafe = threadsafe
       prepare
     end
 
@@ -155,14 +156,18 @@ module ActsAsIndexed #:nodoc:
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
     # Lock a file for a block so only one process can modify it at a time.
     def lock_file(file_path, &block) # :nodoc:
-      if file_path.exist?
-        file_path.open('r') do |f|
-          begin
-            f.flock File::LOCK_EX
-            yield
-          ensure
-            f.flock File::LOCK_UN
+      if @threadsafe
+        if file_path.exist?
+          file_path.open('r') do |f|
+            begin
+              f.flock File::LOCK_EX
+              yield
+            ensure
+              f.flock File::LOCK_UN
+            end
           end
+        else
+          yield
         end
       else
         yield

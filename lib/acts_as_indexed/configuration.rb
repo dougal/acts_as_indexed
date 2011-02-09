@@ -28,15 +28,31 @@ module ActsAsIndexed
 
     # Enable or disable case sensitivity.
     # Set to true to enable.
-    # Default is false, non-case sensitive.
+    # Default is false.
     attr_accessor :case_sensitive
 
+    # Enable or disable thread safety.
+    #
+    # Disabling thread safety comes with a small write-performance boost, but
+    # comes at the small risk of index corruption in an environment where
+    # concurrent writes are common.
+    #
+    # If you have multiple processes accessing the same index (Passenger,
+    # Mongrels, Unicorn) it is recommended that you leave this as-is.
+    #
+    # If the index is only used by one process at any one time (Heroku), then
+    # this can safely be set to false.
+    #
+    # Default is true.
+    attr_accessor :threadsafe
+
     def initialize
-      @index_file = nil
+      @index_file       = nil
       @index_file_depth = 3
-      @min_word_size = 3
-      @if_proc = if_proc
-      @case_sensitive = false
+      @min_word_size    = 3
+      @if_proc          = if_proc
+      @case_sensitive   = false
+      @threadsafe       = true
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put
@@ -73,7 +89,7 @@ module ActsAsIndexed
     end
 
     private
-    
+
     def default_index_file
       if Rails.root.writable?
         Rails.root.join('index')
