@@ -53,7 +53,7 @@ module ActsAsIndexed
       @min_word_size    = 3
       @if_proc          = if_proc
       @case_sensitive   = false
-      @threadsafe       = true
+      @threadsafe       = nil
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put
@@ -87,6 +87,13 @@ module ActsAsIndexed
 
     def if_proc
       @if_proc ||= Proc.new{true}
+    end
+
+    # Since we cannot expect Rails to be available on load, it is best to put
+    # off setting the threadsafety attribute until as late as possible.
+    def threadsafe
+      @threadsafe = Rails.root.writable? if @threadsafe.nil?
+      @threadsafe
     end
 
     private

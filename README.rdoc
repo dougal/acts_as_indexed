@@ -163,7 +163,8 @@ directory is detected, the index will be created in the tmp directory.
 
 It is recommended that you turn thread safety off when running on Heroku,
 see the 'Further Configuration' section above, and the relevant section in
-<tt>lib/acts_as_indexed/configuration.rb</tt> for more information.
+<tt>lib/acts_as_indexed/configuration.rb</tt> for more information. When a
+non-writable root directory is detected, thread safety will turn off by default.
 
 == RDoc Documentation
 
