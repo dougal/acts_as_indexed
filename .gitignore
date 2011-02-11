@@ -2,5 +2,5 @@ rdoc
 test/test.log
 coverage
 index
-pkg
+*.gem
 .bundle
