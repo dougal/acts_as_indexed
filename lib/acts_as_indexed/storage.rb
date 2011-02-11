@@ -79,29 +79,35 @@ module ActsAsIndexed #:nodoc:
 
       atoms_sorted.each do |e_p, atoms|
         path = @path.join(e_p.to_s + INDEX_FILE_EXTENSION)
-
-        if path.exist?
-          from_file = path.open do |f|
-            Marshal.load(f)
+        
+        lock_file(path) do
+        
+          if path.exist?
+            from_file = path.open do |f|
+              Marshal.load(f)
+            end
+          else
+            from_file = {}
           end
-        else
-          from_file = {}
-        end
 
-        atoms = from_file.merge(atoms){ |k,o,n| o.send(operation, n) }
+          atoms = from_file.merge(atoms){ |k,o,n| o.send(operation, n) }
 
-        write_file(path) do |f|
-          Marshal.dump(atoms,f)
-        end
+          write_file(path) do |f|
+            Marshal.dump(atoms,f)
+          end
+        end # end lock.
+        
       end
     end
 
     def update_record_count(delta)
-      new_count = self.record_count + delta
-      new_count = 0 if new_count < 0
+      lock_file(@size_path) do
+        new_count = self.record_count + delta
+        new_count = 0 if new_count < 0
 
-      write_file(@size_path) do |f|
-        f.write(new_count)
+        write_file(@size_path) do |f|
+          f.write(new_count)
+        end
       end
     end
 
@@ -115,7 +121,9 @@ module ActsAsIndexed #:nodoc:
 
       else
         @path.mkpath
-
+        
+        # Do we need to lock for this? I don't think so as it is only ever making
+        # a creation, not a modification.
         write_file(version_path) do |f|
           f.write(ActsAsIndexed::INDEX_VERSION)
         end
@@ -146,16 +154,14 @@ module ActsAsIndexed #:nodoc:
     end
 
     def write_file(file_path)
-      lock_file(file_path) do
-        new_file = file_path.to_s
-        tmp_file = new_file + TEMP_FILE_EXTENSION
+      new_file = file_path.to_s
+      tmp_file = new_file + TEMP_FILE_EXTENSION
 
-        File.open(tmp_file, 'w+') do |f|
-          yield(f)
-        end
-
-        FileUtils.mv(tmp_file, new_file)
+      File.open(tmp_file, 'w+') do |f|
+        yield(f)
       end
+
+      FileUtils.mv(tmp_file, new_file)
     end
 
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
