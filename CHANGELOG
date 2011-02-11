@@ -1,3 +1,10 @@
+===0.7.0 [11th February 2011]
+ - Threadsafe support. Index files are now locked for changes, and atomically written.
+ - Configurable case-sensitivity.
+ - Improved performance of index builds.
+ - Now warns on old version of the index.
+ - Upgrade instructions added to README. [ionas - Florent Guilleux]
+
 ===0.6.7 [7th February 2011]
  - find_by_index and paginate_search are no longer deprecated.
  - Improved documentation.
