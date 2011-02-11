@@ -25,7 +25,7 @@
  - Real names given for all contributors.
 
 ===0.6.3 [5th July 2010]
- - index file path can now be definited as a Pathname as well as an array. [parndt - Philip Arndt]
+ - Index file path can now be defined as a Pathname as well as an array. [parndt - Philip Arndt]
  - Can now define which records are indexed and which are not via an :if proc. [madpilot - Myles Eftos]
  - Lots of tidying up. [parndt - Philip Arndt]
  - Rails 3 fixes. [myabc - Alex Coles]
