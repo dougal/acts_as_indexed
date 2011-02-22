@@ -1,6 +1,8 @@
 source "http://rubygems.org"
 
-gem "jeweler"
-gem "mocha"
-gem "sqlite3-ruby"
-gem "rcov"
+group :test do
+  gem "jeweler"
+  gem "mocha"
+  gem "sqlite3-ruby"
+  gem "rcov"
+end

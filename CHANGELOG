@@ -1,3 +1,6 @@
+===0.7.1 [22nd February 2011]
+ - Removed file locking on Microsoft Windows as it is unsupported.
+
 ===0.7.0 [11th February 2011]
  - Threadsafe support. Index files are now locked for changes, and atomically written.
  - Configurable case-sensitivity.

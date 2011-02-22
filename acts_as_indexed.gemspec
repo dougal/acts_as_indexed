@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{acts_as_indexed}
-  s.version = "0.7.0"
+  s.version = "0.7.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Douglas F Shearer"]
-  s.date = %q{2011-02-11}
+  s.date = %q{2011-02-22}
   s.description = %q{Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app}
   s.email = %q{dougal.s@gmail.com}
   s.extra_rdoc_files = [
@@ -46,7 +46,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = %q{http://github.com/dougal/acts_as_indexed}
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.5.2}
   s.summary = %q{Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app}
   s.test_files = [
     "test/abstract_unit.rb",
@@ -59,7 +59,6 @@ Gem::Specification.new do |s|
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
