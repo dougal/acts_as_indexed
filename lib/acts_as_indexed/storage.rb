@@ -122,8 +122,8 @@ module ActsAsIndexed #:nodoc:
       else
         @path.mkpath
         
-        # Do we need to lock for this? I don't think so as it is only ever making
-        # a creation, not a modification.
+        # Do we need to lock for this? I don't think so as it is only ever
+        # creating, not modifying.
         write_file(version_path) do |f|
           f.write(ActsAsIndexed::INDEX_VERSION)
         end
@@ -167,7 +167,8 @@ module ActsAsIndexed #:nodoc:
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
     # Lock a file for a block so only one process can modify it at a time.
     def lock_file(file_path, &block) # :nodoc:
-      if file_path.exist?
+      # Windows does not support file locking.
+      if !windows? && file_path.exist?
         file_path.open('r') do |f|
           begin
             f.flock File::LOCK_EX
@@ -179,6 +180,10 @@ module ActsAsIndexed #:nodoc:
       else
         yield
       end
+    end
+
+    def windows?
+      @@is_windows ||= RUBY_PLATFORM[/mswin32|mingw|cygwin/]
     end
 
   end
