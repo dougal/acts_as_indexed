@@ -1,5 +1,5 @@
 ===0.7.X [Unreleased]
-  - Fixed bug with ranking of records [Christopher Souvey]
+  - Fixed bug with ranking of records [Christopher Souvey - bug report]
   - Fixed bug with slicing of id-only results.
 
 ===0.7.1 [22nd February 2011]
