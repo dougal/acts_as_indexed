@@ -1,3 +1,7 @@
+===0.7.X [Unreleased]
+  - Fixed bug with ranking of records [Christopher Souvey]
+  - Fixed bug with slicing of id-only results.
+
 ===0.7.1 [22nd February 2011]
  - Removed file locking on Microsoft Windows as it is unsupported.
 
