@@ -169,6 +169,20 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal [3,4], Post.find_with_index('^c', { :order => 'id', :limit => 2, :offset => 2 }).map{ |r| r.id }
   end
 
+  def test_should_error_when_ids_only_combined_with_finder_options
+    expected_message = "ids_only can not be combined with find option keys other than :offset or :limit"
+    
+    error = assert_raise(ArgumentError) do
+      Post.find_with_index('foo', { :order => 'id' }, :ids_only => true)
+    end
+    assert_equal(expected_message, error.message)
+
+    error = assert_raise(ArgumentError) do
+      Post.find_with_index('bar', { 'order' => 'id' }, :ids_only => true)
+    end
+    assert_equal(expected_message, error.message)
+  end
+
   # When a atom already in a record is duplicated, it removes
   # all records with that same atom from the index.
   def test_update_record_bug

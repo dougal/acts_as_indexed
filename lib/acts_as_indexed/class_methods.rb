@@ -109,6 +109,13 @@ module ActsAsIndexed
         (@query_cache ||= {})[query] = new_index.search(query)
       end
 
+      if options[:ids_only]
+        find_option_keys = find_options.keys.map{ |k| k.to_sym }
+        find_option_keys -= [:limit, :offset]
+        if find_option_keys.any?
+          raise ArgumentError, 'ids_only can not be combined with find option keys other than :offset or :limit'
+        end
+      end  
 
       if find_options.include?(:order)
         part_query = @query_cache[query].map{ |r| r.first }
