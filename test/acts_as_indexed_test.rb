@@ -243,10 +243,19 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   private
 
   def run_queries(queries)
-    queries.each do |query, results|
-      assert_equal(results, find_with_index_ids(query))
-      assert_equal(results, find_with_index_ids_only(query))
-      assert_equal_array_contents(results, find_with_query(query))
+    queries.each do |query, expected_results|
+
+      actual_results = find_with_index_ids(query)
+      message = "#{expected_results.inspect} expected for find_with_index(#{query.inspect}) but was\n#{actual_results.inspect}"
+      assert expected_results == actual_results, message
+
+      actual_results = find_with_index_ids_only(query)
+      message = "#{expected_results.inspect} expected for find_with_index(#{query.inspect}, {}, :ids_only => true) but was\n#{actual_results.inspect}"
+      assert expected_results == actual_results, message
+
+      actual_results = find_with_query(query)
+      message = "#{expected_results.inspect} expected for with_query(#{query.inspect}) but was\n#{actual_results.inspect}"
+      assert expected_results.sort == actual_results.sort, message
     end
   end
 
@@ -260,10 +269,6 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
   def find_with_query(query)
     Post.with_query(query).map { |r| r.id }
-  end
-
-  def assert_equal_array_contents(a, b)
-    a.sort == b.sort
   end
 
 end
