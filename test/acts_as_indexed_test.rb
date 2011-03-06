@@ -155,6 +155,18 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     # order
     assert_equal [6,5,4,3,2,1], Post.find_with_index('^c', { :order => 'id desc' }).map{ |r| r.id }
     assert_equal [1,2,3,4,5,6], Post.find_with_index('^c', { :order => 'id' }).map{ |r| r.id }
+
+    # order and limit
+    assert_equal [6,5,4], Post.find_with_index('^c', { :order => 'id desc' , :limit => 3}).map{ |r| r.id }
+    assert_equal [1,2,3,4], Post.find_with_index('^c', { :order => 'id', :limit => 4 }).map{ |r| r.id }
+
+    # order and offset
+    assert_equal [5,4,3,2,1], Post.find_with_index('^c', { :order => 'id desc' , :offset => 1}).map{ |r| r.id }
+    assert_equal [3,4,5,6], Post.find_with_index('^c', { :order => 'id', :offset => 2 }).map{ |r| r.id }
+
+    # order, limit and offset
+    assert_equal [5,4,3], Post.find_with_index('^c', { :order => 'id desc' , :limit => 3, :offset => 1}).map{ |r| r.id }
+    assert_equal [3,4], Post.find_with_index('^c', { :order => 'id', :limit => 2, :offset => 2 }).map{ |r| r.id }
   end
 
   # When a atom already in a record is duplicated, it removes

@@ -1,5 +1,6 @@
 ===0.7.X [Unreleased]
   - Fixed bug with ranking of records [Christopher Souvey - bug report]
+  - Fixed a bug with the slicing of records before AR order is applied. [Christopher Souvey - bug report]
   - Fixed bug with slicing of id-only results.
 
 ===0.7.1 [22nd February 2011]

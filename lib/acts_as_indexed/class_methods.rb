@@ -109,17 +109,23 @@ module ActsAsIndexed
         (@query_cache ||= {})[query] = new_index.search(query)
       end
 
-      # slice up the results by offset and limit
-      offset = find_options[:offset] || 0
-      limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query].size
-      part_query = @query_cache[query].sort_by{ |r| r.last }.slice(offset,limit).map{ |r| r.first }
+
+      if find_options.include?(:order)
+        part_query = @query_cache[query].map{ |r| r.first }
+
+      else
+        # slice up the results by offset and limit
+        offset = find_options[:offset] || 0
+        limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query].size
+        part_query = @query_cache[query].sort_by{ |r| r.last }.slice(offset,limit).map{ |r| r.first }
+
+        # Set these to nil as we are dealing with the pagination by setting
+        # exactly what records we want.
+        find_options[:offset] = nil
+        find_options[:limit] = nil
+      end
 
       return part_query if options[:ids_only]
-
-      # Set these to nil as we are dealing with the pagination by setting
-      # exactly what records we want.
-      find_options[:offset] = nil
-      find_options[:limit] = nil
 
       with_scope :find => find_options do
         # Doing the find like this eliminates the possibility of errors occuring
