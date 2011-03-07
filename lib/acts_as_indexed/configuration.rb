@@ -34,7 +34,7 @@ module ActsAsIndexed
     # Disable indexing, useful for large test suites.
     # Set to false to disable.
     # Default is false.
-    attr_accessor :disable_indexing
+    attr_accessor :disable_auto_indexing
 
     def initialize
       @index_file       = nil
@@ -42,7 +42,7 @@ module ActsAsIndexed
       @min_word_size    = 3
       @if_proc          = if_proc
       @case_sensitive   = false
-      @disable_indexing = false
+      @disable_auto_indexing = false
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put

@@ -58,7 +58,7 @@ module ActsAsIndexed
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
 
     def index_add(record)
-      return if self.aai_config.disable_indexing
+      return if self.aai_config.disable_auto_indexing
 
       build_index unless aai_config.index_file.directory?
       index = new_index
@@ -69,7 +69,7 @@ module ActsAsIndexed
     # Removes the passed +record+ from the index. Clears the query cache.
 
     def index_remove(record)
-      return if self.aai_config.disable_indexing
+      return if self.aai_config.disable_auto_indexing
 
       index = new_index
       index.remove_record(record)
@@ -81,7 +81,7 @@ module ActsAsIndexed
     # 2. Adds the new version to the index.
 
     def index_update(record)
-      return if self.aai_config.disable_indexing
+      return if self.aai_config.disable_auto_indexing
 
       build_index unless aai_config.index_file.directory?
       index = new_index
