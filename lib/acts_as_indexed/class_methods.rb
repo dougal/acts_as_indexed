@@ -58,6 +58,8 @@ module ActsAsIndexed
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
 
     def index_add(record)
+      return if self.aai_config.disable_indexing
+
       build_index unless aai_config.index_file.directory?
       index = new_index
       index.add_record(record)
@@ -67,6 +69,8 @@ module ActsAsIndexed
     # Removes the passed +record+ from the index. Clears the query cache.
 
     def index_remove(record)
+      return if self.aai_config.disable_indexing
+
       index = new_index
       index.remove_record(record)
       @query_cache = {}
@@ -77,6 +81,8 @@ module ActsAsIndexed
     # 2. Adds the new version to the index.
 
     def index_update(record)
+      return if self.aai_config.disable_indexing
+
       build_index unless aai_config.index_file.directory?
       index = new_index
       index.update_record(record,find(record.id))
@@ -115,7 +121,7 @@ module ActsAsIndexed
         if find_option_keys.any?
           raise ArgumentError, 'ids_only can not be combined with find option keys other than :offset or :limit'
         end
-      end  
+      end
 
       if find_options.include?(:order)
         part_query = @query_cache[query].map{ |r| r.first }
