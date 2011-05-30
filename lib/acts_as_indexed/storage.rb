@@ -169,7 +169,7 @@ module ActsAsIndexed #:nodoc:
     def lock_file(file_path, &block) # :nodoc:
       # Windows does not support file locking.
       if !windows? && file_path.exist?
-        file_path.open('r') do |f|
+        file_path.open('r+') do |f|
           begin
             f.flock File::LOCK_EX
             yield
