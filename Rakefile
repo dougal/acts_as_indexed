@@ -43,9 +43,38 @@ begin
     gemspec.description = gemspec.summary
     gemspec.email = "dougal.s@gmail.com"
     gemspec.homepage = "http://github.com/dougal/acts_as_indexed"
-    gemspec.authors = ["Douglas F Shearer"]  
+    gemspec.authors = ["Douglas F Shearer"]
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install jeweler"
+end
+
+namespace :rvm do
+  AR_VERSIONS = %w{2.1.2 2.2.3 2.3.11 3.0.7 3.1.0.rc1}
+
+  desc "Setup RVM gemsets to test different versions of ActiveRecord"
+  task :setup do
+    AR_VERSIONS.each do |version|
+      sh "rvm gemset create aai_ar_#{ version }"
+      sh "rvm gemset use aai_ar_#{ version }"
+      sh "gem install bundler --no-rdoc --no-ri"
+      sh "bundle install"
+      version += ' --pre' if version =~ /rc/
+      sh "gem install activerecord --version #{version}"
+    end
+  end
+
+  desc "Run tests for each version of ActiveRecord to be tested"
+  task :rails_all do
+    AR_VERSIONS.each do |version|
+      sh "rvm gemset use aai_ar_#{ version }"
+      sh "rake test"
+    end
+  end
+
+  task :cleanup do
+    'TODO'
+  end
+
 end
