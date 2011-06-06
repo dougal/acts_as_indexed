@@ -54,27 +54,16 @@ namespace :rvm do
   AR_VERSIONS = %w{2.1.2 2.2.3 2.3.11 3.0.7 3.1.0.rc1}
 
   desc "Setup RVM gemsets to test different versions of ActiveRecord"
-  task :setup do
+  task :test do
     AR_VERSIONS.each do |version|
       sh "rvm gemset create aai_ar_#{ version }"
       sh "rvm gemset use aai_ar_#{ version }"
-      sh "gem install bundler --no-rdoc --no-ri"
+      sh "gem install bundler --no-rdoc --no-ri" unless `gem list`[/bundler/]
       sh "bundle install"
       version += ' --pre' if version =~ /rc/
-      sh "gem install activerecord --version #{version}"
-    end
-  end
-
-  desc "Run tests for each version of ActiveRecord to be tested"
-  task :rails_all do
-    AR_VERSIONS.each do |version|
-      sh "rvm gemset use aai_ar_#{ version }"
+      sh "gem install activerecord --version #{version}" unless `gem list`[/activerecord/]
       sh "rake test"
     end
-  end
-
-  task :cleanup do
-    'TODO'
   end
 
 end
