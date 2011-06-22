@@ -9,7 +9,7 @@ module ActsAsIndexed
 
     # Sets the location for the index. Specify as an array. Heroku, for
     # example would use RAILS_ROOT/tmp/index, which would be set as
-    # [Rails.root,'tmp','index]
+    # [Rails.root,'tmp','index']
     attr_accessor :index_file
 
     # Tuning value for the index partitioning. Larger values result in quicker
