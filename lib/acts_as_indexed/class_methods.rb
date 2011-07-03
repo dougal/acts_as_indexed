@@ -35,9 +35,9 @@ module ActsAsIndexed
 
       # scope for Rails 3.x, named_scope for Rails 2.x.
       if self.respond_to?(:where)
-        scope :with_query, lambda { |query| where("#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true})) }
+        scope :with_query, lambda { |query| where("#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true})) }
       else
-        named_scope :with_query, lambda { |query| { :conditions => ["#{table_name}.id IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
+        named_scope :with_query, lambda { |query| { :conditions => ["#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
       end
 
       cattr_accessor :aai_config, :aai_fields
@@ -143,7 +143,7 @@ module ActsAsIndexed
       with_scope :find => find_options do
         # Doing the find like this eliminates the possibility of errors occuring
         # on either missing records (out-of-sync) or an empty results array.
-        records = find(:all, :conditions => [ "#{table_name}.id IN (?)", part_query])
+        records = find(:all, :conditions => [ "#{table_name}.#{primary_key} IN (?)", part_query])
 
         if find_options.include?(:order)
          records # Just return the records without ranking them.
