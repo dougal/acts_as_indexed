@@ -1,3 +1,7 @@
+===0.7.3 [3rd July 2011]
+  - Support for non-default primary keys. [ttoomey - Theron Toomey]
+  - Fixed issue with file-locking on JRuby. [banderso - Ben Anderson]
+
 ===0.7.2 [31st March 2011]
   - Fixed bug with ranking of records [Christopher Souvey - bug report]
   - Fixed a bug with the slicing of records before AR order is applied. [Christopher Souvey - bug report]
