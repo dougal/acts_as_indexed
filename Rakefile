@@ -51,18 +51,32 @@ rescue LoadError
 end
 
 namespace :rvm do
-  AR_VERSIONS = %w{2.1.2 2.2.3 2.3.11 3.0.7 3.1.0.rc1}
+  AR_VERSIONS = %w{2.1.2 2.2.3 2.3.12 3.0.9}
+  INSTALLED_GEMSETS = `rvm gemset list`.scan(/aai_ar[^\n]+/)
 
   desc "Setup RVM gemsets to test different versions of ActiveRecord"
   task :test do
     AR_VERSIONS.each do |version|
-      sh "rvm gemset create aai_ar_#{ version }"
-      sh "rvm gemset use aai_ar_#{ version }"
-      sh "gem install bundler --no-rdoc --no-ri" unless `gem list`[/bundler/]
-      sh "bundle install"
-      version += ' --pre' if version =~ /rc/
-      sh "gem install activerecord --version #{version}" unless `gem list`[/activerecord/]
+      gemset_name = "aai_ar_#{ version }"
+
+      unless INSTALLED_GEMSETS.include?(gemset_name)
+        sh "rvm gemset create #{ gemset_name }"
+        sh "rvm gemset use aai_ar_#{ version }"
+        sh "gem install bundler --no-rdoc --no-ri"
+        sh "bundle install"
+        sh "gem install activerecord --version #{version} --no-rdoc --no-ri"
+      end
+
+      puts "Testing with Activerecord #{ version }"
+      puts "="*20
       sh "rake test"
+      puts "="*20
+    end
+  end
+
+  task :cleanup do
+    INSTALLED_GEMSETS.each do |gemset|
+      sh "rvm --force gemset delete #{ gemset }"
     end
   end
 
