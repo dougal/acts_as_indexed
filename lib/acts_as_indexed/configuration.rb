@@ -83,5 +83,14 @@ module ActsAsIndexed
       @if_proc ||= Proc.new{true}
     end
 
+<<<<<<< HEAD
+=======
+    private
+
+    def default_index_file
+      Rails.root.join('tmp', 'index')
+    end
+
+>>>>>>> Always use Rails.root/tmp/index, it makes more sense.
   end
 end
