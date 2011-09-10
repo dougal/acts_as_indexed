@@ -30,7 +30,7 @@ module ActsAsIndexed
     # Set to true to enable.
     # Default is false.
     attr_accessor :case_sensitive
-    
+
     # Disable indexing, useful for large test suites.
     # Set to false to disable.
     # Default is false.
@@ -78,11 +78,7 @@ module ActsAsIndexed
     private
 
     def default_index_file
-      if Rails.root.writable?
-        Rails.root.join('index')
-      else
-        Rails.root.join('tmp', 'index')
-      end
+      Rails.root.join('tmp', 'index')
     end
 
   end
