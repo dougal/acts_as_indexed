@@ -52,7 +52,7 @@ module ActsAsIndexed
       end
 
       # Add the Rails environment and this model's name to the index file path.
-      self.aai_config.index_file = self.aai_config.index_file.join(Rails.env, self.name)
+      self.aai_config.index_file = self.aai_config.index_file.join(Rails.env, self.name.underscore)
     end
 
     # Adds the passed +record+ to the index. Index is built if it does not already exist. Clears the query cache.
