@@ -8,6 +8,7 @@ module ActsAsIndexed
   class Configuration
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     # Sets the location for the index. Specify as an array. Heroku, for
     # example would use RAILS_ROOT/tmp/index, which would be set as
     # [Rails.root,'tmp','index']
@@ -18,6 +19,10 @@ module ActsAsIndexed
 >>>>>>> development
 =======
 >>>>>>> Fixed typo in config docs.
+=======
+    # Sets the location for the index. Specify as an array. The default, for
+    #              example, would be set as [Rails.root,'tmp','index].
+>>>>>>> Added docs for new index location.
     attr_accessor :index_file
 
     # Tuning value for the index partitioning. Larger values result in quicker
@@ -84,6 +89,7 @@ module ActsAsIndexed
     end
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     private
 
@@ -92,5 +98,7 @@ module ActsAsIndexed
     end
 
 >>>>>>> Always use Rails.root/tmp/index, it makes more sense.
+=======
+>>>>>>> Added docs for new index location.
   end
 end
