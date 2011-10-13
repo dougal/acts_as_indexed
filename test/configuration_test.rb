@@ -4,7 +4,7 @@ include ActsAsIndexed
 class ConfigurationTest < ActiveSupport::TestCase
 
   def test_default_index_file_should_be_set
-    assert_equal Rails.root.join('index'), config.index_file
+    assert_equal Rails.root.join('tmp', 'index'), config.index_file
   end
 
   def test_default_index_file_depth_should_be_set
