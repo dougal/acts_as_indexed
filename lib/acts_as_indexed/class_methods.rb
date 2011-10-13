@@ -19,9 +19,8 @@ module ActsAsIndexed
     #                 shorter than this value are ignored in searches
     #                 unless preceded by the '+' operator. Default is 3.
     # index_file:: Sets the location for the index. By default this is
-    #              RAILS_ROOT/index. Specify as an array. Heroku, for
-    #              example would use RAILS_ROOT/tmp/index, which would be
-    #              set as [Rails.root,'tmp','index]
+    #              RAILS_ROOT/tmp/index. Specify as an array. The default, for
+    #              example, would be set as [Rails.root,'tmp','index].
 
     def acts_as_indexed(options = {})
       class_eval do

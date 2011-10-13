@@ -7,9 +7,8 @@ module ActsAsIndexed
   # Used to set up and modify settings for acts_as_indexed.
   class Configuration
 
-    # Sets the location for the index. Specify as an array. Heroku, for
-    # example would use RAILS_ROOT/tmp/index, which would be set as
-    # [Rails.root,'tmp','index']
+    # Sets the location for the index. Specify as an array. The default, for
+    #              example, would be set as [Rails.root,'tmp','index].
     attr_accessor :index_file
 
     # Tuning value for the index partitioning. Larger values result in quicker
@@ -48,7 +47,7 @@ module ActsAsIndexed
     # Since we cannot expect Rails to be available on load, it is best to put
     # off setting the index_file attribute until as late as possible.
     def index_file
-      @index_file ||= default_index_file
+      @index_file ||= Rails.root.join('tmp', 'index')
     end
 
     def index_file=(file_path)
@@ -73,12 +72,6 @@ module ActsAsIndexed
 
     def if_proc
       @if_proc ||= Proc.new{true}
-    end
-
-    private
-
-    def default_index_file
-      Rails.root.join('tmp', 'index')
     end
 
   end
