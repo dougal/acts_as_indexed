@@ -1,3 +1,6 @@
+===0.7.4 [14th October 2011]
+ - Screwup fix release.
+
 ===0.7.4 [13th October 2011]
  - Default index location is now in tmp directory. [parndt - Philip Arndt]
  - Fixed a bug where namespaced models would have directory names containing colons. [ugisozols - Uģis Ozols]
