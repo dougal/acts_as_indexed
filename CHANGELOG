@@ -1,3 +1,7 @@
+===0.7.4 [13th October 2011]
+ - Default index location is now in tmp directory. [parndt - Philip Arndt]
+ - Fixed a bug where namespaced models would have directory names containing colons. [ugisozols - Uģis Ozols]
+
 ===0.7.3 [3rd July 2011]
   - Support for non-default primary keys. [ttoomey - Theron Toomey]
   - Fixed issue with file-locking on JRuby. [banderso - Ben Anderson]

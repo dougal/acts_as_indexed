@@ -185,6 +185,11 @@ All of the above are most welcome. mailto:dougal.s@gmail.com
 * Alex Coles
 * Myles Eftos
 * Edward Anderson
+* Florent Guilleux
+* Ben Anderson
+* Theron Toomey
+* Uģis Ozols
+
 
 == Future Releases
 
