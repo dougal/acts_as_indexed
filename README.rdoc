@@ -158,8 +158,8 @@ A full rundown of the available configuration options can be found in
 
 === Heroku Support
 
-Acts As Indexed now supports Heroku out-of-the-box. When a non-writeable root
-directory is detected, the index will be created in the tmp directory.
+Acts As Indexed supports Heroku out-of-the-box. The index is created in the
+tmp directory, which is the only writeable part of the Heroku dyno filesystem.
 
 == RDoc Documentation
 
