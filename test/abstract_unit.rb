@@ -46,7 +46,7 @@ class ActiveSupport::TestCase #:nodoc:
   end
 
   def index_loc
-    Rails.root.join('index')
+    Rails.root.join('tmp', 'index')
   end
 
 end
