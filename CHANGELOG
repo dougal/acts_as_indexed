@@ -1,4 +1,7 @@
-===0.7.4 [14th October 2011]
+===0.7.6 [24th October 2011]
+ - Removed support for atomic writes under Windows. Fixes issue #15.
+
+===0.7.5 [14th October 2011]
  - Screwup fix release.
 
 ===0.7.4 [13th October 2011]
