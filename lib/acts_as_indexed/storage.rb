@@ -79,9 +79,9 @@ module ActsAsIndexed #:nodoc:
 
       atoms_sorted.each do |e_p, atoms|
         path = @path.join(e_p.to_s + INDEX_FILE_EXTENSION)
-        
+
         lock_file(path) do
-        
+
           if path.exist?
             from_file = path.open do |f|
               Marshal.load(f)
@@ -96,7 +96,7 @@ module ActsAsIndexed #:nodoc:
             Marshal.dump(atoms,f)
           end
         end # end lock.
-        
+
       end
     end
 
@@ -121,7 +121,7 @@ module ActsAsIndexed #:nodoc:
 
       else
         @path.mkpath
-        
+
         # Do we need to lock for this? I don't think so as it is only ever
         # creating, not modifying.
         write_file(version_path) do |f|
@@ -157,11 +157,15 @@ module ActsAsIndexed #:nodoc:
       new_file = file_path.to_s
       tmp_file = new_file + TEMP_FILE_EXTENSION
 
+      # Windows doesn't seem to play nice with writing then moving the file.
+      # https://github.com/dougal/acts_as_indexed/issues/15
+      writeable_file = windows? ? new_file : tmp_file
+
       File.open(tmp_file, 'w+') do |f|
         yield(f)
       end
 
-      FileUtils.mv(tmp_file, new_file)
+      FileUtils.mv(tmp_file, new_file) unless windows?
     end
 
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
@@ -182,6 +186,8 @@ module ActsAsIndexed #:nodoc:
       end
     end
 
+    # Checking for windows all the time seems costly.
+    # Write a separate windows storage class, and use it at runtime?
     def windows?
       @@is_windows ||= RUBY_PLATFORM[/mswin32|mingw|cygwin/]
     end
