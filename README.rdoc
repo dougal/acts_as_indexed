@@ -136,6 +136,12 @@ Pagination is supported via the +paginate_search+ method whose first argument is
 
   @images = Image.paginate_search('girl', :page => 1, :per_page => 5)
 
+If you do not have will_paginate then you can configure this plugin to use the generic paginator which has the same usage.
+
+  ActsAsIndexed.configure do |config|
+    config.paginator = :generic
+  end
+
 ==== Without Relevance (Scope)
 
 Since +with_query+ is a named scope, WillPaginate can be used in the normal
