@@ -115,7 +115,8 @@ module ActsAsIndexed #:nodoc:
       version_path = @path.join('version')
 
       if @path.exist?
-        unless version_path.exist? && version_path.read == ActsAsIndexed::INDEX_VERSION
+        version_path_to_check = Pathname.new(version_path.to_s + (TEMP_FILE_EXTENSION if windows?).to_s)
+        unless version_path_to_check.exist? && version_path_to_check.read == ActsAsIndexed::INDEX_VERSION
           raise OldIndexVersion, "Index was created prior to version #{ActsAsIndexed::INDEX_VERSION}. Please delete it, it will be rebuilt automatically."
         end
 
