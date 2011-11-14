@@ -1,3 +1,6 @@
+===0.7.7 [14 November 2011]
+ - Fixed bug with out-of-date indexes on Windows. Fixes issue #20. [parndt - Philip Arndt]
+
 ===0.7.6 [24th October 2011]
  - Removed support for atomic writes under Windows. Fixes issue #15.
 
