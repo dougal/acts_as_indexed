@@ -115,7 +115,7 @@ module ActsAsIndexed #:nodoc:
       version_path = @path.join('version')
 
       if @path.exist?
-        version_path_to_check = Pathname.new(version_path.to_s + (TEMP_FILE_EXTENSION if windows?).to_s)
+        version_path_to_check = Pathname.new(version_path.to_s)
         unless version_path_to_check.exist? && version_path_to_check.read == ActsAsIndexed::INDEX_VERSION
           raise OldIndexVersion, "Index was created prior to version #{ActsAsIndexed::INDEX_VERSION}. Please delete it, it will be rebuilt automatically."
         end
@@ -162,7 +162,7 @@ module ActsAsIndexed #:nodoc:
       # https://github.com/dougal/acts_as_indexed/issues/15
       writeable_file = windows? ? new_file : tmp_file
 
-      File.open(tmp_file, 'w+') do |f|
+      File.open(writeable_file, 'w+') do |f|
         yield(f)
       end
 
