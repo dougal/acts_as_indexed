@@ -170,6 +170,14 @@ acts_as_indexed plugin folder. Then point your web browser at
 Alternatively, you can view the rdoc documentation
 online[http://rdoc.info/projects/dougal/acts_as_indexed/].
 
+== Stemming
+
+This branch has super-basic support for stemming.  It's probably
+better than nothing, but it has the major flaw that it doesn't respect
+quoting.  So, if you search for "fruits fly" (with quotes), you could
+get matches for "fruit flies".  Also, the partial-word match is
+probably ever-so-slightly broken.  What we really need is a separate
+exact-word index.  I'm contemplating it.
 
 == Problems, Comments, Suggestions?
 
@@ -189,7 +197,7 @@ All of the above are most welcome. mailto:dougal.s@gmail.com
 * Ben Anderson
 * Theron Toomey
 * Uģis Ozols
-
+* David Turner
 
 == Future Releases
 
