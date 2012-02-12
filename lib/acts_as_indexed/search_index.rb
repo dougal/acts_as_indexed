@@ -3,6 +3,12 @@
 # http://douglasfshearer.com
 # Distributed under the MIT license as included with this plugin.
 
+require_relative 'stemmer'
+
+class String
+  include Stemmable
+end
+
 module ActsAsIndexed #:nodoc:
   class SearchIndex
 
@@ -254,8 +260,10 @@ module ActsAsIndexed #:nodoc:
     def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
       s = @case_sensitive ? s : s.downcase
       atoms = s.gsub(/\W/,' ').squeeze(' ').split
-      return atoms unless limit_size
-      atoms.reject{|w| w.size < min_size}
+      if limit_size
+        atoms.reject!{|w| w.size < min_size}
+      end
+      atoms.map &:stem
     end
 
     def condense_record(record)
