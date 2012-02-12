@@ -256,10 +256,11 @@ module ActsAsIndexed #:nodoc:
       end
     end
 
-
     def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
+      #U+3000 separates fields so that quoted terms cannot match across
+      #fields
       s = @case_sensitive ? s : s.downcase
-      atoms = s.gsub(/\W/,' ').squeeze(' ').split
+      atoms = s.gsub(/^\w\u3000/,' ').squeeze(' ').split
       if limit_size
         atoms.reject!{|w| w.size < min_size}
       end
@@ -270,10 +271,10 @@ module ActsAsIndexed #:nodoc:
       condensed = []
       @fields.each do |f|
         if (value = record.send(f)).present?
-          condensed << value.to_s
+          condensed << value.to_s.gsub(config.space_regexp, ' ')
         end
       end
-      cleanup_atoms(condensed.join(' '))
+      cleanup_atoms(condensed.join(" \u3000 "))
     end
 
   end
