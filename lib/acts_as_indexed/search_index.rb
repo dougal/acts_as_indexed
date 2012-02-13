@@ -22,6 +22,7 @@ module ActsAsIndexed #:nodoc:
       @records_size = @storage.record_count
       @case_sensitive = config.case_sensitive
       @if_proc = config.if_proc
+      @space_regexp = config.space_regexp
     end
 
     # Adds +record+ to the index.
@@ -65,7 +66,7 @@ module ActsAsIndexed #:nodoc:
     def search(query)
       return [] if query.nil?
 
-      @atoms = @storage.fetch(cleanup_atoms(query), query[/\^/])
+      @atoms = @storage.fetch(cleanup_query_tokens(query), query[/\^/])
       queries = parse_query(query.dup)
       positive = run_queries(queries[:positive])
       positive_quoted = run_quoted_queries(queries[:positive_quoted])
@@ -115,10 +116,12 @@ module ActsAsIndexed #:nodoc:
       r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
     end
 
-    def add_occurences(condensed_record, record_id, atoms={})
-      condensed_record.each_with_index do |atom_name, i|
-        atoms[atom_name] = SearchAtom.new unless atoms.include?(atom_name)
-        atoms[atom_name].add_position(record_id, i)
+    def add_occurences(tokens, record_id, atoms={})
+      tokens.each_with_index do |token, i|
+        next if token == '\u3000'
+        stemmed = token.stem
+        atoms[stemmed] = SearchAtom.new unless atoms.include?(stemmed)
+        atoms[stemmed].add_position(record_id, token, i)
       end
       atoms
     end
@@ -127,42 +130,42 @@ module ActsAsIndexed #:nodoc:
 
       # Find ^"foo bar".
       start_quoted = []
-      while st_quoted = s.slice!(/\^\"[^\"]*\"/)
-        start_quoted << cleanup_atoms(st_quoted)
+      while st_quoted = s.slice!(/\^\"[^\"]+\"/)
+        start_quoted << cleanup_query_tokens(st_quoted, :stem=>false)
       end
 
       # Find -"foo bar".
       negative_quoted = []
-      while neg_quoted = s.slice!(/-\"[^\"]*\"/)
-        negative_quoted << cleanup_atoms(neg_quoted)
+      while neg_quoted = s.slice!(/-\"[^\"]+\"/)
+        negative_quoted << cleanup_query_tokens(neg_quoted, :stem=>false)
       end
 
       # Find "foo bar".
       positive_quoted = []
-      while pos_quoted = s.slice!(/\"[^\"]*\"/)
-        positive_quoted << cleanup_atoms(pos_quoted)
+      while pos_quoted = s.slice!(/\"[^\"]+\"/)
+        positive_quoted << cleanup_query_tokens(pos_quoted, :stem=>false)
       end
 
       # Find ^foo.
       starts_with = []
-      while st_with = s.slice!(/\^[\S]*/)
-        starts_with << cleanup_atoms(st_with).first
+      while st_with = s.slice!(/\^[\S]+/)
+        starts_with << cleanup_query_tokens(st_with).first
       end
 
       # Find -foo.
       negative = []
-      while neg = s.slice!(/-[\S]*/)
-        negative << cleanup_atoms(neg).first
+      while neg = s.slice!(/-[\S]+/)
+        negative << cleanup_query_tokens(neg).first
       end
 
       # Find +foo
       positive = []
-      while pos = s.slice!(/\+[\S]*/)
-        positive << cleanup_atoms(pos).first
+      while pos = s.slice!(/\+[\S]+/)
+        positive << cleanup_query_tokens(pos).first
       end
 
       # Find all other terms.
-      positive += cleanup_atoms(s,true)
+      positive += cleanup_query_tokens(s,:limit_size=>true)
 
       { :start_quoted => start_quoted,
         :negative_quoted => negative_quoted,
@@ -198,22 +201,22 @@ module ActsAsIndexed #:nodoc:
       results
     end
 
-    def run_quoted_queries(quoted_atoms, starts_with=false)
+    def run_quoted_queries(quoted_tokens, starts_with=false)
       results = {}
-      quoted_atoms.each do |quoted_atom|
+      quoted_tokens.each do |quoted_token|
         interim_results = {}
 
-        break if quoted_atom.empty?
+        break if quoted_token.empty?
 
         # If these atoms are to be run as 'starts with', make the final atom a
         # Regexp with a line-start anchor.
-        quoted_atom[-1] = /^#{quoted_atom.last}/ if starts_with
+        quoted_token[-1] = /^#{quoted_token.last}/ if starts_with
 
         # Little bit of memoization.
         atoms_keys = @atoms.keys
 
         # Get the matches for the first atom.
-        matches = get_atom_results(atoms_keys, quoted_atom.first)
+        matches = get_atom_results(atoms_keys, quoted_token.first, true)
         break if matches.nil?
 
         # Check the index contains all the required atoms.
@@ -221,8 +224,8 @@ module ActsAsIndexed #:nodoc:
         #   return atom containing records + positions where current atom is preceded by following atom.
         # end
         # Return records from final atom.
-        quoted_atom[1..-1].each do |atom_name|
-          interim_matches = get_atom_results(atoms_keys, atom_name)
+        quoted_token[1..-1].each do |token|
+          interim_matches = get_atom_results(atoms_keys, token, true)
           if interim_matches.nil?
             matches = nil
             break
@@ -243,38 +246,49 @@ module ActsAsIndexed #:nodoc:
       results
     end
 
-    def get_atom_results(atoms_keys, atom)
-      if atom.is_a? Regexp
-        matching_keys = atoms_keys.grep(atom)
+    def get_atom_results(atoms_keys, token, exact=false)
+      if token.is_a? Regexp
+        matching_keys = atoms_keys.grep(token)
         results = SearchAtom.new
         matching_keys.each do |key|
           results += @atoms[key]
         end
         results
       else
-        @atoms[atom]
+        results = @atoms[token.stem]
+        if exact and results
+          results = results.exact(token)
+        end
+        results
       end
     end
 
-    def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
+    def cleanup_query_tokens(s, options={})
+      s = s.gsub(@space_regexp, ' ')
+      tokens = cleanup_tokens(s, options[:limit_size] || false,
+                              options[:min_size] || @min_word_size || 3)
+      tokens
+    end
+
+    def cleanup_tokens(s, limit_size=false, min_size = @min_word_size || 3)
       #U+3000 separates fields so that quoted terms cannot match across
       #fields
       s = @case_sensitive ? s : s.downcase
-      atoms = s.gsub(/^\w\u3000/,' ').squeeze(' ').split
+      tokens = s.gsub(/[^\w\u3000]/,' ').squeeze(' ').split
       if limit_size
-        atoms.reject!{|w| w.size < min_size}
+        tokens.reject!{|w| w.size < min_size}
       end
-      atoms.map &:stem
+      tokens
     end
 
     def condense_record(record)
       condensed = []
       @fields.each do |f|
         if (value = record.send(f)).present?
-          condensed << value.to_s.gsub(config.space_regexp, ' ')
+          condensed << value.to_s.gsub(@space_regexp, ' ')
         end
       end
-      cleanup_atoms(condensed.join(" \u3000 "))
+      cleanup_tokens(condensed.join(" \u3000 "))
     end
 
   end

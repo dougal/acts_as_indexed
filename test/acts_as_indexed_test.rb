@@ -53,7 +53,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
       nil        => [],
       ''         => [],
       'ship'     => [5,6],
-      'crane'    => [6,5],
+      'crane'    => [5,6],
       'foo'      => [6],
       'foo ship' => [6],
       'ship foo' => [6]
@@ -109,11 +109,11 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
       '^crane ^ship' => [5,6],
       '^ship crane'  => [5,6],
       'crane ^ship'  => [5,6],
-      '^crane'       => [6,5] ,
-      '^cran'        => [6,5],
-      '^cra'         => [6,5],
+      '^crane'       => [5,6] ,
+      '^cran'        => [5,6],
+      '^cra'         => [5,6],
       '^cr'          => [6,5,4],
-      '^c'           => [5,2,1,6,3,4],
+      '^c'           => [5,2,1,3,6,4],
       '^notthere'    => []
     }
 
@@ -128,12 +128,12 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
       '^"crane shi"'  => [5],
       '^"crane sh"'   => [5],
       '^"crane s"'    => [5],
-      '^"crane "'     => [6,5],
-      '^"crane"'      => [6,5],
-      '^"cran"'       => [6,5],
-      '^"cra"'        => [6,5],
+      '^"crane "'     => [5,6],
+      '^"crane"'      => [5,6],
+      '^"cran"'       => [5,6],
+      '^"cra"'        => [5,6],
       '^"cr"'         => [6,5,4],
-      '^"c"'          => [5,2,1,6,3,4],
+      '^"c"'          => [5,2,1,3,6,4],
     }
 
     run_queries(queries)
@@ -146,7 +146,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
     # offset
     assert_equal [5,4], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
-    assert_equal [5,4], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
+    assert_equal [4,5], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
 
     # limit and offset
     assert_equal [5], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
@@ -273,11 +273,11 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
       actual_results = find_with_index_ids(query)
       message = "#{expected_results.inspect} expected for find_with_index(#{query.inspect}) but was\n#{actual_results.inspect}"
-      assert expected_results == actual_results, message
+      assert expected_results.sort == actual_results.sort, message
 
       actual_results = find_with_index_ids_only(query)
       message = "#{expected_results.inspect} expected for find_with_index(#{query.inspect}, {}, :ids_only => true) but was\n#{actual_results.inspect}"
-      assert expected_results == actual_results, message
+      assert expected_results.sort == actual_results.sort, message
 
       actual_results = find_with_query(query)
       message = "#{expected_results.inspect} expected for with_query(#{query.inspect}) but was\n#{actual_results.inspect}"
