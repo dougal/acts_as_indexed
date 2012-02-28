@@ -1,6 +1,6 @@
 require 'rake'
 require 'rake/testtask'
-require 'rake/rdoctask'
+require 'rdoc/task'
 
 desc 'Default: run unit tests.'
 task :default => :test
@@ -48,36 +48,4 @@ begin
   Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install jeweler"
-end
-
-namespace :rvm do
-  AR_VERSIONS = %w{2.1.2 2.2.3 2.3.12 3.0.9}
-  INSTALLED_GEMSETS = `rvm gemset list`.scan(/aai_ar[^\n]+/)
-
-  desc "Setup RVM gemsets to test different versions of ActiveRecord"
-  task :test do
-    AR_VERSIONS.each do |version|
-      gemset_name = "aai_ar_#{ version }"
-
-      unless INSTALLED_GEMSETS.include?(gemset_name)
-        sh "rvm gemset create #{ gemset_name }"
-        sh "rvm gemset use aai_ar_#{ version }"
-        sh "gem install bundler --no-rdoc --no-ri"
-        sh "bundle install"
-        sh "gem install activerecord --version #{version} --no-rdoc --no-ri"
-      end
-
-      puts "Testing with Activerecord #{ version }"
-      puts "="*20
-      sh "rake test"
-      puts "="*20
-    end
-  end
-
-  task :cleanup do
-    INSTALLED_GEMSETS.each do |gemset|
-      sh "rvm --force gemset delete #{ gemset }"
-    end
-  end
-
 end
