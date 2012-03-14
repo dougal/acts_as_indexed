@@ -1,5 +1,5 @@
 ===0.7.8 [14 March 2011]
- - Fixed bug with file renaming on Windows. Fixes issue #21. [gabynamian - Gabriel Namiman]
+ - Fixed bug with file renaming on Windows. Fixes issue #21. [gabynamiman - Gabriel Namiman]
 
 ===0.7.7 [14 November 2011]
  - Fixed bug with out-of-date indexes on Windows. Fixes issue #20. [parndt - Philip Arndt]
