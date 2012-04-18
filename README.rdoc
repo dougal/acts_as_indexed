@@ -44,6 +44,9 @@ unpack it into the <tt>vendor/plugins</tt> directory of your rails app.
 When upgrading to a new version of acts_as_indexed it is recommended you
 delete the index directory and allow it to be rebuilt.
 
+=== Upgrade
+
+You have to clear out your index directory when upgrading.
 
 == Usage
 
