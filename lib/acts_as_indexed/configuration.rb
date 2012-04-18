@@ -20,6 +20,10 @@ module ActsAsIndexed
     # Default is 3.
     attr_reader :min_word_size
 
+    # The regular expression which defines how words are separated;
+    # words are also separated on word-nonword boundaries
+    attr_reader :space_regexp
+
     # Proc that allows you to turn on or off index for a record.
     # Useful if you don't want an object to be placed in the index, such as a
     # draft post.
@@ -42,6 +46,7 @@ module ActsAsIndexed
       @if_proc          = if_proc
       @case_sensitive   = false
       @disable_auto_indexing = false
+      @space_regexp = /[\s\u00a0\u1680\u180e\u2000-\u200a\u202f\u205f\u3000]+/
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put

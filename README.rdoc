@@ -170,6 +170,11 @@ acts_as_indexed plugin folder. Then point your web browser at
 Alternatively, you can view the rdoc documentation
 online[http://rdoc.info/projects/dougal/acts_as_indexed/].
 
+== Stemming
+
+This branch has basic support for stemming using the Porter stemmer.
+Quoted portions of queries will be searched exactly (without
+stemming).
 
 == Problems, Comments, Suggestions?
 
@@ -189,7 +194,7 @@ All of the above are most welcome. mailto:dougal.s@gmail.com
 * Ben Anderson
 * Theron Toomey
 * Uģis Ozols
-
+* David Turner
 
 == Future Releases
 
