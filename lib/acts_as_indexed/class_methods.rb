@@ -1,3 +1,4 @@
+# encoding: utf-8
 # ActsAsIndexed
 # Copyright (c) 2007 - 2011 Douglas F Shearer.
 # http://douglasfshearer.com
@@ -103,15 +104,19 @@ module ActsAsIndexed
     # ids_only:: Method returns an array of integer IDs when set to true.
     # no_query_cache:: Turns off the query cache when set to true. Useful for testing.
 
-    def search_index(query, find_options={}, options={})
+    def search_index(query, find_options={}, options={}, locale = nil)
+      # Setting to current locale if none specified.
+      locale = I18n.locale if locale.nil?
+      locale_separator = "¤"
+      query_with_locale = query + locale_separator + locale.to_s
 
       # Clear the query cache off  if the key is set.
       @query_cache = {}  if options[:no_query_cache]
 
       # Run the query if not already in cache.
-      if !@query_cache || !@query_cache[query]
-        build_index unless aai_config.index_file.directory?
-        (@query_cache ||= {})[query] = new_index.search(query)
+      if !@query_cache || !@query_cache[query_with_locale]
+        build_index unless (aai_config.index_file + "/" + I18n.locale.to_s).directory?
+        (@query_cache ||= {})[query_with_locale] = new_index.search(query)
       end
 
       if options[:ids_only]
@@ -123,13 +128,12 @@ module ActsAsIndexed
       end
 
       if find_options.include?(:order)
-        part_query = @query_cache[query].map{ |r| r.first }
-
+        part_query = @query_cache[query_with_locale].map{ |r| r.first }
       else
         # slice up the results by offset and limit
         offset = find_options[:offset] || 0
-        limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query].size
-        part_query = @query_cache[query].sort_by{ |r| r.last }.slice(offset,limit).map{ |r| r.first }
+        limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query_with_locale].size
+        part_query = @query_cache[query_with_locale].sort_by{ |r| r.last }.slice(offset,limit).map{ |r| r.first }
 
         # Set these to nil as we are dealing with the pagination by setting
         # exactly what records we want.
@@ -145,19 +149,16 @@ module ActsAsIndexed
         records = find(:all, :conditions => [ "#{table_name}.#{primary_key} IN (?)", part_query])
 
         if find_options.include?(:order)
-         records # Just return the records without ranking them.
-
-       else
-         # Results come back in random order from SQL, so order again.
-         ranked_records = {}
-         records.each do |r|
-           ranked_records[r] = @query_cache[query][r.id]
-         end
-
-         ranked_records.to_a.sort_by{ |a| a.last }.map{ |r| r.first}
-       end
+          records # Just return the records without ranking them.
+        else
+          # Results come back in random order from SQL, so order again.
+          ranked_records = {}
+          records.each do |r|
+            ranked_records[r] = @query_cache[query_with_locale][r.id]
+          end
+          ranked_records.to_a.sort_by{ |a| a.last }.map{ |r| r.first}
+        end
       end
-
     end
 
     private
