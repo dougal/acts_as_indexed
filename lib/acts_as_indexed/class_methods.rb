@@ -50,6 +50,15 @@ module ActsAsIndexed
         self.aai_config.send("#{k}=", v)
       end
 
+      # Set up the paginator.
+      if self.aai_config.paginator == :will_paginate
+        require 'will_paginate_search'
+      elsif self.aai_config.paginator == :generic
+        require 'generic_pagination_search'
+      else
+        raise ArgumentError, "The paginator '#{self.aai_config.paginator}' is not supported, could you implement it?"
+      end
+
       # Add the Rails environment and this model's name to the index file path.
       self.aai_config.index_file = self.aai_config.index_file.join(Rails.env, self.name.underscore)
     end

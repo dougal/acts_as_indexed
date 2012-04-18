@@ -2,7 +2,6 @@
 # Copyright (c) 2007 - 2011 Douglas F Shearer.
 # http://douglasfshearer.com
 # Distributed under the MIT license as included with this plugin.
-
 require 'active_record'
 
 require 'acts_as_indexed/class_methods'

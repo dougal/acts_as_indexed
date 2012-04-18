@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
     "lib/acts_as_indexed/singleton_methods.rb",
     "lib/acts_as_indexed/storage.rb",
     "lib/will_paginate_search.rb",
+    "lib/generic_pagination_search.rb",
     "rails/init.rb",
     "test/abstract_unit.rb",
     "test/acts_as_indexed_test.rb",

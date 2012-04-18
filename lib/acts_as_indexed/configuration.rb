@@ -35,6 +35,11 @@ module ActsAsIndexed
     # Default is false.
     attr_accessor :disable_auto_indexing
 
+    # Use a different paginator.
+    # :will_paginate or :generic
+    # Default is :will_paginate
+    attr_accessor :paginator
+
     def initialize
       @index_file       = nil
       @index_file_depth = 3
@@ -42,6 +47,7 @@ module ActsAsIndexed
       @if_proc          = if_proc
       @case_sensitive   = false
       @disable_auto_indexing = false
+      @paginator = :will_paginate
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put
@@ -56,7 +62,7 @@ module ActsAsIndexed
       if file_path.is_a?(Pathname)
         @index_file = file_path
       else
-        @index_file = Pathname.new(file_path.collect{|part| part.to_s}.join(File::SEPARATOR))
+        @index_file = Pathname.new(file_path.map(&:to_s).join(File::SEPARATOR))
       end
     end
 
