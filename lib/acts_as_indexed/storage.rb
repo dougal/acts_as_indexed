@@ -155,18 +155,18 @@ module ActsAsIndexed #:nodoc:
     end
 
     def write_file(file_path)
-      new_file = file_path.to_s
-      tmp_file = new_file + TEMP_FILE_EXTENSION
+      new_file_name = file_path.to_s
+      temp_file_name = "#{new_file_name}.#{Thread.current.object_id}.#{Process.pid}.#{rand(1000000)}#{TEMP_FILE_EXTENSION}"
 
       # Windows doesn't seem to play nice with writing then moving the file.
       # https://github.com/dougal/acts_as_indexed/issues/15
-      writeable_file = windows? ? new_file : tmp_file
+      writeable_file = windows? ? new_file_name : temp_file_name
 
       File.open(writeable_file, 'w+') do |f|
         yield(f)
       end
 
-      FileUtils.mv(tmp_file, new_file) unless windows?
+      FileUtils.mv(temp_file_name, new_file_name) unless windows?
     end
 
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
