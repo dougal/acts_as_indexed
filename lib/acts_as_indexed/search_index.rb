@@ -63,8 +63,8 @@ module ActsAsIndexed #:nodoc:
       queries = parse_query(query.dup)
       positive = run_queries(queries[:positive])
       positive_quoted = run_quoted_queries(queries[:positive_quoted])
-      negative = run_queries(queries[:negative])
-      negative_quoted = run_quoted_queries(queries[:negative_quoted])
+      negative = run_queries(queries[:negative], false, false)
+      negative_quoted = run_quoted_queries(queries[:negative_quoted], false, false)
       starts_with = run_queries(queries[:starts_with], true)
       start_quoted = run_quoted_queries(queries[:start_quoted], true)
 
@@ -92,6 +92,15 @@ module ActsAsIndexed #:nodoc:
     end
 
     private
+
+    def add_query_results(results1, results2)
+      # Return the other if one is empty.
+      return results1 if results2.empty?
+      return results2 if results1.empty?
+
+      # Merge the results by adding their respective scores.
+      results1.merge(results2) { |r_id,old_val,new_val| old_val + new_val}
+    end
 
     def merge_query_results(results1, results2)
       # Return the other if one is empty.
@@ -167,7 +176,7 @@ module ActsAsIndexed #:nodoc:
       }
     end
 
-    def run_queries(atoms, starts_with=false)
+    def run_queries(atoms, starts_with=false, merge_results=true)
       results = {}
       atoms.each do |atom|
         interim_results = {}
@@ -178,26 +187,24 @@ module ActsAsIndexed #:nodoc:
 
         # Get the resulting matches, and break if none exist.
         matches = get_atom_results(@atoms.keys, atom)
-        break if matches.nil?
+        next if matches.nil?
 
         # Grab the record IDs and weightings.
         interim_results = matches.weightings(@records_size)
 
-        # Merge them with the results obtained already, if any.
-        results = results.empty? ? interim_results : merge_query_results(results, interim_results)
-
-        break if results.empty?
+        # add or merge them with the results obtained already
+        results = merge_results ? merge_query_results(results, interim_results) : add_query_results(results, interim_results)
 
       end
       results
     end
 
-    def run_quoted_queries(quoted_atoms, starts_with=false)
+    def run_quoted_queries(quoted_atoms, starts_with=false, merge_results=true)
       results = {}
       quoted_atoms.each do |quoted_atom|
         interim_results = {}
 
-        break if quoted_atom.empty?
+        next if quoted_atom.empty?
 
         # If these atoms are to be run as 'starts with', make the final atom a
         # Regexp with a line-start anchor.
@@ -208,7 +215,7 @@ module ActsAsIndexed #:nodoc:
 
         # Get the matches for the first atom.
         matches = get_atom_results(atoms_keys, quoted_atom.first)
-        break if matches.nil?
+        next if matches.nil?
 
         # Check the index contains all the required atoms.
         # for each of the others
@@ -224,14 +231,12 @@ module ActsAsIndexed #:nodoc:
           matches = interim_matches.preceded_by(matches)
         end
 
-        break if matches.nil?
+        next if matches.nil?
         # Grab the record IDs and weightings.
         interim_results = matches.weightings(@records_size)
 
-        # Merge them with the results obtained already, if any.
-        results = results.empty? ? interim_results : merge_query_results(results, interim_results)
-
-        break if results.empty?
+        # add them with the results obtained already
+        results = merge_results ? merge_query_results(results, interim_results) : add_query_results(results, interim_results)
 
       end
       results

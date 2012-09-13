@@ -72,6 +72,15 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     run_queries(queries)
   end
 
+  def test_multiple_negative_queries
+    queries = {
+      'crane -foo -ship'  => [],
+      'crane -foo -album' => [5]
+    }
+
+    run_queries(queries)
+  end
+
   def test_quoted_queries
     queries = {
       '"crane ship"'     => [5],
@@ -87,6 +96,17 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     queries = {
       'crane -"crane ship"' => [6],
       '-"crane big"'        => [] # edgecase
+    }
+
+    run_queries(queries)
+  end
+
+  def test_multiple_negative_quoted_queries
+    queries = {
+      'crane -"crane ship" -album'           => [6],
+      'crane -"crane ship" -"west side and"' => [6],
+      'crane -"crane ship" -"ready reserve"' => [6],
+      'crane -"crane ship" -"big ship"'      => []
     }
 
     run_queries(queries)
@@ -134,6 +154,17 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
       '^"cra"'        => [6,5],
       '^"cr"'         => [6,5,4],
       '^"c"'          => [5,2,1,6,3,4],
+    }
+
+    run_queries(queries)
+  end
+  
+  def test_positive_queries
+    queries = {
+      'crane +ship'   => [5,6],
+      '+crane ship'   => [5,6],
+      '+ship +crane'  => [5,6],
+      '+crane +album' => []
     }
 
     run_queries(queries)
