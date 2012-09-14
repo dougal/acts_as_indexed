@@ -148,7 +148,7 @@ Thus the operators are:
 * AND :: '+cat +dog' will find records that contains both 'cat' AND 'dog'
 * NOT :: 'cat -dog' will find records matching 'cat' AND NOT 'dog'
 * INCLUDE :: 'cat +me' will find records matching 'me', even if 'me' is smaller than the +min_word_size+, and the relevance will be higher if those records also contains 'cat'
-* "" :: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can include words shorter than the +min_word_size+.
+* "" :: Quoted terms are matched as phrases. '"cat dog"' will find records matching the whole phrase. Quoted terms can be preceded by the NOT operator; 'cat -"big dog"' etc. Quoted terms can be preceded by the AND operator; 'cat +"big dog" will find records with 'big dog' and possibly 'cat'. Quoted terms can include words shorter than the +min_word_size+.
 * ^ :: Terms that begin with ^ will match records that contain a word starting with the term. '^cat' will find matches containing 'cat', 'catapult', 'caterpillar' etc.
 * ^"" :: A quoted term that begins with ^ matches any phrase that begin with this phrase. '^"cat d"' will find records matching the whole phrases "cat dog" and "cat dinner". This type of search is useful for autocomplete inputs.
 
