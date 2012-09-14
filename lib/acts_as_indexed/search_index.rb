@@ -5,13 +5,13 @@
 
 module ActsAsIndexed #:nodoc:
   class SearchIndex
-    attr_reader :atoms, :records_size
+    attr_reader :atoms, :records_size, :default_operator
     
     @@expressions_attributes = [
-      [/\^\"[^\"]*\"/, {:sign => :positive, :quoted => true,  :start => true} ], # Find ^"foo bar".
+      [/\^\"[^\"]*\"/, {:sign => :neutral,  :quoted => true,  :start => true} ], # Find ^"foo bar".
       [/-\"[^\"]*\"/,  {:sign => :negative, :quoted => true,  :start => false}], # Find -"foo bar".
-      [/\"[^\"]*\"/,   {:sign => :positive, :quoted => true,  :start => false}], # Find "foo bar".
-      [/\^[\S]*/,      {:sign => :positive, :quoted => false, :start => true} ], # Find ^foo.
+      [/\"[^\"]*\"/,   {:sign => :neutral,  :quoted => true,  :start => false}], # Find "foo bar".
+      [/\^[\S]*/,      {:sign => :neutral,  :quoted => false, :start => true} ], # Find ^foo.
       [/-[\S]*/,       {:sign => :negative, :quoted => false, :start => false}], # Find -foo.
       [/\+[\S]*/,      {:sign => :positive, :quoted => false, :start => false}]  # Find +foo
     ]
@@ -26,6 +26,7 @@ module ActsAsIndexed #:nodoc:
       @records_size = @storage.record_count
       @case_sensitive = config.case_sensitive
       @if_proc = config.if_proc
+      @default_operator = config.default_operator
     end
 
     # Adds +record+ to the index.
@@ -70,16 +71,22 @@ module ActsAsIndexed #:nodoc:
       return [] if query.nil?
 
       @atoms = @storage.fetch(cleanup_atoms(query), query[/\^/])
-      
+
+      # Parses the queries
       queries = parse_query(query.dup)
-      queries.each {|query| query.run}
-      Query.merge(queries)
+      
+      # updates the sign of the queries based on the default operator setting
+      queries.each {|query| query.sign = :positive if query.sign == :neutral} if @default_operator == :and
+      
+      # run the queries and merge their results
+      Query.merge(queries.each {|query| query.run})
     end
     
     # Query objects encapsulates all the details of query terms, so that
     # running the results is homogenous and merging the results is deterministic
     class Query
-      attr_reader :sign, :quoted, :start, :results
+      attr_reader :quoted, :start, :results
+      attr_accessor :sign
       
       # atom_names: array of words
       # options:
@@ -99,6 +106,7 @@ module ActsAsIndexed #:nodoc:
         @atoms = @search_index.atoms
         @atoms_keys = @atoms.keys
         @records_size = @search_index.records_size
+        @intersect_merge = @search_index.default_operator == :and || @sign == :positive
         
         @results = @quoted ? run_quoted_queries(@atom_names, @start) : run_queries(@atom_names, @start)
       end
@@ -107,15 +115,27 @@ module ActsAsIndexed #:nodoc:
         # how do we merge the queries?
         # First of all, the order of the words in the query string should not be relevent,
         # so only the kind of query is.
-        # Example:
+        # Examples with the default operator (for neutral words) to :and
         #   dog cat +bird -eagle -falcon
         #   means: all documents containing dog AND cat AND bird AND NOT eagle AND NOT falcon.
         #   A document containing dog cat bird eagle will thus match because it lacks falcon.
         #
-        #   The resulting algorithm is: intersect all the positive results, then removing the negative ones.
+        #   The resulting algorithm is: merging (legacy aai way, which is keeping only the intersect)
+        #   all the neutral and positive results, then removing the negative ones.
+        #
+        # Examples with the default operator (for neutral words) to :or
+        #   dog cat +bird -eagle -falcon
+        #   means: all documents containing at least bird with documents that may contain dog OR cat but without eagle OR falcon.
+        #   A document containing dog cat will not match because it lacks bird.
+        #   A document containing bird eagle will not match because it contains eagle.
+        #   A document containing bird will match, if the same document contains also cat or dog it has a better relevance.
+        #
+        #   The resulting algorithm is: merging (legacy aai way, which is keeping only the intersect)
+        #   all the positive results, then adding all the neutral result and then removing the negative ones.
         def merge(queries)
           groups = queries.group_by {|query| query.sign}
           results = (groups[:positive] || []).inject([]) {|memo, query| intersect_results(memo, query.results) }
+          (groups[:neutral] || []).each {|query| results = add_results(results, query.results) }
           (groups[:negative] || []).each {|query| results = remove_results(results, query.results) }
           results
         end
@@ -135,6 +155,15 @@ module ActsAsIndexed #:nodoc:
           r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
         end
 
+        def add_results(results1, results2)
+          # Return the other if one is empty.
+          return results1 if results2.empty?
+          return results2 if results1.empty?
+
+          # Merge the results by adding their respective scores.
+          results1.merge(results2) { |r_id,old_val,new_val| old_val + new_val}
+        end
+
         def remove_results(results, results_to_remove)
           keys_to_remove = results_to_remove.keys
           results.delete_if { |r_id, w| keys_to_remove.include?(r_id) }
@@ -144,7 +173,7 @@ module ActsAsIndexed #:nodoc:
       protected
 
       def merge_query_results(results1, results2)
-        self.class.intersect_results(results1, results2)
+        @intersect_merge ? self.class.intersect_results(results1, results2) : self.class.add_results(results1, results2)
       end
 
       def run_queries(atoms, starts_with=false)

@@ -35,6 +35,12 @@ module ActsAsIndexed
     # Default is false.
     attr_accessor :disable_auto_indexing
 
+    # Sets the default operator to use when for the query string.
+    # By default it is :and, which returns the records with all the atoms.
+    # You may also pass :or, which returns the records with any of the atoms,
+    # of course it will score better the records containing all the atoms.
+    attr_accessor :default_operator
+
     def initialize
       @index_file       = nil
       @index_file_depth = 3
@@ -42,6 +48,7 @@ module ActsAsIndexed
       @if_proc          = if_proc
       @case_sensitive   = false
       @disable_auto_indexing = false
+      @default_operator = :and
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put
