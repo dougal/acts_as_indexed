@@ -275,7 +275,7 @@ module ActsAsIndexed #:nodoc:
 
       # Find all other terms.
       words = cleanup_atoms(s,true)
-      queries << Query.new(words, self, :sign => :positive, :quoted => false, :start => false)
+      queries << Query.new(words, self, :sign => :neutral, :quoted => false, :start => false)
     end
 
     def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
