@@ -120,7 +120,7 @@ class QueriesWithOrTest < ActiveSupport::TestCase
 
   def test_positive_queries
     queries = {
-      'crane +was' => [1,2,4,5],
+      'crane +was' => [5,2,4,1],
       '+crane was' => [5,6],
       '+was +crane' => [5],
       '+crane +album' => []
