@@ -139,6 +139,17 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     run_queries(queries)
   end
 
+  def test_positive_queries
+    queries = {
+      'crane +was' => [5],
+      '+crane was' => [5],
+      '+was +crane' => [5],
+      '+crane +album' => []
+    }
+
+    run_queries(queries)
+  end
+
   def test_find_options
     # limit.
     assert_equal [6], Post.find_with_index('^cr', { :limit => 1 }, :ids_only => true)
