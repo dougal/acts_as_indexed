@@ -129,6 +129,14 @@ class QueriesWithOrTest < ActiveSupport::TestCase
     run_queries(queries)
   end
 
+  def test_complex_queries
+    queries = {
+      'games +was -album -Draft' => [5,1]
+    }
+
+    run_queries(queries)
+  end
+
   private
 
   def run_queries(queries)
