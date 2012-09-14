@@ -134,8 +134,13 @@ module ActsAsIndexed #:nodoc:
         #   all the positive results, then adding all the neutral result and then removing the negative ones.
         def merge(queries)
           groups = queries.group_by {|query| query.sign}
-          results = (groups[:positive] || []).inject([]) {|memo, query| intersect_results(memo, query.results) }
-          (groups[:neutral] || []).each {|query| results = add_results(results, query.results) }
+          
+          positives = (groups[:positive] || []).inject([]) {|memo, query| intersect_results(memo, query.results) }
+          neutrals  = (groups[:neutral]  || []).inject([]) {|memo, query| add_results(memo, query.results) }
+          
+          # combining positives and neutral is by keeping only the positives but adding the weight of atoms that are also present in neutrals.
+          results = augment_results(positives, neutrals)
+          
           (groups[:negative] || []).each {|query| results = remove_results(results, query.results) }
           results
         end
@@ -167,6 +172,18 @@ module ActsAsIndexed #:nodoc:
         def remove_results(results, results_to_remove)
           keys_to_remove = results_to_remove.keys
           results.delete_if { |r_id, w| keys_to_remove.include?(r_id) }
+        end
+        
+        def augment_results(results1, results2)
+          # Return the other if one is empty.
+          return results1 if results2.empty?
+          return results2 if results1.empty?
+          
+          results1.each do |r_id,w|
+            if weight_to_add = results2[r_id]
+              results1[r_id] += weight_to_add
+            end
+          end
         end
       end
       
