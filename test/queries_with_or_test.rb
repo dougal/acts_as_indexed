@@ -129,6 +129,17 @@ class QueriesWithOrTest < ActiveSupport::TestCase
     run_queries(queries)
   end
 
+  def test_positive_quoted_queries
+    queries = {
+      '+"crane ship"'     => [5],
+      '+"crane big"'      => [6],
+      'foo +"crane ship"' => [5],
+      '"crane badger"'   => []
+    }
+
+    run_queries(queries)
+  end
+
   def test_complex_queries
     queries = {
       'games +was -album -Draft' => [5,1]

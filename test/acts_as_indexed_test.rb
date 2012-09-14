@@ -150,6 +150,17 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     run_queries(queries)
   end
 
+  def test_positive_quoted_queries
+    queries = {
+      '+"crane ship"'     => [5],
+      '+"crane big"'      => [6],
+      'foo +"crane ship"' => [],
+      '+"crane badger"'   => []
+    }
+
+    run_queries(queries)
+  end
+
   def test_find_options
     # limit.
     assert_equal [6], Post.find_with_index('^cr', { :limit => 1 }, :ids_only => true)

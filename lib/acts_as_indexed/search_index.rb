@@ -10,6 +10,7 @@ module ActsAsIndexed #:nodoc:
     @@expressions_attributes = [
       [/\^\"[^\"]*\"/, {:sign => :neutral,  :quoted => true,  :start => true} ], # Find ^"foo bar".
       [/-\"[^\"]*\"/,  {:sign => :negative, :quoted => true,  :start => false}], # Find -"foo bar".
+      [/\+\"[^\"]*\"/, {:sign => :positive, :quoted => true,  :start => false}], # Find +"foo bar".
       [/\"[^\"]*\"/,   {:sign => :neutral,  :quoted => true,  :start => false}], # Find "foo bar".
       [/\^[\S]*/,      {:sign => :neutral,  :quoted => false, :start => true} ], # Find ^foo.
       [/-[\S]*/,       {:sign => :negative, :quoted => false, :start => false}], # Find -foo.
