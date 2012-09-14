@@ -156,7 +156,7 @@ module ActsAsIndexed #:nodoc:
 
     def write_file(file_path)
       new_file_name = file_path.to_s
-      temp_file_name = "#{new_file_name}.#{Thread.current.object_id}.#{Process.pid}.#{rand(1000000)}#{TEMP_FILE_EXTENSION}"
+      temp_file_name = new_file_name + TEMP_FILE_EXTENSION
 
       # Windows doesn't seem to play nice with writing then moving the file.
       # https://github.com/dougal/acts_as_indexed/issues/15
@@ -169,21 +169,27 @@ module ActsAsIndexed #:nodoc:
       FileUtils.mv(temp_file_name, new_file_name) unless windows?
     end
 
+    @@file_lock = Mutex.new
+
     # Borrowed from Rails' ActiveSupport FileStore. Also under MIT licence.
-    # Lock a file for a block so only one process can modify it at a time.
+    # Lock a file for a block so only one process or thread can modify it at a time.
     def lock_file(file_path, &block) # :nodoc:
-      # Windows does not support file locking.
-      if !windows? && file_path.exist?
-        file_path.open('r+') do |f|
-          begin
-            f.flock File::LOCK_EX
-            yield
-          ensure
-            f.flock File::LOCK_UN
+      @@file_lock.synchronize do
+
+        # Windows does not support file locking.
+        if !windows? && file_path.exist?
+          file_path.open('r+') do |f|
+            begin
+              f.flock File::LOCK_EX
+              yield
+            ensure
+              f.flock File::LOCK_UN
+            end
           end
+        else
+          yield
         end
-      else
-        yield
+
       end
     end
 
