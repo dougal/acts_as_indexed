@@ -15,10 +15,10 @@ module ActsAsIndexed #:nodoc:
     end
 
     # Takes a hash of atoms and adds these to storage.
-    def add(atoms)
+    def add(atoms, count=1)
       operate(:+, atoms)
 
-      update_record_count(1)
+      update_record_count(count)
     end
 
     # Takes a hash of atoms and removes these from storage.

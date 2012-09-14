@@ -26,15 +26,17 @@ module ActsAsIndexed #:nodoc:
     # Adds multiple records to the index. Accepts an array of +records+.
     def add_records(records)
       atoms = ActiveSupport::OrderedHash.new
+      records_count = 0
 
       records.each do |record|
         next unless @if_proc.call(record)
+        records_count += 1
 
         condensed_record = condense_record(record)
         atoms = add_occurences(condensed_record, record.id, atoms)
       end
 
-      @storage.add(atoms)
+      @storage.add(atoms, records_count)
     end
 
     # Removes +record+ from the index.

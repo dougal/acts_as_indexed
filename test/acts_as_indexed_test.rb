@@ -52,8 +52,8 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     queries = {
       nil        => [],
       ''         => [],
-      'ship'     => [5,6],
-      'crane'    => [6,5],
+      'ship'     => [6,5],
+      'crane'    => [5,6],
       'foo'      => [6],
       'foo ship' => [6],
       'ship foo' => [6]
@@ -104,17 +104,17 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
   def test_start_queries
     queries = {
-      'ship ^crane'  => [5,6],
-      '^crane ship'  => [5,6],
-      '^ship ^crane' => [5,6],
-      '^crane ^ship' => [5,6],
-      '^ship crane'  => [5,6],
-      'crane ^ship'  => [5,6],
-      '^crane'       => [6,5] ,
-      '^cran'        => [6,5],
-      '^cra'         => [6,5],
-      '^cr'          => [6,4,5],
-      '^c'           => [5,2,1,3,6,4],
+      'ship ^crane'  => [6,5],
+      '^crane ship'  => [6,5],
+      '^ship ^crane' => [6,5],
+      '^crane ^ship' => [6,5],
+      '^ship crane'  => [6,5],
+      'crane ^ship'  => [6,5],
+      '^crane'       => [5,6] ,
+      '^cran'        => [5,6],
+      '^cra'         => [5,6],
+      '^cr'          => [4,5,6],
+      '^c'           => [1,2,3,4,5,6],
       '^notthere'    => []
     }
 
@@ -123,18 +123,18 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
   def test_start_quoted_queries
     queries = {
-      '^"crane" ship' => [5,6],
-      'ship ^"crane"' => [5,6],
+      '^"crane" ship' => [6,5],
+      'ship ^"crane"' => [6,5],
       '^"crane ship"' => [5],
       '^"crane shi"'  => [5],
       '^"crane sh"'   => [5],
       '^"crane s"'    => [5],
-      '^"crane "'     => [6,5],
-      '^"crane"'      => [6,5],
-      '^"cran"'       => [6,5],
-      '^"cra"'        => [6,5],
-      '^"cr"'         => [6,4,5],
-      '^"c"'          => [5,2,1,3,6,4],
+      '^"crane "'     => [5,6],
+      '^"crane"'      => [5,6],
+      '^"cran"'       => [5,6],
+      '^"cra"'        => [5,6],
+      '^"cr"'         => [4,5,6],
+      '^"c"'          => [1,2,3,4,5,6],
     }
 
     run_queries(queries)
@@ -146,16 +146,16 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   # The offending assertions are not run in CI as a result.
   def test_find_options
     # limit.
-    assert_equal [6], Post.find_with_index('^cr', { :limit => 1 }, :ids_only => true)
-    assert_equal [6], Post.find_with_index('^cr', { :limit => 1 }).map{ |r| r.id }
+    assert_equal [4], Post.find_with_index('^cr', { :limit => 1 }, :ids_only => true)
+    assert_equal [4], Post.find_with_index('^cr', { :limit => 1 }).map{ |r| r.id }
 
     # offset
-    assert_equal [4,5], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
-    assert_equal [4,5], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
+    assert_equal [5,6], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
+    assert_equal [5,6], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
 
     # limit and offset
-    assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
-    assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }).map{ |r| r.id }
+    assert_equal [5], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
+    assert_equal [5], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }).map{ |r| r.id }
 
     # order
     assert_equal [6,5,4,3,2,1], Post.find_with_index('^c', { :order => 'id desc' }).map{ |r| r.id }

@@ -11,9 +11,9 @@ class WillPaginateSearchTest < ActiveSupport::TestCase
 
   def test_paginate_search
 
-    assert_equal [5,2,1,3,6,4], paginate_search(1, 10)
-    assert_equal [5,2,1], paginate_search(1, 3)
-    assert_equal [3,6,4], paginate_search(2, 3)
+    assert_equal [1,2,3,4,5,6], paginate_search(1, 10)
+    assert_equal [1,2,3], paginate_search(1, 3)
+    assert_equal [4,5,6], paginate_search(2, 3)
   end
 
   private
