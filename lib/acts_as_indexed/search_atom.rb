@@ -87,6 +87,12 @@ module ActsAsIndexed #:nodoc:
     # atom.
     def weightings(records_size)
       out = ActiveSupport::OrderedHash.new
+
+      ## phurni 2012-09-21 when records_size is exactly the @records.size (all records are matches), the Math.log would
+      ## return 0 which means the frequency (pos.size) will have no effect. Cheat to make it like the matching
+      ## record is one less, so that we still can weight on frequency.
+      matching_records_size = (records_size == @records.size ? @records.size - 1 : @records.size)
+
       @records.each do |r_id, pos|
 
         # Fixes a bug when the records_size is zero. i.e. The only record
@@ -99,8 +105,9 @@ module ActsAsIndexed #:nodoc:
         # weighting = frequency * log (records.size / records_with_atom)
         ## parndt 2010/05/03 changed to records_size.to_f to avoid -Infinity Errno::ERANGE exceptions
         ## which would happen for example Math.log(1 / 20) == -Infinity but Math.log(1.0 / 20) == -2.99573227355399
-        out[r_id] = pos.size * Math.log(records_size.to_f / @records.size)
+        out[r_id] = pos.size * Math.log(records_size.to_f / matching_records_size)
       end
+
       out
     end
 
