@@ -182,7 +182,7 @@ module ActsAsIndexed
         if a_score == b_score
           a_id <=> b_id
         else
-          a_score <=> b_score
+          b_score <=> a_score # We want the records with better relevance first.
         end
 
       }
