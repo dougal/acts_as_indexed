@@ -2,4 +2,4 @@ source "http://rubygems.org"
 
 gem "mocha"
 gem "sqlite3-ruby"
-gem "rails", "~> 3.2.9"
+gem "active_record", "~> 3.2.9"
