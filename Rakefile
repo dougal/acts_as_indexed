@@ -1,6 +1,5 @@
 require 'rake'
 require 'rake/testtask'
-require 'rdoc/task'
 
 desc 'Default: run unit tests.'
 task :default => :test
@@ -13,16 +12,6 @@ Rake::TestTask.new(:test) do |t|
   t.verbose = true
 end
 
-desc 'Generate documentation for the acts_as_indexed plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'ActsAsIndexed'
-  rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README.rdoc')
-  rdoc.rdoc_files.include('CHANGELOG')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
-
 namespace :rcov do
   desc "Generate a coverage report in coverage/"
   task :gen do
@@ -33,6 +22,21 @@ namespace :rcov do
   task :clobber do
     sh "rm -rdf coverage"
   end
+end
+
+begin
+  require 'rdoc/task'
+  desc 'Generate documentation for the acts_as_indexed plugin.'
+  Rake::RDocTask.new(:rdoc) do |rdoc|
+    rdoc.rdoc_dir = 'rdoc'
+    rdoc.title    = 'ActsAsIndexed'
+    rdoc.options << '--line-numbers' << '--inline-source'
+    rdoc.rdoc_files.include('README.rdoc')
+    rdoc.rdoc_files.include('CHANGELOG')
+    rdoc.rdoc_files.include('lib/**/*.rb')
+  end
+rescue LoadError
+  puts "rdoc not installed"
 end
 
 begin
