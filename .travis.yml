@@ -10,3 +10,5 @@ gemfile:
   - gemfiles/rails3.0.gemfile
   - gemfiles/rails3.1.gemfile
   - gemfiles/rails3.2.gemfile
+
+script: "bundle exec rake test"
