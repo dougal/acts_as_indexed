@@ -1,3 +1,8 @@
+===NEXT
+ - Storage is now process and thread-safe. Fixes issue #34. [rsamoilov - Roman Samoilov]
+ - Added configuration option to force is-Windows mode for storage. Fixes issues #32, #39.
+ - Added multiple Gemfiles for TravisCI. https://travis-ci.org/dougal/acts_as_indexed
+
 ===0.7.8 [14 March 2011]
  - Fixed bug with file renaming on Windows. Fixes issue #21. [gabynamiman - Gabriel Namiman]
 
