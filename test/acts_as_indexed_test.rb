@@ -66,7 +66,8 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     queries = {
       'crane -foo' => [5],
       '-foo crane' => [5],
-      '-foo'       => [] # edgecase
+      '-foo'       => [], # negative only edgecase.
+      're-entered' => [5] # actually a hyphen edgecase.
     }
 
     run_queries(queries)

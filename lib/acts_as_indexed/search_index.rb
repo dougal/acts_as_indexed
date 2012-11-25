@@ -144,9 +144,12 @@ module ActsAsIndexed #:nodoc:
       end
 
       # Find -foo.
+      # Ignores instances where a dash is used as a hyphen.
       negative = []
-      while neg = s.slice!(/-[\S]*/)
-        negative << cleanup_atoms(neg).first
+      s.gsub!(/^(.*\s)?-(\S*)/) do |match|
+        negative << cleanup_atoms($2).first
+
+        $1
       end
 
       # Find +foo
