@@ -12,6 +12,9 @@ require 'acts_as_indexed/configuration'
 require 'acts_as_indexed/search_index'
 require 'acts_as_indexed/search_atom'
 require 'acts_as_indexed/storage'
+require 'acts_as_indexed/pre_tokenizer'
+require 'acts_as_indexed/tokenizer'
+require 'acts_as_indexed/token_normalizer'
 
 module ActsAsIndexed #:nodoc:
 
