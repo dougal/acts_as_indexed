@@ -21,6 +21,7 @@ GEM
     rake (0.8.7)
     rcov (0.9.9)
     sqlite3 (1.3.6)
+    stringex (1.4.0)
     tzinfo (0.3.33)
 
 PLATFORMS
@@ -31,3 +32,4 @@ DEPENDENCIES
   mocha
   rcov
   sqlite3 (~> 1.3.5)
+  stringex

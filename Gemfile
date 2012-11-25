@@ -5,4 +5,6 @@ group :test do
   gem "sqlite3", "~> 1.3.5"
   gem "rcov"
   gem "activerecord"
+
+  gem "stringex"
 end
