@@ -129,7 +129,7 @@ module ActsAsIndexed
         # slice up the results by offset and limit
         offset = find_options[:offset] || 0
         limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query].size
-        part_query = @query_cache[query].sort_by{ |r| r.last }.slice(offset,limit).map{ |r| r.first }
+        part_query = sort(@query_cache[query]).slice(offset,limit).map{ |r| r.first }
 
         # Set these to nil as we are dealing with the pagination by setting
         # exactly what records we want.
@@ -147,20 +147,39 @@ module ActsAsIndexed
         if find_options.include?(:order)
          records # Just return the records without ranking them.
 
-       else
-         # Results come back in random order from SQL, so order again.
-         ranked_records = ActiveSupport::OrderedHash.new
-         records.each do |r|
-           ranked_records[r] = @query_cache[query][r.id]
-         end
+         else
+           # Results come back in random order from SQL, so order again.
+           ranked_records = ActiveSupport::OrderedHash.new
+           records.each do |r|
+             ranked_records[r] = @query_cache[query][r.id]
+           end
 
-         ranked_records.to_a.sort_by{ |a| a.last }.map{ |r| r.first}
-       end
+           sort(ranked_records.to_a).map{ |r| r.first}
+         end
       end
 
     end
 
     private
+
+    # If two records or record IDs have the same rank, sort them by ID.
+    # This prevents a different order being returned by different Rubies.
+    def sort(ranked_records)
+      ranked_records.sort { |a, b|
+        a_score = a.last
+        a_id = a.first.is_a?(Fixnum) ? a.first : a.first.id
+
+        b_score = b.last
+        b_id = b.first.is_a?(Fixnum) ? b.first : b.first.id
+
+        if a_score == b_score
+          a_id <=> b_id
+        else
+          a_score <=> b_score
+        end
+
+      }
+    end
 
     def new_index
       SearchIndex.new(aai_fields, aai_config)

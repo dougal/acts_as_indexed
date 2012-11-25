@@ -112,7 +112,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
       '^crane'       => [6,5] ,
       '^cran'        => [6,5],
       '^cra'         => [6,5],
-      '^cr'          => [6,5,4],
+      '^cr'          => [6,4,5],
       '^c'           => [5,2,1,3,6,4],
       '^notthere'    => []
     }
@@ -132,7 +132,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
       '^"crane"'      => [6,5],
       '^"cran"'       => [6,5],
       '^"cra"'        => [6,5],
-      '^"cr"'         => [6,5,4],
+      '^"cr"'         => [6,4,5],
       '^"c"'          => [5,2,1,3,6,4],
     }
 
@@ -145,12 +145,12 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal [6], Post.find_with_index('^cr', { :limit => 1 }).map{ |r| r.id }
 
     # offset
-    assert_equal [5,4], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
+    assert_equal [4,5], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
     assert_equal [4,5], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
 
     # limit and offset
-    assert_equal [5], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
-    assert_equal [5], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }).map{ |r| r.id }
+    assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
+    assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }).map{ |r| r.id }
 
     # order
     assert_equal [6,5,4,3,2,1], Post.find_with_index('^c', { :order => 'id desc' }).map{ |r| r.id }
