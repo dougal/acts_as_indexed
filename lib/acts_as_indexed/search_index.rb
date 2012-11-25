@@ -255,10 +255,9 @@ module ActsAsIndexed #:nodoc:
 
 
     def cleanup_atoms(s, limit_size=false)
-      s = @case_sensitive ? s : s.downcase
-      atoms = s.gsub(/\W/,' ').squeeze(' ').split
-      return atoms unless limit_size
-      atoms.reject{|w| w.size < @min_word_size}
+      pre_tokenized = PreTokenizer.process(s)
+      tokenized     = Tokenizer.process(pre_tokenized)
+      TokenNormalizer.process(tokenized, :normalize_case => !@case_sensitive, :min_token_length => !limit_size ? @min_token_length : false)
     end
 
     def condense_record(record)
