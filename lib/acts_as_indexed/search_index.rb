@@ -11,7 +11,7 @@ module ActsAsIndexed #:nodoc:
     def initialize(fields, config)
       @storage = Storage.new(Pathname.new(config.index_file.to_s), config.index_file_depth)
       @fields = fields
-      @atoms = {}
+      @atoms = ActiveSupport::OrderedHash.new
       @min_word_size = config.min_word_size
       @records_size = @storage.record_count
       @case_sensitive = config.case_sensitive
@@ -30,7 +30,7 @@ module ActsAsIndexed #:nodoc:
 
     # Adds multiple records to the index. Accepts an array of +records+.
     def add_records(records)
-      atoms = {}
+      atoms = ActiveSupport::OrderedHash.new
 
       records.each do |record|
         next unless @if_proc.call(record)
@@ -68,7 +68,7 @@ module ActsAsIndexed #:nodoc:
       starts_with = run_queries(queries[:starts_with], true)
       start_quoted = run_quoted_queries(queries[:start_quoted], true)
 
-      results = {}
+      results = ActiveSupport::OrderedHash.new
 
       if queries[:start_quoted].any?
         results = merge_query_results(results, start_quoted)
@@ -109,7 +109,7 @@ module ActsAsIndexed #:nodoc:
       r1.merge(r2) { |r_id,old_val,new_val| old_val + new_val}
     end
 
-    def add_occurences(condensed_record, record_id, atoms={})
+    def add_occurences(condensed_record, record_id, atoms=ActiveSupport::OrderedHash.new)
       condensed_record.each_with_index do |atom_name, i|
         atoms[atom_name] = SearchAtom.new unless atoms.include?(atom_name)
         atoms[atom_name].add_position(record_id, i)
@@ -168,9 +168,9 @@ module ActsAsIndexed #:nodoc:
     end
 
     def run_queries(atoms, starts_with=false)
-      results = {}
+      results = ActiveSupport::OrderedHash.new
       atoms.each do |atom|
-        interim_results = {}
+        interim_results = ActiveSupport::OrderedHash.new
 
         # If these atoms are to be run as 'starts with', make them a Regexp
         # with a carat.
@@ -193,9 +193,9 @@ module ActsAsIndexed #:nodoc:
     end
 
     def run_quoted_queries(quoted_atoms, starts_with=false)
-      results = {}
+      results = ActiveSupport::OrderedHash.new
       quoted_atoms.each do |quoted_atom|
-        interim_results = {}
+        interim_results = ActiveSupport::OrderedHash.new
 
         break if quoted_atom.empty?
 

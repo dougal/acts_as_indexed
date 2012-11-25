@@ -35,7 +35,7 @@ module ActsAsIndexed #:nodoc:
     # Takes a string array of atoms names
     # return a hash of the relevant atoms.
     def fetch(atom_names, start=false)
-      atoms = {}
+      atoms = ActiveSupport::OrderedHash.new
 
       atom_names.uniq.collect{|a| encoded_prefix(a) }.uniq.each do |prefix|
         pattern = @path.join(prefix.to_s).to_s
@@ -74,7 +74,7 @@ module ActsAsIndexed #:nodoc:
       # Sort the atoms into the appropriate shards for writing to individual
       # files.
       atoms.each do |atom_name, records|
-        (atoms_sorted[encoded_prefix(atom_name)] ||= {})[atom_name] = records
+        (atoms_sorted[encoded_prefix(atom_name)] ||= ActiveSupport::OrderedHash.new)[atom_name] = records
       end
 
       atoms_sorted.each do |e_p, atoms|
@@ -87,7 +87,7 @@ module ActsAsIndexed #:nodoc:
               Marshal.load(f)
             end
           else
-            from_file = {}
+            from_file = ActiveSupport::OrderedHash.new
           end
 
           atoms = from_file.merge(atoms){ |k,o,n| o.send(operation, n) }
@@ -134,7 +134,7 @@ module ActsAsIndexed #:nodoc:
     def encoded_prefix(atom)
       prefix = atom[0, @prefix_size]
 
-      unless (@prefix_cache ||= {}).has_key?(prefix)
+      unless (@prefix_cache ||= ActiveSupport::OrderedHash.new).has_key?(prefix)
         if atom.length > 1
           @prefix_cache[prefix] = prefix.split(//).map{|c| encode_character(c)}.join('_')
         else
