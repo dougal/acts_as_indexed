@@ -254,11 +254,11 @@ module ActsAsIndexed #:nodoc:
     end
 
 
-    def cleanup_atoms(s, limit_size=false, min_size = @min_word_size || 3)
+    def cleanup_atoms(s, limit_size=false)
       s = @case_sensitive ? s : s.downcase
       atoms = s.gsub(/\W/,' ').squeeze(' ').split
       return atoms unless limit_size
-      atoms.reject{|w| w.size < min_size}
+      atoms.reject{|w| w.size < @min_word_size}
     end
 
     def condense_record(record)
