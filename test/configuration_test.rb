@@ -15,6 +15,15 @@ class ConfigurationTest < ActiveSupport::TestCase
     assert_equal 3, config.min_word_size
   end
 
+  def test_default_is_windows_filesystem_should_be_set
+    assert_equal !!RUBY_PLATFORM[/mswin32|mingw|cygwin/], config.is_windows_filesystem?
+  end
+
+  def tests_is_windows_filesystem_should_be_writeable
+    config.is_windows_filesystem = 'banana'
+    assert config.is_windows_filesystem?
+  end
+
   def test_index_file_should_be_writeable
     config.index_file = [Rails.root, 'my_index']
     assert_equal Rails.root.join('my_index'), config.index_file

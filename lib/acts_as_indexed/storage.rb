@@ -11,10 +11,11 @@ module ActsAsIndexed #:nodoc:
     INDEX_FILE_EXTENSION = '.ind'
     TEMP_FILE_EXTENSION  = '.tmp'
 
-    def initialize(path, prefix_size)
-      @path = path
-      @size_path = path.join('size')
-      @prefix_size = prefix_size
+    def initialize(config)
+      @path = Pathname.new(config.index_file.to_s)
+      @size_path = @path.join('size')
+      @prefix_size = config.index_file_depth
+      @is_windows_filesystem = config.is_windows_filesystem?
       prepare
     end
 
@@ -190,7 +191,7 @@ module ActsAsIndexed #:nodoc:
     # Checking for windows all the time seems costly.
     # Write a separate windows storage class, and use it at runtime?
     def windows?
-      @@is_windows ||= RUBY_PLATFORM[/mswin32|mingw|cygwin/]
+      @is_windows_filesystem
     end
 
   end
