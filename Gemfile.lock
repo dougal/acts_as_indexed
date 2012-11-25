@@ -1,24 +1,33 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    git (1.2.5)
-    jeweler (1.5.2)
-      bundler (~> 1.0.0)
-      git (>= 1.2.5)
-      rake
+    activemodel (3.2.8)
+      activesupport (= 3.2.8)
+      builder (~> 3.0.0)
+    activerecord (3.2.8)
+      activemodel (= 3.2.8)
+      activesupport (= 3.2.8)
+      arel (~> 3.0.2)
+      tzinfo (~> 0.3.29)
+    activesupport (3.2.8)
+      i18n (~> 0.6)
+      multi_json (~> 1.0)
+    arel (3.0.2)
+    builder (3.0.4)
+    i18n (0.6.1)
     mocha (0.9.11)
       rake
+    multi_json (1.3.7)
     rake (0.8.7)
     rcov (0.9.9)
-    sqlite3 (1.3.3)
-    sqlite3-ruby (1.3.3)
-      sqlite3 (>= 1.3.3)
+    sqlite3 (1.3.6)
+    tzinfo (0.3.33)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  jeweler
+  activerecord
   mocha
   rcov
-  sqlite3-ruby
+  sqlite3 (~> 1.3.5)
