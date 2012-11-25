@@ -190,6 +190,7 @@ All of the above are most welcome. mailto:dougal.s@gmail.com
 * Theron Toomey
 * Uģis Ozols
 * Gabriel Namiman
+* Roman Samoilov
 
 
 == Future Releases
