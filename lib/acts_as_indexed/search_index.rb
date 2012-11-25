@@ -9,7 +9,7 @@ module ActsAsIndexed #:nodoc:
     # fields:: Fields or instance methods of ActiveRecord model to be indexed.
     # config:: ActsAsIndexed::Configuration instance.
     def initialize(fields, config)
-      @storage = Storage.new(Pathname.new(config.index_file.to_s), config.index_file_depth)
+      @storage = Storage.new(config)
       @fields = fields
       @atoms = ActiveSupport::OrderedHash.new
       @min_word_size = config.min_word_size

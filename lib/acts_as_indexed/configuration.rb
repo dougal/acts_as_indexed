@@ -35,6 +35,11 @@ module ActsAsIndexed
     # Default is false.
     attr_accessor :disable_auto_indexing
 
+    # Disable advanced features not compatible with the Windows filesystem.
+    # Set to true to disable.
+    # Default is guessed depending on current platform.
+    attr_writer :is_windows_filesystem
+
     def initialize
       @index_file       = nil
       @index_file_depth = 3
@@ -42,6 +47,7 @@ module ActsAsIndexed
       @if_proc          = if_proc
       @case_sensitive   = false
       @disable_auto_indexing = false
+      @is_windows_filesystem = RUBY_PLATFORM[/mswin32|mingw|cygwin/]
     end
 
     # Since we cannot expect Rails to be available on load, it is best to put
@@ -72,6 +78,10 @@ module ActsAsIndexed
 
     def if_proc
       @if_proc ||= Proc.new{true}
+    end
+
+    def is_windows_filesystem?
+      !!@is_windows_filesystem
     end
 
   end
