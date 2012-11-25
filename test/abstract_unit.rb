@@ -38,7 +38,7 @@ class ActiveSupport::TestCase #:nodoc:
   self.use_instantiated_fixtures  = false
 
   def destroy_index
-    `rm -rdf #{index_loc}`
+    FileUtils.rm_rf(index_loc)
   end
 
   def build_index
