@@ -1,6 +1,8 @@
 require 'test/unit'
 require 'fileutils'
 require 'rubygems'
+
+require 'bundler/setup'
 require 'active_record'
 require 'active_record/fixtures'
 require 'mocha'
