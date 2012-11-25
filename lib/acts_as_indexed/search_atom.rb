@@ -16,7 +16,7 @@ module ActsAsIndexed #:nodoc:
 
     attr_reader :records
 
-    def initialize(records={})
+    def initialize(records=ActiveSupport::OrderedHash.new)
       @records = records
     end
 
@@ -68,7 +68,7 @@ module ActsAsIndexed #:nodoc:
     # "former latter" or "big dog" where "big" is the former and "dog" is the latter.
     def preceded_by(former)
       matches = SearchAtom.new
-      latter = {}
+      latter = ActiveSupport::OrderedHash.new
       former.record_ids.each do |rid|
         latter[rid] = @records[rid] if @records[rid]
       end
@@ -91,7 +91,7 @@ module ActsAsIndexed #:nodoc:
     # Returns a hash of record_ids and weightings for each record in the
     # atom.
     def weightings(records_size)
-      out = {}
+      out = ActiveSupport::OrderedHash.new
       @records.each do |r_id, pos|
 
         # Fixes a bug when the records_size is zero. i.e. The only record
