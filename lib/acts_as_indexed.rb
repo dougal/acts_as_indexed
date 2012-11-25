@@ -34,7 +34,7 @@ module ActsAsIndexed #:nodoc:
 
   # Call this method to modify defaults in your initializers.
   #
-  # Example showing defaults:
+  # Example showing some defaults:
   #   ActsAsIndexed.configure do |config|
   #     config.index_file = [Rails.root,'index']
   #     config.index_file_depth = 3
