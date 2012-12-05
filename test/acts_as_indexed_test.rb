@@ -273,6 +273,11 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal 5, Post.find_with_index('the', {}, { :no_query_cache => true, :ids_only => true}).size
   end
 
+  def test_queries_across_field_boundaries
+    assert_equal [], Post.find_with_index('"Ellis Julien"', { :limit => 1 }, :ids_only => true)
+    assert_equal [], Post.find_with_index('"myself crane"', { :limit => 1 }, :ids_only => true)
+  end
+
   private
 
   def run_queries(queries)

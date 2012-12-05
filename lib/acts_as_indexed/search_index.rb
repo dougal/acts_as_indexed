@@ -261,13 +261,19 @@ module ActsAsIndexed #:nodoc:
     end
 
     def condense_record(record)
-      condensed = []
+      atoms = []
+
       @fields.each do |f|
         if (value = record.send(f)).present?
-          condensed << value.to_s
+          atoms += cleanup_atoms(value.to_s)
+
+          #U+3000 separates fields so that quoted terms cannot match across
+          #fields
+          atoms << "\u3000"
         end
       end
-      cleanup_atoms(condensed.join(' '))
+
+      atoms
     end
 
   end
