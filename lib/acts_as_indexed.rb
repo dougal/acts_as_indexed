@@ -16,6 +16,10 @@ require 'acts_as_indexed/pre_tokenizer'
 require 'acts_as_indexed/tokenizer'
 require 'acts_as_indexed/token_normalizer'
 
+if defined?(WillPaginate)
+  require 'will_paginate_search'
+end
+
 module ActsAsIndexed #:nodoc:
 
   # This is the last version of the plugin where the index structure was
