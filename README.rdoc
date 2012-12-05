@@ -167,7 +167,8 @@ All of the above are most welcome. mailto:dougal.s@gmail.com
 
 == Contributors
 
-A huge thanks to all the contributors to this library. Without them many of the bugfixes and features wouldn't have happened.
+A huge thanks to all the contributors to this library. Without them many
+bugfixes and features wouldn't have happened.
 
 * Douglas F Shearer - http://douglasfshearer.com
 * Thomas Pomfret
