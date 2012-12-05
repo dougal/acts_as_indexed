@@ -1,6 +1,3 @@
-# Note: Not sure why having to manually require will_paginate/collection.
-require 'will_paginate'
-require 'will_paginate/collection'
 require 'abstract_unit'
 
 class WillPaginateSearchTest < ActiveSupport::TestCase

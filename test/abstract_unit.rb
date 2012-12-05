@@ -18,6 +18,10 @@ class Rails
   end
 end
 
+# Load will_paginate.
+require 'will_paginate'
+require 'will_paginate/collection'
+
 test_path = Pathname.new(File.expand_path('../', __FILE__))
 require test_path.parent.join('lib', 'acts_as_indexed').to_s
 
