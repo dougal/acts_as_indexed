@@ -191,13 +191,14 @@ All of the above are most welcome. mailto:dougal.s@gmail.com
 * Uģis Ozols
 * Gabriel Namiman
 * Roman Samoilov
+* David Turner
 
 
-== Future Releases
+== Unicode (UTF8) Support
 
-Future releases will be looking to add the following features:
-* Optional html scrubbing during indexing.
-* Ranking affected by field weightings.
-* Support for DataMapper, Sequel and the various MongoDB ORMs.
-* UTF-8 support. See the current solution in the following Gist:
+At the moment acts_as_indexed only works with Unicode characters when used in
+the following way:
+
   https://gist.github.com/193903bb4e0d6e5debe1
+
+I have rewritten the tokenization process to allow easier handling of this in the future.
