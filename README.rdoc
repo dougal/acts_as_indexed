@@ -22,7 +22,7 @@ app with no dependencies and minimal setup.
 
   gem install acts_as_indexed
 
-Run <tt>bundle install<tt>. Done.
+Run <tt>bundle install</tt>. Done.
 
 ==== Still on Rails 2.x.x without Bundler?
 
