@@ -125,7 +125,7 @@ INCLUDE :: 'cat +me' will find records matching 'cat' and 'me', even if 'me' is 
 
 ==== With Relevance
 
-Pagination is supported via the +paginate_search+ method whose first argument is the search query, followed all the standard will_paginate arguments.
+Pagination is supported via the +paginate_search+ method whose first argument is the search query, followed by all the standard will_paginate arguments.
 
   @images = Image.paginate_search('girl', :page => 1, :per_page => 5)
 
@@ -166,6 +166,8 @@ All of the above are most welcome. mailto:dougal.s@gmail.com
 
 
 == Contributors
+
+A huge thanks to all the contributors to this library. Without them many of the bugfixes and features wouldn't have happened.
 
 * Douglas F Shearer - http://douglasfshearer.com
 * Thomas Pomfret
