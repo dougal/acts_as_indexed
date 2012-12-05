@@ -16,30 +16,23 @@ app with no dependencies and minimal setup.
 
 == Resources
 
-=== Install
+=== Installation
 
-==== Rails 2.x.x
-  ./script/plugin install git://github.com/dougal/acts_as_indexed.git
-
-==== Rails 3.x.x
-  rails plugin install git://github.com/dougal/acts_as_indexed.git
-
-==== As a Gem
-Despite this being slightly against the the original ethos of the project,
-acts_as_indexed is now available as a Gem as several people have requested it.
+==== Add to your gemfile
 
   gem install acts_as_indexed
 
-Make sure to specify the Gem in your environment.rb file (Rails 2.x.x), or the
-Gemfile (Rails 3.x.x).
+Run `bundle install`. Done.
 
-==== No Git?
+==== Still on Rails 2.x.x without Bundler?
+
+  ./script/plugin install git://github.com/dougal/acts_as_indexed.git
 
 If you don't have git installed, but still want the plugin, you can download
 the plugin from the GitHub page (http://github.com/dougal/acts_as_indexed) and
 unpack it into the <tt>vendor/plugins</tt> directory of your rails app.
 
-=== Upgrade
+=== Upgrading
 
 When upgrading to a new version of acts_as_indexed it is recommended you
 delete the index directory and allow it to be rebuilt.
