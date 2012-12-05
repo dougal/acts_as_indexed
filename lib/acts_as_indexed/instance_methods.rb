@@ -1,10 +1,5 @@
-# ActsAsIndexed
-# Copyright (c) 2007 - 2011 Douglas F Shearer.
-# http://douglasfshearer.com
-# Distributed under the MIT license as included with this plugin.
-
 module ActsAsIndexed
-  
+
   # Adds model class instance methods.
   # Methods are called automatically by ActiveRecord on +save+, +destroy+,
   # and +update+ of model instances.
@@ -28,5 +23,5 @@ module ActsAsIndexed
       self.class.index_update(self)
     end
   end
-  
+
 end

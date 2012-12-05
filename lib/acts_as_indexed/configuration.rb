@@ -1,8 +1,3 @@
-# ActsAsIndexed
-# Copyright (c) 2007 - 2011 Douglas F Shearer.
-# http://douglasfshearer.com
-# Distributed under the MIT license as included with this plugin.
-
 module ActsAsIndexed
   # Used to set up and modify settings for acts_as_indexed.
   class Configuration
