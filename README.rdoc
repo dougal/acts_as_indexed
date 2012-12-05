@@ -22,7 +22,7 @@ app with no dependencies and minimal setup.
 
   gem install acts_as_indexed
 
-Run `bundle install`. Done.
+Run <tt>bundle install<tt>. Done.
 
 ==== Still on Rails 2.x.x without Bundler?
 
@@ -156,11 +156,7 @@ tmp directory, which is the only writeable part of the Heroku dyno filesystem.
 
 == RDoc Documentation
 
-To generate the RDoc documentation, run the <tt>rake rdoc</tt> task in the
-acts_as_indexed plugin folder. Then point your web browser at
-<tt>vendor/plugins/acts_as_indexed/rdoc/index.html</tt>.
-
-Alternatively, you can view the rdoc documentation
+View the rdoc documentation
 online[http://rdoc.info/projects/dougal/acts_as_indexed/].
 
 
