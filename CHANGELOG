@@ -1,13 +1,13 @@
 ===0.8.0
- - Fixed bug where intentianal hyphenation was treated as a negative query. Fixes #31.
+ - Fixed bug where intentional hyphenation was treated as a negative query. Fixes #31.
  - Fixed bug where will_paginate_search was not being required. Fixes #23.
  - Fixed bug where quoted phrases were matched across field boundaries. [novalis - David Turner]
- - Fixed bug where records with indentical match-rankings were returned in different orders under different ruby implementations.
+ - Fixed bug where records with indentical match-rankings were returned in different orders under different Ruby implementations.
  - Storage is now process and thread-safe. Fixes issue #34. [rsamoilov - Roman Samoilov]
  - Added configuration option to force is-Windows mode for storage. Fixes issues #32, #39.
- - Added multiple Gemfiles for TravisCI. https://travis-ci.org/dougal/acts_as_indexed
+ - Added multiple Gemfiles for Travis CI. https://travis-ci.org/dougal/acts_as_indexed
  - Acts as Indexed can now be tested stand-alone without a generated Rails app.
- - ModelKlass.build_index is now a public method
+ - ModelKlass.build_index is now a public method.
 
 ===0.7.8 [14 March 2011]
  - Fixed bug with file renaming on Windows. Fixes issue #21. [gabynamiman - Gabriel Namiman]
