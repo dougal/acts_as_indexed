@@ -25,9 +25,10 @@ namespace :rcov do
 end
 
 begin
-  require 'rdoc/task'
+  require 'sdoc'
+
   desc 'Generate documentation for the acts_as_indexed plugin.'
-  Rake::RDocTask.new(:rdoc) do |rdoc|
+  RDoc::Task.new(:rdoc) do |rdoc|
     rdoc.rdoc_dir = 'rdoc'
     rdoc.title    = 'ActsAsIndexed'
     rdoc.options << '--line-numbers' << '--inline-source'
@@ -36,7 +37,7 @@ begin
     rdoc.rdoc_files.include('lib/**/*.rb')
   end
 rescue LoadError
-  puts "rdoc not installed"
+  puts "sdoc not installed"
 end
 
 begin
