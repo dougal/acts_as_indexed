@@ -7,6 +7,7 @@
  - Added configuration option to force is-Windows mode for storage. Fixes issues #32, #39.
  - Added multiple Gemfiles for TravisCI. https://travis-ci.org/dougal/acts_as_indexed
  - Acts as Indexed can now be tested stand-alone without a generated Rails app.
+ - ModelKlass.build_index is now a public method
 
 ===0.7.8 [14 March 2011]
  - Fixed bug with file renaming on Windows. Fixes issue #21. [gabynamiman - Gabriel Namiman]
