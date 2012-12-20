@@ -153,6 +153,8 @@ A full rundown of the available configuration options can be found in
 
 Acts As Indexed supports Heroku out-of-the-box. The index is created in the
 tmp directory, which is the only writeable part of the Heroku dyno filesystem.
+Please read Heroku's documentation(
+https://devcenter.heroku.com/articles/read-only-filesystem) regarding their file-system.
 
 == RDoc Documentation
 
