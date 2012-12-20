@@ -54,7 +54,7 @@ module ActsAsIndexed
     def index_add(record)
       return if self.aai_config.disable_auto_indexing
 
-      build_index unless aai_config.index_file.directory?
+      build_index
       index = new_index
       index.add_record(record)
       @query_cache = {}
@@ -77,7 +77,7 @@ module ActsAsIndexed
     def index_update(record)
       return if self.aai_config.disable_auto_indexing
 
-      build_index unless aai_config.index_file.directory?
+      build_index
       index = new_index
       index.update_record(record,find(record.id))
       @query_cache = {}
@@ -105,7 +105,7 @@ module ActsAsIndexed
 
       # Run the query if not already in cache.
       if !@query_cache || !@query_cache[query]
-        build_index unless aai_config.index_file.directory?
+        build_index
         (@query_cache ||= {})[query] = new_index.search(query)
       end
 
@@ -155,6 +155,18 @@ module ActsAsIndexed
 
     end
 
+    # Builds an index from scratch for the current model class.
+    # Does not run if the index already exists.
+
+    def build_index
+      return if aai_config.index_file.directory?
+
+      index = new_index
+      find_in_batches({ :batch_size => 500 }) do |records|
+        index.add_records(records)
+      end
+    end
+
     private
 
     # If two records or record IDs have the same rank, sort them by ID.
@@ -178,14 +190,6 @@ module ActsAsIndexed
 
     def new_index
       SearchIndex.new(aai_fields, aai_config)
-    end
-
-    # Builds an index from scratch for the current model class.
-    def build_index
-      index = new_index
-      find_in_batches({ :batch_size => 500 }) do |records|
-        index.add_records(records)
-      end
     end
 
   end
