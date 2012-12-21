@@ -186,6 +186,7 @@ bugfixes and features wouldn't have happened.
 * Gabriel Namiman
 * Roman Samoilov
 * David Turner
+* Pascal Hurni
 
 
 == Unicode (UTF8) Support

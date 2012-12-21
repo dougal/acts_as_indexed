@@ -1,4 +1,7 @@
-===0.8.0
+===0.8.1 [21 December 2012]
+ - Fixed bug where record count was not correctly updated on bulk add. [phurni - Pascal Hurni]
+
+===0.8.0 [20 December 2012]
  - Fixed bug where intentional hyphenation was treated as a negative query. Fixes #31.
  - Fixed bug where will_paginate_search was not being required. Fixes #23.
  - Fixed bug where quoted phrases were matched across field boundaries. [novalis - David Turner]
