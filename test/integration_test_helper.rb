@@ -7,6 +7,8 @@ require 'active_record'
 require 'active_record/fixtures'
 require 'mocha'
 
+puts "ActiveRecord version is #{ActiveRecord::VERSION::STRING}"
+
 # Mock out the required environment variables.
 # Do this before requiring AAI.
 class Rails
