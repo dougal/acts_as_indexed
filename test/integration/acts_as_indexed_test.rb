@@ -52,8 +52,8 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     queries = {
       nil        => [],
       ''         => [],
-      'ship'     => [6,5],
-      'crane'    => [5,6],
+      'ship'     => [5, 6], # 5 has 3/4 occurences, 6 has 1/4.
+      'crane'    => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
       'foo'      => [6],
       'foo ship' => [6],
       'ship foo' => [6]
@@ -104,17 +104,17 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
   def test_start_queries
     queries = {
-      'ship ^crane'  => [6,5],
-      '^crane ship'  => [6,5],
-      '^ship ^crane' => [6,5],
-      '^crane ^ship' => [6,5],
-      '^ship crane'  => [6,5],
-      'crane ^ship'  => [6,5],
-      '^crane'       => [5,6] ,
-      '^cran'        => [5,6],
-      '^cra'         => [5,6],
-      '^cr'          => [4,5,6],
-      '^c'           => [1,2,3,4,5,6],
+      'ship ^crane'  => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
+      '^crane ship'  => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
+      '^ship ^crane' => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
+      '^crane ^ship' => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
+      '^ship crane'  => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
+      'crane ^ship'  => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
+      '^crane'       => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
+      '^cran'        => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
+      '^cra'         => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
+      '^cr'          => [6, 4, 5], # 6 has 2/4, 4 has 1/4, 5 has 1/4.
+      '^c'           => [5, 2, 1, 3, 6, 4], # 5 has 9/25, 2 has 8/25, 1 has 1/25, 3 has 2/25, 6 has 2/25, 5 has 1/25.
       '^notthere'    => []
     }
 
@@ -123,18 +123,18 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
   def test_start_quoted_queries
     queries = {
-      '^"crane" ship' => [6,5],
-      'ship ^"crane"' => [6,5],
+      '^"crane" ship' => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
+      'ship ^"crane"' => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
       '^"crane ship"' => [5],
       '^"crane shi"'  => [5],
       '^"crane sh"'   => [5],
       '^"crane s"'    => [5],
-      '^"crane "'     => [5,6],
-      '^"crane"'      => [5,6],
-      '^"cran"'       => [5,6],
-      '^"cra"'        => [5,6],
-      '^"cr"'         => [4,5,6],
-      '^"c"'          => [1,2,3,4,5,6],
+      '^"crane "'     => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
+      '^"crane"'      => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
+      '^"cran"'       => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
+      '^"cra"'        => [6, 5], # 6 has 2/3 occurences, 5 has 1/3.
+      '^"cr"'         => [6, 4, 5], # 6 has 2/4, 4 has 1/4, 5 has 1/4.
+      '^"c"'          => [5, 2, 1, 3, 6, 4] # 5 has 9/25, 2 has 8/25, 1 has 1/25, 3 has 2/25, 6 has 2/25, 5 has 1/25.
     }
 
     run_queries(queries)
@@ -146,16 +146,16 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   # The offending assertions are not run in CI as a result.
   def test_find_options
     # limit.
-    assert_equal [4], Post.find_with_index('^cr', { :limit => 1 }, :ids_only => true)
-    assert_equal [4], Post.find_with_index('^cr', { :limit => 1 }).map{ |r| r.id }
+    assert_equal [6], Post.find_with_index('^cr', { :limit => 1 }, :ids_only => true)
+    assert_equal [6], Post.find_with_index('^cr', { :limit => 1 }).map{ |r| r.id }
 
     # offset
-    assert_equal [5,6], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
-    assert_equal [5,6], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
+    assert_equal [4, 5], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
+    assert_equal [4, 5], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
 
     # limit and offset
-    assert_equal [5], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
-    assert_equal [5], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }).map{ |r| r.id }
+    assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
+    assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }).map{ |r| r.id }
 
     # order
     assert_equal [6,5,4,3,2,1], Post.find_with_index('^c', { :order => 'id desc' }).map{ |r| r.id }
@@ -190,7 +190,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal(expected_message, error.message)
   end
 
-  # When a atom already in a record is duplicated, it removes
+  # When a atom already in a record is duplicated, it should not remove
   # all records with that same atom from the index.
   def test_update_record_bug
     p = Post.find(6)
