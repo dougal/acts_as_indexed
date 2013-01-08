@@ -1,4 +1,5 @@
 ===NEXT [?? ? 2013]
+ - Full review and update of test examples.
  - Fixed bug where all records matching resulted in an ID rather than scored order. [phurni - Pascal Hurni]
  - Fixed bug where records were returned in order of lowest-score first. [phurni - Pascal Hurni]
 

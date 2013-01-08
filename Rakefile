@@ -28,18 +28,6 @@ Rake::TestTask.new('test:integration') do |t|
   t.verbose = true
 end
 
-namespace :rcov do
-  desc "Generate a coverage report in coverage/"
-  task :gen do
-    sh "rcov --output coverage test/*_test.rb"
-  end
-
-  desc "Remove generated coverage files."
-  task :clobber do
-    sh "rm -rdf coverage"
-  end
-end
-
 begin
   require 'sdoc'
 
