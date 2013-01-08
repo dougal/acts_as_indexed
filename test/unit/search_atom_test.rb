@@ -1,4 +1,4 @@
-require 'abstract_unit'
+require 'test_helper'
 include ActsAsIndexed
 
 class SearchAtomTest < ActiveSupport::TestCase  

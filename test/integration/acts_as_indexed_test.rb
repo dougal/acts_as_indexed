@@ -1,4 +1,4 @@
-require 'abstract_unit'
+require 'test_helper'
 
 class ActsAsIndexedTest < ActiveSupport::TestCase
   fixtures :posts
