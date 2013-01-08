@@ -1,14 +1,30 @@
 require 'rake'
 require 'rake/testtask'
 
-desc 'Default: run unit tests.'
+desc 'Default: run all tests.'
 task :default => :test
 
-desc 'Test the acts_as_indexed plugin.'
+desc 'Run all tests.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'test'
   t.libs << 'lib'
   t.pattern = 'test/**/*_test.rb'
+  t.verbose = true
+end
+
+desc 'Run unit tests.'
+Rake::TestTask.new('test:unit') do |t|
+  t.libs << 'test'
+  t.libs << 'lib'
+  t.pattern = 'test/unit/**/*_test.rb'
+  t.verbose = true
+end
+
+desc 'Run integration tests.'
+Rake::TestTask.new('test:integration') do |t|
+  t.libs << 'test'
+  t.libs << 'lib'
+  t.pattern = 'test/integration/**/*_test.rb'
   t.verbose = true
 end
 
