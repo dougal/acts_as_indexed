@@ -1,4 +1,4 @@
-require 'test_helper'
+require 'integration_test_helper.rb'
 
 class ActsAsIndexedTest < ActiveSupport::TestCase
   fixtures :posts

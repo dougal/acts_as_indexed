@@ -1,4 +1,4 @@
-require 'test_helper'
+require 'unit_test_helper.rb'
 include ActsAsIndexed
 
 class SearchIndexTest < ActiveSupport::TestCase
