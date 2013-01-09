@@ -1,7 +1,7 @@
 require 'integration_test_helper.rb'
 require 'benchmark'
 
-class RecordUpdatePerformance < ActiveSupport::TestCase
+class RecordUpdatePerformanceTest < ActiveSupport::TestCase
   fixtures :posts
 
   def teardown
