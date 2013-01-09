@@ -251,15 +251,15 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal 2, Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true}).size
   end
 
-  # If an index doesn't exist, and an if proc is supplied, and the proc is false, then nothing happens
+  # If a record is not in the index, and is updated, it should still not be in the index.
   def test_update_if_not_in
     Post.acts_as_indexed :fields => [:title, :body], :if => Proc.new { |post| post.visible }
     destroy_index
 
-    assert_equal 1, Post.find_with_index('crane', {}, { :no_query_cache => true, :ids_only => true}).size
-    p = Post.find(5)
-    assert p.update_attributes(:visible => false)
-    assert_equal 1, Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true}).size
+    assert_equal [6], Post.find_with_index('crane', {}, { :no_query_cache => true, :ids_only => true})
+
+    posts(:wikipedia_article_5).update_attributes(:title => 'A new title')
+    assert_equal [6], Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true})
   end
 
   def test_case_insensitive
