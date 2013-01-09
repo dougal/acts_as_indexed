@@ -2,6 +2,8 @@
  - Full review and update of test examples.
  - Fixed bug where all records matching resulted in an ID rather than scored order. [phurni - Pascal Hurni]
  - Fixed bug where records were returned in order of lowest-score first. [phurni - Pascal Hurni]
+ - 70x performance improvement for non-changed record updates.
+ - Added a benchmark suite.
 
 ===0.8.1 [21 December 2012]
  - Fixed bug where record count was not correctly updated on bulk add. [phurni - Pascal Hurni]
