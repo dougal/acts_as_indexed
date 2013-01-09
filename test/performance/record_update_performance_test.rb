@@ -29,4 +29,14 @@ class RecordUpdatePerformanceTest < ActiveSupport::TestCase
       end
     }
   end
+
+  def test_unchanged_with_false_if_proc
+    iterations = 200
+    puts "Unchanged record update with false if_proc (x #{ iterations })"
+
+    Post.acts_as_indexed :fields => [:title, :body], :if => Proc.new { |post| post.visible }
+
+
+    puts Benchmark.measure { iterations.times { posts(:wikipedia_article_5).save } }
+  end
 end

@@ -262,6 +262,19 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal [6], Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true})
   end
 
+  def test_update_if_with_external_proc
+    external_truth = true
+    Post.acts_as_indexed :fields => [:title, :body], :if => Proc.new { |post| external_truth }
+    destroy_index
+
+    assert_equal [6], Post.find_with_index('foo', {}, { :no_query_cache => true, :ids_only => true})
+
+    # When the proc returns false, on update, the post should be removed from the index.
+    external_truth = false
+    posts(:article_similar_to_5).save
+    assert_equal [], Post.find_with_index('foo', {}, { :no_query_cache => true, :ids_only => true})
+  end
+
   def test_case_insensitive
     Post.acts_as_indexed :fields => [:title, :body], :case_sensitive => true
     destroy_index

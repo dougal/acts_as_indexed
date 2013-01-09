@@ -48,10 +48,15 @@ module ActsAsIndexed #:nodoc:
     end
 
     def update_record(record_new, record_old)
-      return if record_unchanged?(record_new, record_old)
+      if !record_unchanged?(record_new, record_old)
+        remove_record(record_old)
+        add_record(record_new)
 
-      remove_record(record_old)
-      add_record(record_new)
+      # Always try to remove the record if it is non-indexable, in case proc
+      # makes use of any methods or attributes exteral of the record.
+      elsif !allow_indexing?(record_new)
+        remove_record(record_old)
+      end
     end
 
     # Returns an array of IDs for records matching +query+.
