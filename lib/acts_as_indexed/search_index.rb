@@ -15,7 +15,7 @@ module ActsAsIndexed #:nodoc:
 
     # Adds +record+ to the index.
     def add_record(record)
-      return unless @if_proc.call(record)
+      return unless allow_indexing?(record)
 
       condensed_record = condense_record(record)
       atoms = add_occurences(condensed_record, record.id)
@@ -29,7 +29,7 @@ module ActsAsIndexed #:nodoc:
       records_count = 0
 
       records.each do |record|
-        next unless @if_proc.call(record)
+        next unless allow_indexing?(record)
         records_count += 1
 
         condensed_record = condense_record(record)
@@ -89,6 +89,10 @@ module ActsAsIndexed #:nodoc:
     end
 
     private
+
+    def allow_indexing?(record)
+      @if_proc.call(record)
+    end
 
     def merge_query_results(results1, results2)
       # Return the other if one is empty.
