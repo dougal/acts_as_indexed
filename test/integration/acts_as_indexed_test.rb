@@ -93,15 +93,6 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     run_queries(queries)
   end
 
-  def test_scoped_negative_quoted_queries
-    queries = {
-      'crane -"crane ship"' => [6],
-      '-"crane big"'        => []
-    }
-
-    run_queries(queries)
-  end
-
   def test_start_queries
     queries = {
       'ship ^crane'  => [5, 6], # 5 has 3/4 + 2/3 = 17/12, 6 has 1/4 + 1/3 = 7/12
