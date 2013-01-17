@@ -18,9 +18,9 @@ app with no dependencies and minimal setup.
 
 === Installation
 
-==== Add to your gemfile
+==== Add to your Gemfile
 
-  gem install acts_as_indexed
+  gem 'acts_as_indexed'
 
 Run <tt>bundle install</tt>. Done.
 
