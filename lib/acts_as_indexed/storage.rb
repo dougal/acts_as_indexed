@@ -1,3 +1,5 @@
+require 'thread'
+
 module ActsAsIndexed #:nodoc:
   class Storage
 
