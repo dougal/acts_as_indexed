@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "acts_as_indexed"
-  s.version = "0.8.1"
+  s.version = "0.8.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Douglas F Shearer"]
-  s.date = "2012-12-21"
+  s.date = "2013-01-27"
   s.description = "Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app"
   s.email = "dougal.s@gmail.com"
   s.extra_rdoc_files = [
@@ -42,19 +42,24 @@ Gem::Specification.new do |s|
     "lib/acts_as_indexed/tokenizer.rb",
     "lib/will_paginate_search.rb",
     "rails/init.rb",
-    "test/abstract_unit.rb",
-    "test/acts_as_indexed_test.rb",
-    "test/configuration_test.rb",
-    "test/database.yml",
+    "test/config/database.yml",
+    "test/db/schema.rb",
     "test/fixtures/post.rb",
     "test/fixtures/posts.yml",
-    "test/pre_tokenizer_test.rb",
-    "test/schema.rb",
-    "test/search_atom_test.rb",
-    "test/search_index_test.rb",
-    "test/token_normalizer_test.rb",
-    "test/tokenizer_test.rb",
-    "test/will_paginate_search_test.rb"
+    "test/integration/acts_as_indexed_test.rb",
+    "test/integration/will_paginate_search_test.rb",
+    "test/integration_test_helper.rb",
+    "test/performance/query_performance_test.rb",
+    "test/performance/record_addition_performance_test.rb",
+    "test/performance/record_removal_performance_test.rb",
+    "test/performance/record_update_performance_test.rb",
+    "test/unit/configuration_test.rb",
+    "test/unit/pre_tokenizer_test.rb",
+    "test/unit/search_atom_test.rb",
+    "test/unit/search_index_test.rb",
+    "test/unit/token_normalizer_test.rb",
+    "test/unit/tokenizer_test.rb",
+    "test/unit_test_helper.rb"
   ]
   s.homepage = "http://github.com/dougal/acts_as_indexed"
   s.require_paths = ["lib"]
