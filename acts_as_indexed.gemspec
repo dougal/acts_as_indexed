@@ -9,11 +9,12 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Douglas F Shearer"]
-  s.date = "2013-01-27"
+  s.cert_chain = [".public_cert.pem"]
+  s.date = "2013-01-31"
   s.description = "Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app"
   s.email = "dougal.s@gmail.com"
   s.extra_rdoc_files = [
-    "README.rdoc"
+    "README.rdoc",
   ]
   s.files = [
     ".travis.yml",
@@ -64,6 +65,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/dougal/acts_as_indexed"
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.23"
+  s.signing_key = "/Users/dougal/.ssh/rubygems/gem-private_key.pem"
   s.summary = "Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app"
 
   if s.respond_to? :specification_version then
