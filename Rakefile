@@ -61,8 +61,6 @@ begin
     gemspec.email = "dougal.s@gmail.com"
     gemspec.homepage = "http://github.com/dougal/acts_as_indexed"
     gemspec.authors = ["Douglas F Shearer"]
-    gemspec.signing_key = File.expand_path('~/.ssh/rubygems/gem-private_key.pem')
-    gemspec.cert_chain  = ['.public_cert.pem']
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
