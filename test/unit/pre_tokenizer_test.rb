@@ -7,4 +7,8 @@ class PreTokenizerTest < ActiveSupport::TestCase
     assert_equal "Chocolate Chip Cookies ", PreTokenizer.process("Chocolate-Chip Cookies!")
   end
 
+  def test_strips_underscores
+    assert_equal "Test try it", PreTokenizer.process("Test_try_it")
+  end
+
 end

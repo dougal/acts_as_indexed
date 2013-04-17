@@ -4,7 +4,7 @@ module ActsAsIndexed
     # Strips all non-word characters and returns the resulting
     # string.
     def self.process(str)
-      str.gsub(/\W/,' ')
+      str.gsub(/[\W_]/,' ')
     end
 
   end

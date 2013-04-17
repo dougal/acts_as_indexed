@@ -282,6 +282,12 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     assert_equal [], Post.find_with_index('"myself crane"', { :limit => 1 }, :ids_only => true)
   end
 
+  def test_records_with_underscores
+    post_with_underscores = Post.create(:title => 'Test_try_it', :body => 'Any old thing')
+
+    assert_equal [post_with_underscores], Post.find_with_index('try')
+  end
+
   private
 
   def run_queries(queries)
