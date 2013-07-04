@@ -1,4 +1,5 @@
 require 'thread'
+require 'tempfile'
 
 module ActsAsIndexed #:nodoc:
   class Storage
@@ -153,18 +154,15 @@ module ActsAsIndexed #:nodoc:
     end
 
     def write_file(file_path)
-      new_file_name = file_path.to_s
-      temp_file_name = new_file_name + TEMP_FILE_EXTENSION
+      temp_file = Tempfile.new(File.basename(file_path.to_s))
+      begin
+        yield temp_file
+        FileUtils.mv(temp_file.path, file_path.to_s)
 
-      # Windows doesn't seem to play nice with writing then moving the file.
-      # https://github.com/dougal/acts_as_indexed/issues/15
-      writeable_file = windows? ? new_file_name : temp_file_name
-
-      File.open(writeable_file, 'w+') do |f|
-        yield(f)
+      ensure
+        temp_file.close
+        temp_file.unlink
       end
-
-      FileUtils.mv(temp_file_name, new_file_name) unless windows?
     end
 
     @@file_lock = Mutex.new
