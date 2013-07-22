@@ -25,6 +25,8 @@ module ActsAsIndexed #:nodoc:
 
   @configuration = Configuration.new
 
+  attr_accessor :score
+
   # Returns the current configuration for acts_as_indexed.
 
   def self.configuration

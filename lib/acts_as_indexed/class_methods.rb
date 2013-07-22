@@ -149,7 +149,10 @@ module ActsAsIndexed
              ranked_records[r] = @query_cache[query][r.id]
            end
 
-           sort(ranked_records.to_a).map{ |r| r.first }
+           sort(ranked_records.to_a).map { |r|
+              r.first.score = r.last
+              r.first
+           }
          end
       end
 
