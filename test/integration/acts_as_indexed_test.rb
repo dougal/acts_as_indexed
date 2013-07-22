@@ -1,7 +1,7 @@
 require 'integration_test_helper.rb'
 
 class ActsAsIndexedTest < ActiveSupport::TestCase
-  fixtures :posts
+  fixtures :posts, :sources
 
   def teardown
     # need to do this to work with the :if Proc tests.
@@ -287,11 +287,21 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
     assert_equal [post_with_underscores], Post.find_with_index('try')
   end
-  
+
   def test_records_with_scores
-    post_with_score = Post.create(:title => 'Test_try_it', :body => 'Any old thing')
+    post_with_score = Post.create(:title => 'Test try it', :body => 'Any old thing')
 
     assert_not_nil Post.find_with_index('try').first.score
+  end
+
+  def test_multiple_model_support
+    post = Post.create(:title => 'Test try it', :body => 'Any old thing')
+    source = Source.create(:name => 'Test try it again!', :description => 'Any old thing but a chicken wing')
+
+    results = ActsAsIndexed.find_with_index([Source, Post], 'try')
+
+    assert results.include? post
+    assert results.include? source
   end
 
   private
