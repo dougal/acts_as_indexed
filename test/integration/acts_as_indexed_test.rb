@@ -291,7 +291,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   def test_records_with_scores
     post_with_score = Post.create(:title => 'Test try it', :body => 'Any old thing')
 
-    assert_not_nil Post.find_with_index('try').first.score
+    assert_not_nil Post.find_with_index('try').first.search_score
   end
 
   def test_multiple_model_support

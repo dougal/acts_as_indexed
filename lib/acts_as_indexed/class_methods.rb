@@ -150,7 +150,7 @@ module ActsAsIndexed
            end
 
            sort(ranked_records.to_a).map { |r|
-              r.first.score = r.last
+              r.first.search_score = r.last
               r.first
            }
          end

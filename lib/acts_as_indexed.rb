@@ -25,7 +25,7 @@ module ActsAsIndexed #:nodoc:
 
   @configuration = Configuration.new
 
-  attr_accessor :score
+  attr_accessor :search_score
 
   # Returns the current configuration for acts_as_indexed.
 
@@ -56,7 +56,7 @@ module ActsAsIndexed #:nodoc:
     models.each do |m|
       matches << m.find_with_index(query, find_options={}, options={})
     end
-    matches.flatten.sort { |a,b| a.score <=> b.score }
+    matches.flatten.sort { |a,b| a.search_score <=> b.search_score }
   end
   
 end
