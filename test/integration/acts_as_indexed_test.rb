@@ -143,10 +143,14 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     # offset
     assert_equal [4, 5], Post.find_with_index('^cr', { :offset => 1 }, :ids_only => true)
     assert_equal [4, 5], Post.find_with_index('^cr', { :offset => 1 }).map{ |r| r.id }
+    assert_equal [], Post.find_with_index('^cr', { :offset => 4 }, :ids_only => true)
+    assert_equal [], Post.find_with_index('^cr', { :offset => 4 }).map{ |r| r.id }
 
     # limit and offset
     assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }, :ids_only => true)
     assert_equal [4], Post.find_with_index('^cr', { :limit => 1, :offset => 1 }).map{ |r| r.id }
+    assert_equal [], Post.find_with_index('^cr', { :limit => 1, :offset => 4 }, :ids_only => true)
+    assert_equal [], Post.find_with_index('^cr', { :limit => 1, :offset => 4 }).map{ |r| r.id }
 
     # order
     assert_equal [6,5,4,3,2,1], Post.find_with_index('^c', { :order => 'id desc' }).map{ |r| r.id }

@@ -124,7 +124,8 @@ module ActsAsIndexed
         # slice up the results by offset and limit
         offset = find_options[:offset] || 0
         limit = find_options.include?(:limit) ? find_options[:limit] : @query_cache[query].size
-        part_query = sort(@query_cache[query]).slice(offset,limit).map{ |r| r.first }
+        sorted_and_sliced_results = sort(@query_cache[query]).slice(offset, limit)
+        part_query = sorted_and_sliced_results ? sorted_and_sliced_results.map{ |r| r.first } : []
 
         # Set these to nil as we are dealing with the pagination by setting
         # exactly what records we want.
