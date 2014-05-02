@@ -149,7 +149,15 @@ module ActsAsIndexed
              ranked_records[r] = @query_cache[query][r.id]
            end
 
-           sort(ranked_records.to_a).map{ |r| r.first }
+           sorted_records = sort(ranked_records.to_a)
+
+           if options.include?(:include_rank)
+             sorted_records.map do |r|
+               {record: r.first, rank: r.second}
+             end
+           else
+             sorted_records.map{ |r| r.first }   #Remove the rank
+           end
          end
       end
 
