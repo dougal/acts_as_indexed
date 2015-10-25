@@ -132,7 +132,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   end
 
   def test_queries_return_rank
-    result = Post.find_with_index('crane', {}, {include_rank: true});
+    result = Post.find_with_index('crane', {}, { include_rank: true });
     assert_equal 2, result.length
     assert_not_nil result.first[:record]
     assert_not_nil result.first[:rank]
