@@ -97,7 +97,9 @@ module ActsAsIndexed
     # ====options
     # ids_only:: Method returns an array of integer IDs when set to true.
     # no_query_cache:: Turns off the query cache when set to true. Useful for testing.
-
+    # include_rank:: If set to true then this returns the hash with the record
+    #                and the rank. Otherwise it just returns the record object.
+    #                Default is false.
     def search_index(query, find_options={}, options={})
 
       # Clear the query cache off  if the key is set.
@@ -149,7 +151,15 @@ module ActsAsIndexed
              ranked_records[r] = @query_cache[query][r.id]
            end
 
-           sort(ranked_records.to_a).map{ |r| r.first }
+           sorted_records = sort(ranked_records.to_a)
+
+           if options[:include_rank]
+             sorted_records.map do |r|
+               { record: r.first, rank: r.second }
+             end
+           else
+             sorted_records.map{ |r| r.first }   #Remove the rank
+           end
          end
       end
 
