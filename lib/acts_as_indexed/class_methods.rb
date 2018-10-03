@@ -140,9 +140,9 @@ module ActsAsIndexed
         records = find(:all, :conditions => [ "#{table_name}.#{primary_key} IN (?)", part_query])
 
         if find_options.include?(:order)
-         records # Just return the records without ranking them.
+          records # Just return the records without ranking them.
 
-         else
+        else
            # Results come back in random order from SQL, so order again.
            ranked_records = ActiveSupport::OrderedHash.new
            records.each do |r|
@@ -150,9 +150,8 @@ module ActsAsIndexed
            end
 
            sort(ranked_records.to_a).map{ |r| r.first }
-         end
+        end
       end
-
     end
 
     # Builds an index from scratch for the current model class.
@@ -174,10 +173,10 @@ module ActsAsIndexed
     def sort(ranked_records)
       ranked_records.sort { |a, b|
         a_score = a.last
-        a_id = a.first.is_a?(Fixnum) ? a.first : a.first.id
+        a_id = a.first.is_a?(Integer) ? a.first : a.first.id
 
         b_score = b.last
-        b_id = b.first.is_a?(Fixnum) ? b.first : b.first.id
+        b_id = b.first.is_a?(Integer) ? b.first : b.first.id
 
         if a_score == b_score
           a_id <=> b_id
