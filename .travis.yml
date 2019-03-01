@@ -8,3 +8,7 @@ rvm:
 gemfile:
   - Gemfile
   - gemfiles/rails3_2.gemfile
+
+before_install:
+
+  - gem install bundler --no-rdoc --no-ri
