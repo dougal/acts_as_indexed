@@ -5,7 +5,8 @@ require 'rubygems'
 require 'bundler/setup'
 require 'active_record'
 require 'active_record/fixtures'
-require 'mocha'
+# require 'mocha'
+require 'mocha/integration/test_unit'
 
 puts "ActiveRecord version is #{ActiveRecord::VERSION::STRING}"
 

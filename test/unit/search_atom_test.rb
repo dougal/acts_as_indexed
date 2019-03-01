@@ -33,7 +33,6 @@ class SearchAtomTest < ActiveSupport::TestCase
   
   def test_add_position_should_add_position
     search_atom = build_search_atom
-    search_atom.expects(:add_record).with(123)
     
     search_atom.add_position(123,98)
     assert search_atom.positions(123).include?(98)
