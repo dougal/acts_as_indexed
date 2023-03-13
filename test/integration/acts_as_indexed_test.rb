@@ -131,6 +131,15 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
     run_queries(queries)
   end
 
+  def test_queries_return_rank
+    result = Post.find_with_index('crane', {}, { include_rank: true });
+    assert_equal 2, result.length
+    assert_not_nil result.first[:record]
+    assert_not_nil result.first[:rank]
+
+    assert_equal 2, result.first[:rank].floor
+    assert_equal 1, result.second[:rank].floor
+  end
 
   # NOTE: This test always fails for Rails 2.3. A bug somewhere in either
   #       Rails or the SQLite adaptor which causes the offset to be ignored.
