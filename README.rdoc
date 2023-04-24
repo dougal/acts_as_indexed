@@ -149,6 +149,13 @@ Example showing changing the min word size:
 A full rundown of the available configuration options can be found in
 <tt>lib/acts_as_indexed/configuration.rb</tt>
 
+=== Multi Model Support
+
+The module now has a method find_with_index, that takes an array of the Models and the query, e.g.:
+
+    results = ActsAsIndexed.find_with_index([Source, Post], 'try')
+
+
 === Heroku Support
 
 Acts As Indexed supports Heroku out-of-the-box. The index is created in the
