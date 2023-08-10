@@ -27,3 +27,4 @@ end
 class ActiveRecord::Base
   extend ActsAsIndexed::WillPaginate::Search
 end
+
