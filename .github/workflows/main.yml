@@ -1,0 +1,28 @@
+name: Ruby Gem Test
+
+on:
+  push:
+    branches: [ main, test-workflow ]
+  pull_request:
+    branches: [ main, test-workflow ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby-version: ['1.8.7', '1.9.2', '1.9.3', '2.0.0']
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+
+    - name: Set up dependencies
+      run: bundle install
+
+    - name: Run tests
+      run: bundle exec rake
