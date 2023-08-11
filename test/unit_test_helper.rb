@@ -4,6 +4,7 @@ require 'rubygems'
 
 require 'bundler/setup'
 require 'mocha'
+require 'mocha/integration/test_unit'
 
 # Mock out the required environment variables.
 # Do this before requiring AAI.
