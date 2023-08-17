@@ -1,4 +1,4 @@
-require 'integration_test_helper.rb'
+require 'integration_test_helper'
 
 class WillPaginateSearchTest < ActiveSupport::TestCase
   fixtures :posts
@@ -10,7 +10,6 @@ class WillPaginateSearchTest < ActiveSupport::TestCase
   end
 
   def test_paginate_search
-
     assert_equal [5, 2, 1, 3, 6, 4], paginate_search(1, 10)
     assert_equal [5, 2, 1], paginate_search(1, 3)
     assert_equal [3, 6, 4], paginate_search(2, 3)

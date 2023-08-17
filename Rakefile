@@ -28,6 +28,14 @@ Rake::TestTask.new('test:integration') do |t|
   t.verbose = true
 end
 
+desc 'Run temp tests.'
+Rake::TestTask.new('test:temp') do |t|
+  t.libs << 'test'
+  t.libs << 'lib'
+  t.pattern = 'test/integration/will_paginate_search_test.rb'
+  t.verbose = true
+end
+
 desc 'Run performance tests.'
 Rake::TestTask.new('test:performance') do |t|
   t.libs << 'test'

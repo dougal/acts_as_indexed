@@ -34,7 +34,10 @@ module ActsAsIndexed
         named_scope :with_query, lambda { |query| { :conditions => ["#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
       end
 
-      cattr_accessor :aai_config, :aai_fields
+      unless respond_to?(:aai_fields) && respond_to?(:aai_config)
+        cattr_accessor :aai_config, :aai_fields
+      end
+      #cattr_accessor :aai_config, :aai_fields
 
       self.aai_fields = options.delete(:fields)
       raise(ArgumentError, 'no fields specified') if self.aai_fields.nil? || self.aai_fields.empty?
@@ -134,24 +137,58 @@ module ActsAsIndexed
 
       return part_query if options[:ids_only]
 
-      with_scope :find => find_options do
-        # Doing the find like this eliminates the possibility of errors occuring
-        # on either missing records (out-of-sync) or an empty results array.
-        records = find(:all, :conditions => [ "#{table_name}.#{primary_key} IN (?)", part_query])
+      # New 2023 way to find the records.
+      conditions = ["#{table_name}.#{primary_key} IN (?)", part_query]
+      query_options = find_options.slice(:limit, :offset, :order)
+      records = where(conditions)
 
-        if find_options.include?(:order)
-         records # Just return the records without ranking them.
-
-         else
-           # Results come back in random order from SQL, so order again.
-           ranked_records = ActiveSupport::OrderedHash.new
-           records.each do |r|
-             ranked_records[r] = @query_cache[query][r.id]
-           end
-
-           sort(ranked_records.to_a).map{ |r| r.first }
-         end
+      if find_options[:conditions]
+        records = records.where(find_options[:conditions])
       end
+      if find_options[:joins]
+        records = records.joins(find_options[:joins])
+      end
+      if find_options[:includes]
+        records = records.includes(find_options[:includes])
+      end
+      if find_options[:limit]
+        records = records.limit(find_options[:limit])
+      end
+      if find_options[:offset]
+        records = records.offset(find_options[:offset])
+      end
+      if find_options[:order]
+        records = records.order(find_options[:order])
+        return records # Just return the records without ranking them.
+      end
+
+      # Results come back in random order from SQL, so order again.
+      ranked_records = ActiveSupport::OrderedHash.new
+      records.each do |r|
+        ranked_records[r] = @query_cache[query][r.id]
+      end
+
+      sort(ranked_records.to_a).map{ |r| r.first }
+
+      # Old way, deprecated and broken.
+      # with_scope :find => find_options do
+      #   # Doing the find like this eliminates the possibility of errors occuring
+      #   # on either missing records (out-of-sync) or an empty results array.
+      #   records = find(:all, :conditions => [ "#{table_name}.#{primary_key} IN (?)", part_query])
+      #
+      #   if find_options.include?(:order)
+      #     records # Just return the records without ranking them.
+      #
+      #   else
+      #     # Results come back in random order from SQL, so order again.
+      #     ranked_records = ActiveSupport::OrderedHash.new
+      #     records.each do |r|
+      #       ranked_records[r] = @query_cache[query][r.id]
+      #     end
+      #
+      #     sort(ranked_records.to_a).map{ |r| r.first }
+      #   end
+      # end
 
     end
 
@@ -162,7 +199,7 @@ module ActsAsIndexed
       return if aai_config.index_file.directory?
 
       index = new_index
-      find_in_batches({ :batch_size => 500 }) do |records|
+      find_in_batches(batch_size: 500) do |records|
         index.add_records(records)
       end
     end

@@ -4,7 +4,7 @@ module ActsAsIndexed
 
     # Sets the location for the index. Specify as an array. The default, for
     # example, would be set as [Rails.root,'tmp','index].
-    attr_accessor :index_file
+    #attr_accessor :index_file
 
     # Tuning value for the index partitioning. Larger values result in quicker
     # searches, but slower indexing. Default is 3.
@@ -18,7 +18,7 @@ module ActsAsIndexed
     # Proc that allows you to turn on or off index for a record.
     # Useful if you don't want an object to be placed in the index, such as a
     # draft post.
-    attr_accessor :if_proc
+    attr_writer :if_proc
 
     # Enable or disable case sensitivity.
     # Set to true to enable.

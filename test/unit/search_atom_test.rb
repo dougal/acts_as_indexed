@@ -1,7 +1,7 @@
 require 'unit_test_helper.rb'
 include ActsAsIndexed
 
-class SearchAtomTest < ActiveSupport::TestCase  
+class SearchAtomTest < ActiveSupport::TestCase
   
   def test_should_create_a_new_instance
     assert SearchAtom.new
@@ -48,7 +48,7 @@ class SearchAtomTest < ActiveSupport::TestCase
   end
   
   def test_positions_should_return_nil
-    assert_equal nil, build_search_atom.positions(456)
+    assert_nil build_search_atom.positions(456)
   end
   
   def test_remove_record
