@@ -163,7 +163,7 @@ module ActsAsIndexed
       end
 
       # Results come back in random order from SQL, so order again.
-      ranked_records = ActiveSupport::OrderedHash.new
+      ranked_records = {}
       records.each do |r|
         ranked_records[r] = @query_cache[query][r.id]
       end
