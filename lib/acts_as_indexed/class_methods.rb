@@ -139,7 +139,6 @@ module ActsAsIndexed
 
       # New 2023 way to find the records.
       conditions = ["#{table_name}.#{primary_key} IN (?)", part_query]
-      query_options = find_options.slice(:limit, :offset, :order)
       records = where(conditions)
 
       if find_options[:conditions]
