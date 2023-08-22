@@ -1,5 +1,7 @@
 require 'active_record'
 
+path = File.expand_path(File.dirname(__FILE__))
+$:.unshift path unless $:.include?(path)
 require 'acts_as_indexed/class_methods'
 require 'acts_as_indexed/instance_methods'
 require 'acts_as_indexed/singleton_methods'

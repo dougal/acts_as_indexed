@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
     ".travis.yml",
     "CHANGELOG",
     "Gemfile",
-    "Gemfile.lock",
     "MIT-LICENSE",
     "README.rdoc",
     "Rakefile",
