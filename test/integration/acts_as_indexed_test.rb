@@ -44,7 +44,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   def test_updates_index
     p = Post.create(:title => 'A special title', :body => 'foo bar bla bla bla')
     assert find_with_index_ids('title').include?(p.id)
-    p.update_attributes(:title => 'No longer special')
+    p.update(:title => 'No longer special')
     assert !find_with_index_ids('title').include?(p.id)
   end
 
@@ -185,7 +185,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
   # all records with that same atom from the index.
   def test_update_record_bug
     p = Post.find(6)
-    assert p.update_attributes(:body => p.body + ' crane')
+    assert p.update(:body => p.body + ' crane')
     assert_equal 2, find_with_index_ids('crane').size
     assert_equal 2, find_with_index_ids('ship').size
   end
@@ -216,7 +216,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
     assert_equal 1, Post.find_with_index('crane', {}, { :no_query_cache => true, :ids_only => true}).size
     p = Post.find(6)
-    assert p.update_attributes(:visible => true)
+    assert p.update(:visible => true)
     assert_equal 1, Post.find_with_index('crane', {}, { :no_query_cache => true, :ids_only => true}).size
   end
 
@@ -227,7 +227,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
     assert_equal 1, Post.find_with_index('crane', {}, { :no_query_cache => true, :ids_only => true}).size
     p = Post.find(6)
-    assert p.update_attributes(:visible => false)
+    assert p.update(:visible => false)
     assert_equal 0, Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true}).size
   end
 
@@ -238,7 +238,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
     assert_equal 1, Post.find_with_index('crane', {}, { :no_query_cache => true, :ids_only => true}).size
     p = Post.find(5)
-    assert p.update_attributes(:visible => true)
+    assert p.update(:visible => true)
     assert_equal 2, Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true}).size
   end
 
@@ -249,7 +249,7 @@ class ActsAsIndexedTest < ActiveSupport::TestCase
 
     assert_equal [6], Post.find_with_index('crane', {}, { :no_query_cache => true, :ids_only => true})
 
-    posts(:wikipedia_article_5).update_attributes(:title => 'A new title')
+    posts(:wikipedia_article_5).update(:title => 'A new title')
     assert_equal [6], Post.find_with_index('crane',{},{ :no_query_cache => true, :ids_only => true})
   end
 

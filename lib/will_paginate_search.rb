@@ -1,8 +1,8 @@
 module ActsAsIndexed
 
-   module WillPaginate
+  module WillPaginate
 
-     module Search
+    module Search
 
       def paginate_search(query, options)
         page = options.fetch(:page) { raise ArgumentError, ":page parameter required" }

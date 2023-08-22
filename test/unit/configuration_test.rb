@@ -1,4 +1,4 @@
-require 'unit_test_helper.rb'
+require 'unit_test_helper'
 include ActsAsIndexed
 
 class ConfigurationTest < ActiveSupport::TestCase
@@ -35,7 +35,7 @@ class ConfigurationTest < ActiveSupport::TestCase
   end
 
   def test_index_file_depth_should_raise_on_lower_than_1_value
-    assert_nothing_raised(ArgumentError) {  config.index_file_depth = 1  }
+    assert_nothing_raised {  config.index_file_depth = 1  }
 
     e = assert_raise(ArgumentError) { config.index_file_depth = 0 }
     assert_equal 'index_file_depth cannot be less than one (1)', e.message
@@ -49,7 +49,7 @@ class ConfigurationTest < ActiveSupport::TestCase
   end
 
   def test_min_word_size_should_raise_on_lower_than_1_value
-    assert_nothing_raised(ArgumentError) {  config.min_word_size = 1  }
+    assert_nothing_raised {  config.min_word_size = 1  }
 
     e = assert_raise(ArgumentError) { config.min_word_size = 0 }
     assert_equal 'min_word_size cannot be less than one (1)', e.message

@@ -4,3 +4,4 @@ coverage
 index
 *.gem
 .bundle
+Gemfile.lock
