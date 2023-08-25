@@ -2,6 +2,8 @@
 
 ## 0.9.0 [25 August 2023]
 
+Thanks to Ryan Kopf for reviewing PRs, fixing the broken CI, and tidying things up to make this release possible.
+
 - Now tested on Ruby 3.0 and Ruby 3.1. [#70](https://github.com/dougal/acts_as_indexed/pull/70). [[ryankopf](https://github.com/ryankopf) - Ryan Kopf]
 - Remove deprecated Fixnum references. [#62](https://github.com/dougal/acts_as_indexed/pull/62). [[yez](https://github.com/yez) - Jake Yesbeck]
 - Delete Gemfile.lock from repo. [#68](https://github.com/dougal/acts_as_indexed/pull/68). [[parndt](https://github.com/parndt) - Philip Arndt]
