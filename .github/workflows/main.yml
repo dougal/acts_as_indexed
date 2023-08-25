@@ -2,9 +2,9 @@ name: Ruby Gem Test
 
 on:
   push:
-    branches: [ main, test-workflow ]
+    branches: [ main, master, test-workflow ]
   pull_request:
-    branches: [ main, test-workflow ]
+    branches: [ main, master, test-workflow ]
 
 jobs:
   test:
