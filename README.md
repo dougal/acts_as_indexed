@@ -15,15 +15,15 @@ gem 'acts_as_indexed'
 
 ## Upgrading
 
-When upgrading it is recommended you delete the index directory and allow it to
+When upgrading it is recommended to delete the index directory and allow it to
 be rebuilt.
 
 ## Usage
 
 ### Setup
 
-Add `acts_as_indexed` to the top of any models you want to index, along with a
-list of the fields you wish to be indexed.
+Add `acts_as_indexed` to any models to be indexed, along with a list of the
+fields to be indexed.
 
 ```ruby
 class Post < ActiveRecord::Base
@@ -56,8 +56,8 @@ configuration.
 A `proc` can be assigned to the `if` key which determines whether a record is
 added to the index.
 
-For example, if you have a `is_visible` column that is false if the post is hidden,
-or true if it is visible, you can filter the index by doing:
+For example, if you have a `is_visible` column then non-visible records can be
+excluded from the index with:
 
 ```ruby
 acts_as_indexed fields: [:title, :body], if: proc.new { |post| post.is_visible? }
@@ -67,7 +67,7 @@ acts_as_indexed fields: [:title, :body], if: proc.new { |post| post.is_visible? 
 
 #### With Relevance
 
-to search with the most relevant matches appearing first, call the
+To search with the most relevant matches appearing first, call the
 `find_with_index` method on your model, passing a query as the first argument.
 the optional `ids_only` parameter, when set to true, will return only the ids
 of any matching records.
@@ -100,10 +100,10 @@ Post.public.with_query('my search query').find(:all, limit: 10) # return the fir
 
 The following query operators are supported:
 
-- This is the default option. `cat dog` will find records matching `cat` AND
+- `cat dog` will find records matching `cat` AND
   `dog`.
 - `cat -dog` will find records matching `cat` AND NOT `dog`
-- 'cat +me' will find records matching `cat` and `me`, even if `me` is smaller
+- `cat +me` will find records matching `cat` and `me`, even if `me` is smaller
   than the `min_word_size`
 - Quoted terms are matched as phrases. `"cat dog"` will find records matching
   the whole phrase. Quoted terms can be preceded by the NOT operator; `cat
