@@ -1,3 +1,11 @@
+===0.9.0 [25 August 2023]
+- Now tested on Ruby 3.0 and Ruby 3.1. [#70](https://github.com/dougal/acts_as_indexed/pull/70). [[ryankopf](https://github.com/ryankopf) - Ryan Kopf]
+- Remove deprecated Fixnum references. [#62](https://github.com/dougal/acts_as_indexed/pull/62). [[yez](https://github.com/yez) - Jake Yesbeck]
+- Delete Gemfile.lock from repo. [#68](https://github.com/dougal/acts_as_indexed/pull/68). [[parndt](https://github.com/parndt) - Philip Arndt]
+- Bump i18n from 0.6.1 to 0.9.5. [#64](https://github.com/dougal/acts_as_indexed/pull/64)
+- Bump tzinfo from 0.3.35 to 0.3.61. [#66](https://github.com/dougal/acts_as_indexed/pull/66)
+- Bump will_paginate from 3.0.3 to 3.0.5. [#67](https://github.com/dougal/acts_as_indexed/pull/67)
+
 ===0.8.3 [17 February 2013]
  - Now tested on Ruby 2.0.
  - Fixed issue where underscores were not stripped by the pre-tokenizer.
