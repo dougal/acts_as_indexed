@@ -15,14 +15,12 @@ Gem::Specification.new do |s|
   s.description = "Acts As Indexed is a plugin which provides a pain-free way to add fulltext search to your Ruby on Rails app".freeze
   s.email = "dougal.s@gmail.com".freeze
   s.extra_rdoc_files = [
-    "CHANGELOG",
+    "CHANGELOG.md",
     "README.rdoc",
     "TODO"
   ]
   s.files = [
-    ".github/workflows/main.yml",
-    ".travis.yml",
-    "CHANGELOG",
+    "CHANGELOG.md",
     "Gemfile",
     "MIT-LICENSE",
     "README.rdoc",

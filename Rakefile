@@ -69,7 +69,8 @@ begin
     gemspec.email = "dougal.s@gmail.com"
     gemspec.homepage = "http://github.com/dougal/acts_as_indexed"
     gemspec.authors = ["Douglas F Shearer"]
-    gemspec.files.exclude ".github"
+    gemspec.files.exclude ".github/**/*"
+    gemspec.files.exclude ".travis.yml"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
