@@ -185,6 +185,7 @@ module ActsAsIndexed
       # Extend the relation with ranking behavior that optimizes at execution time
       relation = all.extending(RankedRelationExtension)
       relation.ranked_ids = ids
+      relation.total_search_results = ids.size  # Store original count before any slicing
       relation.model_table_name = table_name
       relation.model_primary_key = primary_key
       
@@ -193,7 +194,7 @@ module ActsAsIndexed
 
     # Module to extend relations with ranked search behavior
     module RankedRelationExtension
-      attr_accessor :ranked_ids, :model_table_name, :model_primary_key
+      attr_accessor :ranked_ids, :model_table_name, :model_primary_key, :total_search_results
 
       def load
         # Apply optimized ranking before executing the query
@@ -206,13 +207,13 @@ module ActsAsIndexed
       # Override count/size to return the total search results, not the sliced count
       def count(column_name = nil)
         return super if column_name
-        return super unless ranked_ids
-        ranked_ids.size
+        return super unless total_search_results
+        total_search_results
       end
 
       def size
-        return super unless ranked_ids
-        ranked_ids.size
+        return super unless total_search_results
+        total_search_results
       end
 
       private
