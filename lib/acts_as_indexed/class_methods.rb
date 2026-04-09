@@ -203,6 +203,18 @@ module ActsAsIndexed
         super
       end
 
+      # Override count/size to return the total search results, not the sliced count
+      def count(column_name = nil)
+        return super if column_name
+        return super unless ranked_ids
+        ranked_ids.size
+      end
+
+      def size
+        return super unless ranked_ids
+        ranked_ids.size
+      end
+
       private
 
       def apply_ranked_ordering!
