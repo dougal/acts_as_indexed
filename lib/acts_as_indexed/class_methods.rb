@@ -167,11 +167,14 @@ module ActsAsIndexed
     end
 
     # NEW 2026 way to search that returns an ActiveRecord::Relation instead of an array.
-    # This allows for chaining of other query methods. This method uses an extension to
-    # apply the relevance ranking at execution time, which allows it to work with limit
-    # and offset without needing to slice the ranked IDs in Ruby or sending a large number
-    # of IDs in the SQL query.
-    def search_relation(query, options = {})
+    # Returns a chainable ActiveRecord relation with results ranked by relevance.
+    # Uses an extension to apply ranking at execution time, optimizing the CASE
+    # statement based on limit/offset values.
+    #
+    # ====Examples
+    #   Post.search('ruby rails').limit(10)
+    #   Post.search('tutorial').where(published: true).order(:created_at)
+    def search(query, options = {})
       build_index
 
       results = (@query_cache ||= {})[query] ||= new_index.search(query)
