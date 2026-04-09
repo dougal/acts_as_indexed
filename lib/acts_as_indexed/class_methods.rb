@@ -27,12 +27,7 @@ module ActsAsIndexed
       before_update :update_index
       after_destroy :remove_from_index
 
-      # scope for Rails 3.x, named_scope for Rails 2.x.
-      if self.respond_to?(:where)
-        scope :with_query, lambda { |query| where("#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true})) }
-      else
-        named_scope :with_query, lambda { |query| { :conditions => ["#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
-      end
+      scope :with_query, lambda { |query| where("#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true})) }
 
       unless respond_to?(:aai_fields) && respond_to?(:aai_config)
         cattr_accessor :aai_config, :aai_fields
@@ -169,26 +164,70 @@ module ActsAsIndexed
 
       sort(ranked_records.to_a).map{ |r| r.first }
 
-      # Old way, deprecated and broken.
-      # with_scope :find => find_options do
-      #   # Doing the find like this eliminates the possibility of errors occuring
-      #   # on either missing records (out-of-sync) or an empty results array.
-      #   records = find(:all, :conditions => [ "#{table_name}.#{primary_key} IN (?)", part_query])
-      #
-      #   if find_options.include?(:order)
-      #     records # Just return the records without ranking them.
-      #
-      #   else
-      #     # Results come back in random order from SQL, so order again.
-      #     ranked_records = ActiveSupport::OrderedHash.new
-      #     records.each do |r|
-      #       ranked_records[r] = @query_cache[query][r.id]
-      #     end
-      #
-      #     sort(ranked_records.to_a).map{ |r| r.first }
-      #   end
-      # end
+    end
 
+    # NEW 2026 way to search that returns an ActiveRecord::Relation instead of an array.
+    # This allows for chaining of other query methods. This method uses an extension to
+    # apply the relevance ranking at execution time, which allows it to work with limit
+    # and offset without needing to slice the ranked IDs in Ruby or sending a large number
+    # of IDs in the SQL query.
+    def search_relation(query, options = {})
+      build_index
+
+      results = (@query_cache ||= {})[query] ||= new_index.search(query)
+
+      ids = sort(results).map { |r| r.first }
+      return none if ids.empty?
+
+      # Extend the relation with ranking behavior that optimizes at execution time
+      relation = all.extending(RankedRelationExtension)
+      relation.ranked_ids = ids
+      relation.model_table_name = table_name
+      relation.model_primary_key = primary_key
+      
+      relation
+    end
+
+    # Module to extend relations with ranked search behavior
+    module RankedRelationExtension
+      attr_accessor :ranked_ids, :model_table_name, :model_primary_key
+
+      def load
+        # Apply optimized ranking before executing the query
+        if ranked_ids && !loaded?
+          apply_ranked_ordering!
+        end
+        super
+      end
+
+      private
+
+      def apply_ranked_ordering!
+        # Determine which IDs we actually need based on limit/offset
+        offset = offset_value || 0
+        limit = limit_value || ranked_ids.size
+        
+        # Slice to only the IDs needed for this query
+        sliced_ids = ranked_ids.slice(offset, limit) || []
+        
+        return unless sliced_ids.any?
+
+        # Apply WHERE clause with only the needed IDs
+        where!("#{model_table_name}.#{model_primary_key} IN (?)", sliced_ids)
+
+        # Build CASE statement for ranking (only for sliced IDs)
+        # Cast to Integer to prevent SQL injection from corrupt index files
+        order_clause = "CASE #{sliced_ids.each_with_index.map { |id, i|
+          "WHEN #{model_table_name}.#{model_primary_key}=#{Integer(id)} THEN #{i}"
+        }.join(' ')} END"
+        
+        order!(Arel.sql(order_clause))
+
+        # Clear limit/offset since we already sliced the IDs
+        # This prevents double-application of limit/offset
+        offset!(nil)
+        limit!(nil)
+      end
     end
 
     # Builds an index from scratch for the current model class.
