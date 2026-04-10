@@ -24,14 +24,6 @@ app with no dependencies and minimal setup.
 
 Run <tt>bundle install</tt>. Done.
 
-==== Still on Rails 2.x.x without Bundler?
-
-  ./script/plugin install git://github.com/dougal/acts_as_indexed.git
-
-If you don't have git installed, but still want the plugin, you can download
-the plugin from the GitHub page (http://github.com/dougal/acts_as_indexed) and
-unpack it into the <tt>vendor/plugins</tt> directory of your rails app.
-
 === Upgrading
 
 When upgrading to a new version of acts_as_indexed it is recommended you

@@ -14,7 +14,7 @@ module ActsAsIndexed
     #                 shorter than this value are ignored in searches
     #                 unless preceded by the '+' operator. Default is 3.
     # index_file:: Sets the location for the index. By default this is
-    #              RAILS_ROOT/tmp/index. Specify as an array. The default, for
+    #              #{Rails.root}/tmp/index. Specify as an array. The default, for
     #              example, would be set as [Rails.root,'tmp','index].
 
     def acts_as_indexed(options = {})
@@ -27,12 +27,7 @@ module ActsAsIndexed
       before_update :update_index
       after_destroy :remove_from_index
 
-      # scope for Rails 3.x, named_scope for Rails 2.x.
-      if self.respond_to?(:where)
-        scope :with_query, lambda { |query| where("#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true})) }
-      else
-        named_scope :with_query, lambda { |query| { :conditions => ["#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true}) ] } }
-      end
+      scope :with_query, lambda { |query| where("#{table_name}.#{primary_key} IN (?)", search_index(query, {}, {:ids_only => true})) }
 
       unless respond_to?(:aai_fields) && respond_to?(:aai_config)
         cattr_accessor :aai_config, :aai_fields
@@ -168,26 +163,6 @@ module ActsAsIndexed
       end
 
       sort(ranked_records.to_a).map{ |r| r.first }
-
-      # Old way, deprecated and broken.
-      # with_scope :find => find_options do
-      #   # Doing the find like this eliminates the possibility of errors occuring
-      #   # on either missing records (out-of-sync) or an empty results array.
-      #   records = find(:all, :conditions => [ "#{table_name}.#{primary_key} IN (?)", part_query])
-      #
-      #   if find_options.include?(:order)
-      #     records # Just return the records without ranking them.
-      #
-      #   else
-      #     # Results come back in random order from SQL, so order again.
-      #     ranked_records = ActiveSupport::OrderedHash.new
-      #     records.each do |r|
-      #       ranked_records[r] = @query_cache[query][r.id]
-      #     end
-      #
-      #     sort(ranked_records.to_a).map{ |r| r.first }
-      #   end
-      # end
 
     end
 

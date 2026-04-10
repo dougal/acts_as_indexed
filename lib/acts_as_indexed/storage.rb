@@ -143,13 +143,8 @@ module ActsAsIndexed #:nodoc:
       @prefix_cache[prefix]
     end
 
-    # Allows compatibility with 1.8.6 which has no ord method.
     def encode_character(char)
-      if @@has_ord ||= char.respond_to?(:ord)
-        char.ord.to_s
-      else
-        char[0]
-      end
+      char.ord.to_s
     end
 
     def write_file(file_path)
