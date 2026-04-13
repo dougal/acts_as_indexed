@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.9.2
+
+Adds a new way to search that returns an ActiveRecord::Relation instead of an array, returning a
+chainable ActiveRecord relation with results ranked by relevance. This change uses an extension to
+apply ranking at execution time, optimizing the CASE statement based on limit/offset values, preventing
+massive index results from slowing search execution.
+
+### Examples
+
+Post.search('ruby rails').limit(10)
+Post.search('tutorial').where(published: true).order(:created_at)
+
 ## 0.9.1
 
 Removes "Still on Rails 2.x.x without Bundler?" from the Readme

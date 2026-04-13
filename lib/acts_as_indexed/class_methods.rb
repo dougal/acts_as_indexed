@@ -166,6 +166,86 @@ module ActsAsIndexed
 
     end
 
+    # NEW 2026 way to search that returns an ActiveRecord::Relation instead of an array.
+    # Returns a chainable ActiveRecord relation with results ranked by relevance.
+    # Uses an extension to apply ranking at execution time, optimizing the CASE
+    # statement based on limit/offset values.
+    #
+    # ====Examples
+    #   Post.search('ruby rails').limit(10)
+    #   Post.search('tutorial').where(published: true).order(:created_at)
+    def search(query, options = {})
+      build_index
+
+      results = (@query_cache ||= {})[query] ||= new_index.search(query)
+
+      ids = sort(results).map { |r| r.first }
+      return none if ids.empty?
+
+      # Extend the relation with ranking behavior that optimizes at execution time
+      relation = all.extending(RankedRelationExtension)
+      relation.ranked_ids = ids
+      relation.total_search_results = ids.size  # Store original count before any slicing
+      relation.model_table_name = table_name
+      relation.model_primary_key = primary_key
+      
+      relation
+    end
+
+    # Module to extend relations with ranked search behavior
+    module RankedRelationExtension
+      attr_accessor :ranked_ids, :model_table_name, :model_primary_key, :total_search_results
+
+      def load
+        # Apply optimized ranking before executing the query
+        if ranked_ids && !loaded?
+          apply_ranked_ordering!
+        end
+        super
+      end
+
+      # Override count/size to return the total search results, not the sliced count
+      def count(column_name = nil)
+        return super if column_name
+        return super unless total_search_results
+        total_search_results
+      end
+
+      def size
+        return super unless total_search_results
+        total_search_results
+      end
+
+      private
+
+      def apply_ranked_ordering!
+        # Determine which IDs we actually need based on limit/offset
+        offset = offset_value || 0
+        limit = limit_value || ranked_ids.size
+        
+        # Slice to only the IDs needed for this query
+        sliced_ids = ranked_ids.slice(offset, limit) || []
+        
+        return unless sliced_ids.any?
+
+        # Apply WHERE clause with only the needed IDs
+        where!("#{model_table_name}.#{model_primary_key} IN (?)", sliced_ids)
+
+        # Build CASE statement for ranking (only for sliced IDs)
+        # Cast to Integer to prevent SQL injection from corrupt index files
+        order_clause = "CASE #{sliced_ids.each_with_index.map { |id, i|
+          "WHEN #{model_table_name}.#{model_primary_key}=#{Integer(id)} THEN #{i}"
+        }.join(' ')} END"
+        
+        order!(Arel.sql(order_clause))
+
+        # Clear limit/offset since we already sliced the IDs
+        # This prevents double-application of limit/offset
+        offset!(nil)
+        limit!(nil)
+      end
+    end
+
     # Builds an index from scratch for the current model class.
     # Does not run if the index already exists.
 
