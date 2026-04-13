@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.1
+
+Removes "Still on Rails 2.x.x without Bundler?" from the Readme
+
+Changes scope for Rails 3.x, named_scope for Rails 2.x. to just use 'scope', no longer supporting rails 2.
+
+def encode_character(char) no longer needs to check for :ord since we're not supporting Ruby 1.8.6 which is 10+ years old.
+
+Removes check for below Rails 3 in a test file.
+
 ## 0.9.0 [25 August 2023]
 
 Thanks to Ryan Kopf for reviewing PRs, fixing the broken CI, and tidying things up to make this release possible.

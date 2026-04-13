@@ -39,7 +39,7 @@ require 'post'
 
 class ActiveSupport::TestCase #:nodoc:
   include ActiveRecord::TestFixtures
-  self.fixture_path = Pathname.new(File.expand_path('../', __FILE__)).join('fixtures').to_s
+  self.fixture_paths = [Pathname.new(File.expand_path('../', __FILE__)).join('fixtures').to_s]
   self.use_transactional_tests = true
   self.use_instantiated_fixtures = false
   #fixtures :all
